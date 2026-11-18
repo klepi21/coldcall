@@ -3,10 +3,10 @@ import { Suspense, useEffect, useState, type CSSProperties } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'motion/react';
-import { GAMES, formatCredits, type GameKind, type Mode, type TableSummary } from '@coldcall/shared';
+import { GAMES, formatAmount, type GameKind, type Mode, type TableSummary } from '@coldcall/shared';
 import { useSession } from '@/components/app/Providers';
 import { GameSetupSheet } from '@/components/app/GameSetupSheet';
-import { Button, Skeleton, Credits, InfoTip, Glass, Eyebrow, useTilt } from '@/components/ui';
+import { Button, Skeleton, Amount, InfoTip, Glass, Eyebrow, useTilt } from '@/components/ui';
 import { api, randomClientSeed } from '@/lib/api';
 import { haptic } from '@/lib/haptics';
 import { WORLD, WorldArt } from '@/components/app/WorldArt';
@@ -16,6 +16,7 @@ interface HistoryRow {
   id: string;
   game: GameKind;
   mode: Mode;
+  currency: import('@coldcall/shared').Currency;
   stake: number;
   status: string;
 }
@@ -81,7 +82,7 @@ function WorldTile({ game, i, openTables, onOpen }: { game: GameKind; i: number;
 }
 
 function Lobby() {
-  const { me, toast, openAuth } = useSession();
+  const { me, toast, openAuth, currency } = useSession();
   const params = useSearchParams();
   const router = useRouter();
   const [setup, setSetup] = useState<{ game: GameKind; mode: Mode } | null>(null);
@@ -92,13 +93,14 @@ function Lobby() {
 
   useEffect(() => {
     const load = () => {
-      api<TableSummary[]>('/api/tables').then(setTables).catch(() => setTables([]));
+      // Open tables of the active coin only: a LOFI player is never offered a SUI table.
+      api<TableSummary[]>(`/api/tables?currency=${currency}`).then(setTables).catch(() => setTables([]));
       api('/api/stats').then(setStats).catch(() => {});
     };
     load();
     const t = setInterval(load, 8000);
     return () => clearInterval(t);
-  }, []);
+  }, [currency]);
 
   useEffect(() => {
     if (!me) return setActive(null);
@@ -111,7 +113,7 @@ function Lobby() {
   const startFirst = async () => {
     setFirstBusy(true);
     try {
-      const r = await api('/api/tables', { game: 'backgammon', mode: 'practice', stake: 0, visibility: 'public', clientSeed: randomClientSeed() });
+      const r = await api('/api/tables', { game: 'backgammon', mode: 'practice', currency, stake: 0, visibility: 'public', clientSeed: randomClientSeed() });
       router.push(`/table/${r.id}?tutorial=1`);
     } catch (e: any) {
       toast(e.message, 'error');
@@ -146,7 +148,7 @@ function Lobby() {
           <Glass spill tint="var(--primary)" className="mt-5 flex flex-col gap-3 overflow-hidden rounded-[20px] p-5 sm:flex-row sm:items-center sm:justify-between">
             <div className="relative">
               <p className="t-title">Your first game is on us</p>
-              <p className="mt-1 text-text-2">A free practice backgammon game. Hints are on, no credits involved.</p>
+              <p className="mt-1 text-text-2">A free practice backgammon game. Hints are on, no coins involved.</p>
             </div>
             <Button size="lg" className="relative" loading={firstBusy} onClick={startFirst}>
               Play my first game
@@ -170,7 +172,7 @@ function Lobby() {
                 {GAMES[active.game].name} {active.mode === 'practice' ? 'practice' : active.mode === 'bot' ? 'vs bot' : 'vs people'}
                 {active.mode !== 'practice' ? (
                   <span className="ml-2 text-sm font-normal text-text-2">
-                    stake <Credits minor={active.stake} />
+                    stake <Amount minor={active.stake} currency={active.currency} />
                   </span>
                 ) : null}
               </span>
@@ -217,7 +219,7 @@ function Lobby() {
                 </div>
                 <div className="flex shrink-0 items-center gap-3">
                   <span className="text-sm text-text-2">
-                    Stake <Credits minor={t.stake} />
+                    Stake <Amount minor={t.stake} currency={t.currency} />
                   </span>
                   <Button
                     size="sm"
@@ -231,7 +233,7 @@ function Lobby() {
                       }
                     }}
                   >
-                    Join for {formatCredits(t.stake + t.fee)}
+                    Join for {formatAmount(t.stake + t.fee, t.currency)}
                   </Button>
                 </div>
               </div>

@@ -2,7 +2,8 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { useParams } from 'next/navigation';
-import { Card, Chip, Credits, Skeleton } from '@/components/ui';
+import { Card, Chip, Skeleton } from '@/components/ui';
+import { Credits } from '@/components/admin/parts';
 import { Addr, DataTable, ErrorBox, Net, Panel, Pill, WALLET_KIND } from '@/components/admin/parts';
 import { DepositsList, PlayerGames, TxList, WithdrawalsList } from '@/components/admin/lists';
 import { GAME_IDS, GAME_NAME, GAME_VAR, explorer, fmtAgo, fmtDate, fmtInt, useAdmin, useAdminConfig, type GameId } from '@/components/admin/data';

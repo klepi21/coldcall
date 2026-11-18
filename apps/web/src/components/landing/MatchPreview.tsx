@@ -7,11 +7,13 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { Chess, type Square } from 'chess.js';
-import { outcomeSummary, formatCredits } from '@coldcall/shared';
+import { outcomeSummary, formatNumber as formatCredits } from '@coldcall/shared';
 import { PieceArt, type PieceColor, type PieceType } from '@/components/games/chess/pieces';
-import { Coin } from '@/components/ui';
+import { CoinChip } from '@/components/ui';
 
-const STAKE = 1_000; // 10 credits
+const Coin = ({ className }: { className?: string }) => <CoinChip currency="LOFI" className={className} />;
+
+const STAKE = 1_000; // 10 LOFI
 const MOVES = ['e4', 'e5', 'Bc4', 'Nc6', 'Qh5', 'Nf6', 'Qxf7#'];
 const LIGHT = '#EDE6D8';
 const DARK = '#9C8F7B';
@@ -51,7 +53,7 @@ const pos = (sq: Square) => ({ x: sq.charCodeAt(0) - 97, y: 8 - Number(sq[1]) })
 export function MatchPreview(_props: { onPlay?: () => void; signedIn?: boolean }) {
   const reduce = useReducedMotion();
   const all = useMemo(frames, []);
-  const s = outcomeSummary('pvp', 'chess', STAKE, 2);
+  const s = outcomeSummary('pvp', 'chess', STAKE, 2, 'LOFI');
   const [phase, setPhase] = useState<Phase>(reduce ? 'win' : 'stake');
   const [ply, setPly] = useState(reduce ? MOVES.length : 0);
   const [visible, setVisible] = useState(true);
@@ -164,15 +166,15 @@ export function MatchPreview(_props: { onPlay?: () => void; signedIn?: boolean }
 
       {/* Steps */}
       <ol className="relative mt-3 flex items-center justify-between gap-1 text-[11px] font-semibold">
-        {[`Both stake ${formatCredits(STAKE).replace('.00', '')}`, 'Play', `Winner gets ${formatCredits(s.ifWin).replace('.00', '')}`].map((t, i) => (
+        {[`Both stake ${formatCredits(STAKE).replace('.00', '')} LOFI`, 'Play', `Winner gets ${formatCredits(s.ifWin).replace('.00', '')}`].map((t, i) => (
           <li key={t} className="flex items-center gap-1">
             {i > 0 ? <span className="mx-0.5 h-px w-3 bg-white/15" aria-hidden /> : null}
             <span className={`rounded-full px-2 py-1 transition-colors duration-300 ${i === step ? 'bg-primary text-primary-ink' : 'bg-white/[.06] text-text-2'}`}>{t}</span>
           </li>
         ))}
       </ol>
-      <p className="relative mt-2 text-center text-[10.5px] leading-snug text-text-2">Fee {formatCredits(s.fee)} credits per player, shown before you join. Practice is free.</p>
-      <p className="sr-only">Example: you and another player each put in 10 credits. You win the chess game and take the pot of 20 credits. Evens charges a 0.50 credit fee per player.</p>
+      <p className="relative mt-2 text-center text-[10.5px] leading-snug text-text-2">Fee {formatCredits(s.fee)} LOFI per player, shown before you join. Practice is free.</p>
+      <p className="sr-only">Example: you and another player each put in 10 LOFI. You win the chess game and take the pot of 20 LOFI. Cold Call charges a 0.50 LOFI fee per player.</p>
     </div>
   );
 }

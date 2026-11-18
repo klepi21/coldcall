@@ -35,6 +35,8 @@ import {
   verifyGuestSignIn,
   verifyGoogleSignIn,
   AuthError,
+  verifyGoogleIdToken,
+  zkSalt,
   setSessionCookie,
   sessionUser,
   requireUser,
@@ -73,7 +75,7 @@ import {
   reserveCheck,
   walletOverview,
 } from './wallet';
-import { chainConfig, vaultBalanceBase } from './chain/vault';
+import { chainConfig, vaultBalanceBase, client as suiClient } from './chain/vault';
 import { chessBotFor, levelFor } from './games/calibration';
 import { stockfishEval, stopStockfish } from './games/stockfish';
 import { getProgress, getAward, equip, EquipError } from './progress';
@@ -196,6 +198,46 @@ app.post('/api/auth/google', { config: { rateLimit: { max: 20, timeWindow: '1 mi
   const r = await verifyGoogleSignIn(b.idToken, { ephemeralPublicKey: b.ephemeralPublicKey, maxEpoch: b.maxEpoch, randomness: b.randomness });
   setSessionCookie(reply, r.sid);
   return { user: publicUser(r.user), salt: r.salt, address: r.address };
+});
+
+/** Current Sui epoch, for the zkLogin nonce (max epoch = current + 2). */
+let epochCache: { at: number; epoch: number } | null = null;
+app.get('/api/chain/epoch', async () => {
+  if (!epochCache || Date.now() - epochCache.at > 30_000) {
+    const s: any = await suiClient.getCurrentSystemState();
+    epochCache = { at: Date.now(), epoch: Number(s.systemState?.epoch ?? s.epoch) };
+  }
+  return { epoch: epochCache.epoch };
+});
+
+/**
+ * zkLogin proof, fetched through the server so the browser never depends on the prover's CORS.
+ * Only for the signed in Google user, and only for their own token (checked again here).
+ */
+app.post('/api/auth/zk-proof', { preHandler: requireUser, config: { rateLimit: { max: 10, timeWindow: '1 minute' } } }, async (req, reply) => {
+  const b = z
+    .object({
+      jwt: z.string().min(20).max(4096),
+      extendedEphemeralPublicKey: z.string().regex(/^\d{1,90}$/),
+      maxEpoch: z.number().int().positive(),
+      jwtRandomness: z.string().regex(/^\d{1,80}$/),
+    })
+    .parse(req.body);
+  if (req.user.wallet_kind !== 'zklogin') return reply.code(403).send({ error: 'forbidden', message: 'Only Google accounts use this.' });
+  const claims = await verifyGoogleIdToken(b.jwt);
+  if (claims.sub !== req.user.google_sub) return reply.code(403).send({ error: 'forbidden', message: 'That Google account is not signed in here.' });
+  const r = await fetch('https://prover-dev.mystenlabs.com/v1', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ ...b, salt: zkSalt(claims), keyClaimName: 'sub' }),
+    signal: AbortSignal.timeout(30_000),
+  });
+  const text = await r.text();
+  if (!r.ok) {
+    log.warn({ status: r.status, body: text.slice(0, 300) }, 'zk prover refused');
+    return reply.code(502).send({ error: 'prover', message: 'We could not finish the Google sign in just now. Please try again in a moment.' });
+  }
+  return JSON.parse(text);
 });
 
 app.post('/api/auth/logout', async (req, reply) => {

@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { formatCredits, parseCredits } from '@coldcall/shared';
+import { formatAmount, formatNumber, parseAmount } from '@coldcall/shared';
 import { useSession } from '@/components/app/Providers';
 import { Button, Card, Empty, Sheet, Row, InfoTip, Chip, PageHeader, Glass } from '@/components/ui';
 import { api } from '@/lib/api';
@@ -24,7 +24,7 @@ function Toggle({ label, checked, onChange, hint }: { label: string; checked: bo
 }
 
 export default function ProfilePage() {
-  const { me, setMe, toast, signOut, openAuth, ready } = useSession();
+  const { me, setMe, toast, signOut, openAuth, ready, currency } = useSession();
   const [name, setName] = useState('');
   const [limits, setLimits] = useState(false);
   const [lim, setLim] = useState({ depositDaily: '', lossDaily: '', lossWeekly: '' });
@@ -32,6 +32,7 @@ export default function ProfilePage() {
   const [keyOpen, setKeyOpen] = useState(false);
   const [showKey, setShowKey] = useState(false);
 
+  const lim0 = me?.limits?.[currency] ?? { depositDaily: null, lossDaily: null, lossWeekly: null };
   if (ready && !me) return <Empty title="Your profile" text="Sign in to change your name, settings and limits." action={<Button onClick={() => openAuth()}>Start playing</Button>} />;
   if (!me) return null;
 
@@ -90,7 +91,7 @@ export default function ProfilePage() {
 
       <Card className="divide-well px-5">
         <Toggle label="Sound" checked={s.sound !== false} onChange={(v) => save({ settings: { sound: v } })} />
-        <Toggle label="Confirm moves in games with credits" hint="Ask before sending a move, so a slip of the finger costs nothing." checked={s.confirmMoves ?? true} onChange={(v) => save({ settings: { confirmMoves: v } })} />
+        <Toggle label="Confirm moves in games with stakes" hint="Ask before sending a move, so a slip of the finger costs nothing." checked={s.confirmMoves ?? true} onChange={(v) => save({ settings: { confirmMoves: v } })} />
         <Toggle label="Hints in practice" checked={s.hints ?? true} onChange={(v) => save({ settings: { hints: v } })} />
         <Toggle label="3D boards" hint="Chess, backgammon and Sea Battle in 3D. Turn off for a lighter 2D board on older phones." checked={s.render3d ?? true} onChange={(v) => save({ settings: { render3d: v } })} />
         <div className="py-3">
@@ -117,11 +118,12 @@ export default function ProfilePage() {
 
       <Card className="p-5" id="limits">
         <h2 className="t-title">Safer play</h2>
-        <p className="mt-1 text-sm text-text-2">Set limits that fit you. Lowering a limit works right away. Raising or removing one takes 24 hours.</p>
-        <div className="well mt-3 rounded-[14px] px-4 py-1 text-sm">
-          <Row label="Daily add money limit" value={me.limits.depositDaily ? formatCredits(me.limits.depositDaily) : 'None'} />
-          <Row label="Daily loss limit" value={me.limits.lossDaily ? formatCredits(me.limits.lossDaily) : 'None'} />
-          <Row label="Weekly loss limit" value={me.limits.lossWeekly ? formatCredits(me.limits.lossWeekly) : 'None'} />
+        <p className="mt-1 text-sm text-text-2">Set limits that fit you. LOFI and SUI each have their own limits. Lowering a limit works right away. Raising or removing one takes 24 hours.</p>
+        <p className="mt-3 text-sm font-semibold">Your {currency} limits</p>
+        <div className="well mt-1 rounded-[14px] px-4 py-1 text-sm">
+          <Row label="Daily add money limit" value={lim0.depositDaily ? formatAmount(lim0.depositDaily, currency) : 'None'} />
+          <Row label="Daily loss limit" value={lim0.lossDaily ? formatAmount(lim0.lossDaily, currency) : 'None'} />
+          <Row label="Weekly loss limit" value={lim0.lossWeekly ? formatAmount(lim0.lossWeekly, currency) : 'None'} />
         </div>
         {onBreak ? (
           <p className="mt-3 rounded-chip border border-warn/40 bg-warn/10 p-3 text-sm">
@@ -133,14 +135,14 @@ export default function ProfilePage() {
             variant="secondary"
             onClick={() => {
               setLim({
-                depositDaily: me.limits.depositDaily ? formatCredits(me.limits.depositDaily) : '',
-                lossDaily: me.limits.lossDaily ? formatCredits(me.limits.lossDaily) : '',
-                lossWeekly: me.limits.lossWeekly ? formatCredits(me.limits.lossWeekly) : '',
+                depositDaily: lim0.depositDaily ? formatNumber(lim0.depositDaily) : '',
+                lossDaily: lim0.lossDaily ? formatNumber(lim0.lossDaily) : '',
+                lossWeekly: lim0.lossWeekly ? formatNumber(lim0.lossWeekly) : '',
               });
               setLimits(true);
             }}
           >
-            Set limits
+            Set {currency} limits
           </Button>
           <Button variant="secondary" onClick={() => setBreakOpen(true)}>
             Take a break
@@ -155,9 +157,9 @@ export default function ProfilePage() {
       <Card className="p-5">
         <h2 className="t-title">Account</h2>
         <div className="mt-2 text-sm">
-          <Row label="Wallet" value={me.walletKind === 'embedded' ? 'Wallet on this device' : 'Your own wallet'} />
+          <Row label="Wallet" value={me.walletKind === 'zklogin' ? 'Your Google account' : 'Wallet on this device'} />
         </div>
-        {me.walletKind === 'embedded' ? (
+        {me.walletKind === 'guest' ? (
           <Button variant="secondary" full className="mt-3" onClick={() => setKeyOpen(true)}>
             Back up my wallet
           </Button>
@@ -177,12 +179,12 @@ export default function ProfilePage() {
         ) : null}
       </Card>
 
-      <Sheet open={limits} onClose={() => setLimits(false)} title="Your limits">
+      <Sheet open={limits} onClose={() => setLimits(false)} title={`Your ${currency} limits`}>
         {(
           [
-            ['depositDaily', 'Add money per day', 'The most you can add to Evens in 24 hours.'],
-            ['lossDaily', 'Losses per day', 'Games that could take you past this are blocked until tomorrow.'],
-            ['lossWeekly', 'Losses per week', 'The same, over 7 days.'],
+            ['depositDaily', `Add ${currency} per day`, `The most ${currency} you can add to Cold Call in 24 hours.`],
+            ['lossDaily', `${currency} losses per day`, `${currency} games that could take you past this are blocked until tomorrow.`],
+            ['lossWeekly', `${currency} losses per week`, 'The same, over 7 days.'],
           ] as const
         ).map(([k, label, hint]) => (
           <div key={k} className="mb-4">
@@ -197,9 +199,9 @@ export default function ProfilePage() {
           size="lg"
           full
           onClick={async () => {
-            const toMinor = (v: string) => (v.trim() === '' ? null : parseCredits(v.replace(/,/g, '')));
+            const toMinor = (v: string) => (v.trim() === '' ? null : parseAmount(v.replace(/,/g, '')));
             try {
-              const r = await api('/api/me/limits', { depositDaily: toMinor(lim.depositDaily), lossDaily: toMinor(lim.lossDaily), lossWeekly: toMinor(lim.lossWeekly) });
+              const r = await api('/api/me/limits', { currency, depositDaily: toMinor(lim.depositDaily), lossDaily: toMinor(lim.lossDaily), lossWeekly: toMinor(lim.lossWeekly) });
               setMe(r.user);
               setLimits(false);
               toast(Object.keys(r.pending ?? {}).length ? 'Saved. Higher or removed limits start in 24 hours.' : 'Limits saved.');
@@ -250,8 +252,8 @@ export default function ProfilePage() {
       </Sheet>
 
       <Sheet open={keyOpen} onClose={() => (setKeyOpen(false), setShowKey(false))} title="Back up your wallet">
-        <p className="text-text-2">Your wallet lives in this browser. If you clear your browser data, you lose access. Save this secret key somewhere safe, or import it into Phantom.</p>
-        <p className="mt-3 rounded-chip border border-loss/40 bg-loss/10 p-3 text-sm">Never share this key. Anyone with it controls your wallet. Evens will never ask for it.</p>
+        <p className="text-text-2">Your wallet lives in this browser. If you clear your browser data, you lose access. Save this secret key somewhere safe, or import it into a Sui wallet app.</p>
+        <p className="mt-3 rounded-chip border border-loss/40 bg-loss/10 p-3 text-sm">Never share this key. Anyone with it controls your wallet. Cold Call will never ask for it.</p>
         {showKey ? (
           <textarea readOnly value={exportGuestKey() ?? ''} className="well mt-3 h-24 w-full rounded-chip p-3 font-mono text-xs" aria-label="Secret key" />
         ) : (

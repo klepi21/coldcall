@@ -1,9 +1,9 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { GAMES } from '@coldcall/shared';
+import { GAMES, type Currency } from '@coldcall/shared';
 import { useSession } from '@/components/app/Providers';
-import { Card, Credits, Empty, Skeleton, Button, Chip, PageHeader } from '@/components/ui';
+import { Card, Amount, Empty, Skeleton, Button, Chip, PageHeader } from '@/components/ui';
 import { WORLD } from '@/components/app/WorldArt';
 import { api } from '@/lib/api';
 
@@ -11,6 +11,7 @@ interface Row {
   id: string;
   game: 'chess' | 'backgammon' | 'tichu' | 'seabattle';
   mode: 'practice' | 'bot' | 'pvp';
+  currency: Currency;
   stake: number;
   status: string;
   result: any;
@@ -20,17 +21,18 @@ interface Row {
 }
 
 export default function HistoryPage() {
-  const { me, openAuth, ready } = useSession();
+  const { me, openAuth, ready, currency } = useSession();
   const [rows, setRows] = useState<Row[] | null>(null);
   const [filter, setFilter] = useState<'all' | 'chess' | 'backgammon' | 'tichu' | 'seabattle'>('all');
   useEffect(() => {
     if (me) api<Row[]>('/api/me/history').then(setRows).catch(() => setRows([]));
   }, [me]);
   if (ready && !me) return <Empty title="Your games" text="Sign in to see your games and results." action={<Button onClick={() => openAuth()}>Start playing</Button>} />;
-  const list = rows?.filter((r) => filter === 'all' || r.game === filter) ?? null;
+  // Money games of the active coin only (practice games carry no coin and always show).
+  const list = rows?.filter((r) => (filter === 'all' || r.game === filter) && (r.mode === 'practice' || r.currency === currency)) ?? null;
   return (
     <div className="mx-auto max-w-2xl">
-      <PageHeader eyebrow="Every game, every result" title="History" />
+      <PageHeader eyebrow={`Your ${currency} games and free practice games`} title="History" sub={`Games in the other coin are under the other coin. Switch at the top.`} />
       <div className="-mx-4 mt-3 flex gap-2 overflow-x-auto px-4 py-2 no-scrollbar sm:mx-0 sm:px-0">
         {(['all', 'chess', 'backgammon', 'tichu', 'seabattle'] as const).map((f) => (
           <span key={f} className="shrink-0">
@@ -67,7 +69,7 @@ export default function HistoryPage() {
                       <span className={won ? 'font-semibold text-win' : r.status === 'settled' && !draw ? 'text-text-2' : ''}>{label}</span>, {new Date(r.created_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}
                     </p>
                   </div>
-                  {r.mode !== 'practice' && r.payout !== null ? <Credits minor={r.payout} sign className={r.payout > 0 ? 'text-win' : ''} /> : <span className="text-sm text-text-2">{r.mode === 'practice' ? 'Free' : ''}</span>}
+                  {r.mode !== 'practice' && r.payout !== null ? <Amount minor={r.payout} currency={r.currency} sign className={r.payout > 0 ? 'text-win' : ''} /> : <span className="text-sm text-text-2">{r.mode === 'practice' ? 'Free' : ''}</span>}
                 </Link>
               );
             })}

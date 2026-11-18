@@ -1,6 +1,7 @@
 'use client';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { api } from '@/lib/api';
+import { useSession } from '@/components/app/Providers';
 
 export type GameId = 'chess' | 'backgammon' | 'tichu' | 'seabattle';
 export const GAME_IDS: GameId[] = ['chess', 'seabattle', 'backgammon', 'tichu'];
@@ -16,8 +17,14 @@ export interface Paged<T> {
   limit: number;
 }
 
-/** GET an admin endpoint. Refetches when `path` changes. Keeps the previous data while a new page loads. */
-export function useAdmin<T>(path: string | null) {
+/**
+ * GET an admin endpoint. Every money figure in the admin area belongs to one coin: the coin picked in the
+ * header switch is added to every request as `currency`, and switching refetches. Keeps the previous data
+ * while a new page loads.
+ */
+export function useAdmin<T>(rawPath: string | null) {
+  const { currency } = useSession();
+  const path = rawPath ? `${rawPath}${rawPath.includes('?') ? '&' : '?'}currency=${currency}` : null;
   const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -74,16 +81,16 @@ export function fmtDuration(secs: number | null | undefined) {
   if (m < 60) return `${m}m ${t % 60}s`;
   return `${Math.floor(m / 60)}h ${m % 60}m`;
 }
-export const short = (s: string | null | undefined, a = 4, b = 4) => (!s ? '' : s.length <= a + b + 1 ? s : b > 0 ? `${s.slice(0, a)}…${s.slice(-b)}` : `${s.slice(0, a)}…`);
+export const short = (s: string | null | undefined, a = 4, b = 4) => (!s ? '' : s.length <= a + b + 1 ? s : b > 0 ? `${s.slice(0, a)} ${s.slice(-b)}` : s.slice(0, a));
 
 /* ---------- explorer ---------- */
 
 export interface AdminConfig {
-  cluster: 'localnet' | 'devnet';
-  rpc: string | null;
+  network: string;
+  packageId: string;
+  gameAddress: string;
   termsVersion: string;
-  reviewAbove: number;
-  userDailyWithdraw: number;
+  limits: Record<'LOFI' | 'SUI', { reviewAbove: number; userDailyWithdraw: number }>;
   botHouseEdge: number;
 }
 let cfgPromise: Promise<AdminConfig> | null = null;
@@ -98,9 +105,10 @@ export function useAdminConfig() {
   }, []);
   return cfg;
 }
-export function explorer(cfg: AdminConfig | null, kind: 'address' | 'tx', id: string) {
-  const q = !cfg || cfg.cluster === 'devnet' ? '?cluster=devnet' : `?cluster=custom&customUrl=${encodeURIComponent(cfg.rpc ?? 'http://127.0.0.1:8899')}`;
-  return `https://explorer.solana.com/${kind}/${id}${q}`;
+/** Suiscan link: wallets are accounts, digests are transactions, vaults and the package are objects. */
+export function explorer(cfg: AdminConfig | null, kind: 'address' | 'tx' | 'object', id: string) {
+  const k = kind === 'address' ? 'account' : kind;
+  return `https://suiscan.xyz/${cfg?.network ?? 'devnet'}/${k}/${id}`;
 }
 
 /* ---------- ledger labels ---------- */
@@ -114,6 +122,7 @@ export const TX_KIND: Record<string, string> = {
   game_settle: 'Game result',
   game_refund: 'Game refund',
   bankroll_fund: 'House funding',
+  bankroll_withdraw: 'House money taken out',
   adjustment: 'Adjustment',
 };
 export const ACCOUNT_KIND: Record<string, string> = {
@@ -123,7 +132,6 @@ export const ACCOUNT_KIND: Record<string, string> = {
   house_bankroll: 'House bankroll',
   fee_revenue: 'Fee revenue',
   vault_onchain: 'Vault on chain',
-  faucet_source: 'Faucet',
 };
 export const WD_STATUS: Record<string, string> = {
   review: 'Needs review',

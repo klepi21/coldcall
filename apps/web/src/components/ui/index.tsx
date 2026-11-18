@@ -1,12 +1,12 @@
 'use client';
 import { forwardRef, useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { formatCredits } from '@coldcall/shared';
+import { CURRENCY, formatAmount, formatNumber, type Currency } from '@coldcall/shared';
 import { feedback } from '@/lib/haptics';
 import { play } from '@/lib/sound';
 
 /* =====================================================================
-   Evens UI primitives, v3 "Four Worlds".
+   Cold Call UI primitives, v3 "Four Worlds".
    Every export from v2 is kept with the same props. New in v3:
    Glass, TiltCard, useTilt, CountUp, useCountUp, Cosmos, PageHeader, Eyebrow.
    ===================================================================== */
@@ -73,38 +73,21 @@ export function Skeleton({ className = '' }: { className?: string }) {
   return <div className={`shimmer rounded-card ${className}`} aria-hidden />;
 }
 
-/** The credits coin: gold is reserved for credits and wins. */
-export function Coin({ className = 'size-4' }: { className?: string }) {
+/** Coin chip for a currency: the brand chip image, with a lettered fallback if the image fails to load. */
+export function CoinChip({ currency, className = 'size-4' }: { currency: Currency; className?: string }) {
+  const [broken, setBroken] = useState(false);
+  if (broken)
+    return (
+      <span
+        className={`inline-grid shrink-0 place-items-center rounded-full text-[0.55em] font-extrabold leading-none ${currency === 'SUI' ? 'bg-[#4DA2FF] text-white' : 'bg-gold text-[#14192a]'} ${className}`}
+        aria-hidden
+      >
+        {currency === 'SUI' ? 'S' : 'L'}
+      </span>
+    );
   return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden>
-      <circle cx="12" cy="12" r="10.5" fill="var(--gold)" />
-      <path d="M4.2 9.2A8.4 8.4 0 0 1 19.6 8" fill="none" stroke="rgba(255,255,255,.5)" strokeWidth="1.3" strokeLinecap="round" />
-      <circle cx="12" cy="12" r="7.5" fill="none" stroke="rgba(0,0,0,.25)" strokeWidth="1.2" />
-      <rect x="8" y="9" width="8" height="1.8" rx=".9" fill="rgba(0,0,0,.45)" />
-      <rect x="8" y="13.2" width="8" height="1.8" rx=".9" fill="rgba(0,0,0,.45)" />
-    </svg>
-  );
-}
-
-/** USDC mark (blue circle, white dollar sign, side arcs), used to identify the USDC currency. USDC is a trademark of Circle. */
-export function UsdcIcon({ className = 'size-4' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 32 32" className={className} aria-hidden>
-      <circle cx="16" cy="16" r="16" fill="#2775CA" />
-      <path d="M20.2 18.4c0-2.2-1.3-3-4-3.3-1.9-.3-2.3-.8-2.3-1.7s.7-1.5 2-1.5c1.2 0 1.8.4 2.1 1.4.1.2.2.3.4.3h1.1c.3 0 .5-.2.5-.5v-.1c-.3-1.5-1.5-2.6-3-2.8V8.6c0-.3-.2-.5-.6-.5h-1c-.3 0-.5.2-.6.5v1.6c-2 .3-3.2 1.6-3.2 3.3 0 2.1 1.3 2.9 3.9 3.2 1.8.3 2.4.7 2.4 1.8s-.9 1.8-2.2 1.8c-1.7 0-2.3-.7-2.5-1.7-.1-.3-.3-.4-.5-.4h-1.2c-.3 0-.5.2-.5.5v.1c.3 1.7 1.3 2.8 3.5 3.1v1.7c0 .3.2.5.6.5h1c.3 0 .5-.2.6-.5v-1.7c2-.3 3.5-1.7 3.5-3.5Z" fill="#fff" />
-      <path d="M12.4 25.1c-5-1.8-7.6-7.4-5.8-12.4.9-2.7 3.1-4.8 5.8-5.8.3-.1.4-.3.4-.6v-.9c0-.2-.1-.4-.4-.5h-.1c-6 1.9-9.4 8.3-7.5 14.4 1.1 3.6 3.9 6.3 7.5 7.5.2.1.5 0 .5-.2.1-.1.1-.2.1-.3v-.9c0-.1-.2-.3-.5-.3Zm7.3-20.8c-.2-.1-.5 0-.5.2-.1.1-.1.2-.1.3v.9c0 .3.2.5.4.6 5 1.8 7.6 7.4 5.8 12.4-.9 2.7-3.1 4.8-5.8 5.8-.3.1-.4.3-.4.6v.9c0 .2.1.4.4.5h.1c6-1.9 9.4-8.3 7.5-14.4-1.1-3.6-3.9-6.4-7.4-7.8Z" fill="#fff" />
-    </svg>
-  );
-}
-
-/** USDC amount with its icon. `base` is token base units / 1e6 as a number of USDC. */
-export function Usdc({ amount, className = '' }: { amount: number; className?: string }) {
-  return (
-    <span className={`inline-flex items-center gap-1 tabular font-semibold ${className}`} aria-label={`${amount.toFixed(2)} USDC`}>
-      <UsdcIcon className="size-[1em]" />
-      <span>{amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-      <span className="text-[0.75em] font-bold opacity-80">USDC</span>
-    </span>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src={CURRENCY[currency].chip} alt="" aria-hidden className={`inline-block shrink-0 rounded-full object-contain ${className}`} onError={() => setBroken(true)} />
   );
 }
 
@@ -150,15 +133,16 @@ export function CountUp({ value, format = (n) => Math.round(n).toLocaleString('e
 }
 
 /**
- * Credits with the gold coin. `animate` counts the number up when it changes (display only; the
- * screen reader label always carries the exact final amount).
+ * An amount in one currency, always with its coin chip and code ("12.50 LOFI"). `animate` counts the
+ * number up when it changes (display only; the screen reader label always carries the exact amount).
  */
-export function Credits({ minor, sign, className = '', coin = true, animate = false, from }: { minor: number; sign?: boolean; className?: string; coin?: boolean; animate?: boolean; from?: number }) {
+export function Amount({ minor, currency, sign, className = '', coin = true, code = true, animate = false, from }: { minor: number; currency: Currency; sign?: boolean; className?: string; coin?: boolean; code?: boolean; animate?: boolean; from?: number }) {
   const neg = minor < 0;
   return (
-    <span className={`inline-flex items-center gap-1 tabular font-semibold ${className}`} aria-label={`${neg ? 'lost ' : ''}${formatCredits(Math.abs(minor))} credits`}>
-      {coin ? <Coin className="size-[1em]" /> : null}
-      {animate ? <CountUp value={minor} from={from} format={(n) => formatCredits(Math.round(n), { sign })} /> : <span>{formatCredits(minor, { sign })}</span>}
+    <span className={`inline-flex items-center gap-1 tabular font-semibold ${className}`} aria-label={`${neg ? 'lost ' : ''}${formatAmount(Math.abs(minor), currency)}`}>
+      {coin ? <CoinChip currency={currency} className="size-[1.05em]" /> : null}
+      {animate ? <CountUp value={minor} from={from} format={(n) => formatNumber(Math.round(n), { sign })} /> : <span>{formatNumber(minor, { sign })}</span>}
+      {code ? <span className="text-[0.72em] font-bold opacity-75">{currency}</span> : null}
     </span>
   );
 }
@@ -432,17 +416,17 @@ export function Empty({ title, text, action }: { title: string; text: string; ac
   );
 }
 
-/** Evens mark: an equals sign whose bars are two halves of a board square. */
+/** Cold Call mark (placeholder until the final brand logo lands). */
 export function Logo({ className = 'size-8' }: { className?: string }) {
   return (
     <svg viewBox="0 0 32 32" className={className} aria-hidden>
       <defs>
-        <linearGradient id="evens-mark" x1="0" y1="0" x2="1" y2="1">
+        <linearGradient id="cc-mark" x1="0" y1="0" x2="1" y2="1">
           <stop offset="0" stopColor="var(--accent)" />
           <stop offset="1" stopColor="#2a1a7a" />
         </linearGradient>
       </defs>
-      <rect x="1" y="1" width="30" height="30" rx="9" fill="url(#evens-mark)" />
+      <rect x="1" y="1" width="30" height="30" rx="9" fill="url(#cc-mark)" />
       <rect x="7" y="9.5" width="18" height="5" rx="2.5" fill="#ffffff" />
       <rect x="7" y="17.5" width="18" height="5" rx="2.5" fill="var(--primary)" />
     </svg>
@@ -453,7 +437,7 @@ export function Wordmark({ className = '' }: { className?: string }) {
   return (
     <span className={`inline-flex items-center gap-2 ${className}`}>
       <Logo className="size-8" />
-      <span className="font-display text-[20px] font-extrabold uppercase tracking-tight">evens</span>
+      <span className="font-display text-[20px] font-extrabold uppercase tracking-tight">cold call</span>
     </span>
   );
 }

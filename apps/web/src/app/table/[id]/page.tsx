@@ -4,11 +4,11 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { AnimatePresence, motion } from 'motion/react';
-import { GAMES, entryCost, formatCredits, type TableSummary } from '@coldcall/shared';
+import { GAMES, entryCost, formatAmount, type TableSummary } from '@coldcall/shared';
 import { useSession } from '@/components/app/Providers';
 import { AuthSheet } from '@/components/app/AuthSheet';
 import { OnboardingSheet } from '@/components/app/OnboardingSheet';
-import { Button, Card, Credits, Sheet, Spinner, InfoTip, Logo } from '@/components/ui';
+import { Button, Card, Amount, Sheet, Spinner, InfoTip, Logo } from '@/components/ui';
 import { api, randomClientSeed } from '@/lib/api';
 import { play, haptic } from '@/lib/sound';
 import type { BoardSettings } from '@/components/games/types';
@@ -235,7 +235,7 @@ function TablePageInner({ params }: { params: Promise<{ id: string }> }) {
     );
 
   const meta = GAMES[table.game];
-  const cost = entryCost(table.mode, table.stake);
+  const cost = entryCost(table.mode, table.stake, table.currency);
   const seatNames = table.seats.map((s) => s.name);
   const clockFor = (seat: number) => {
     if (!state?.clocks) return null;
@@ -266,7 +266,7 @@ function TablePageInner({ params }: { params: Promise<{ id: string }> }) {
     if (table.status === 'waiting' && mySeat !== null) {
       try {
         await api(`/api/tables/${id}/leave`, {});
-        toast(table.mode === 'pvp' && cost.total ? `You left. ${formatCredits(cost.total)} credits are back in your balance.` : 'You left the table.');
+        toast(table.mode === 'pvp' && cost.total ? `You left. ${formatAmount(cost.total, table.currency)} is back in your balance.` : 'You left the table.');
       } catch (e: any) {
         toast(e.message, 'error');
       }
@@ -308,7 +308,7 @@ function TablePageInner({ params }: { params: Promise<{ id: string }> }) {
         <div className="min-w-0 text-center">
           <p className="truncate font-display text-[17px] font-semibold">{meta.name}</p>
           <p className="truncate text-xs text-text-2">
-            {table.mode === 'practice' ? 'Practice, free' : table.mode === 'bot' ? `Against the bot, stake ${formatCredits(table.stake)}` : `Against people, stake ${formatCredits(table.stake)}`}
+            {table.mode === 'practice' ? 'Practice, free' : table.mode === 'bot' ? `Against the bot, stake ${formatAmount(table.stake, table.currency)}` : `Against people, stake ${formatAmount(table.stake, table.currency)}`}
             {table.time ? `, ${table.time}` : ''}
           </p>
         </div>
@@ -420,7 +420,7 @@ function TablePageInner({ params }: { params: Promise<{ id: string }> }) {
         <p className="text-text-2">
           {table.mode === 'practice'
             ? 'This is a free practice game. If you resign it simply ends.'
-            : `If you resign, the game counts as a loss and your ${formatCredits(cost.total)} credits are not returned. If you just close the page, your clock keeps running.`}
+            : `If you resign, the game counts as a loss and your ${formatAmount(cost.total, table.currency)} is not returned. If you just close the page, your clock keeps running.`}
         </p>
         <div className="mt-5 grid grid-cols-2 gap-2">
           <Button variant="secondary" onClick={() => setConfirmLeave(false)}>
@@ -458,8 +458,8 @@ function TablePageInner({ params }: { params: Promise<{ id: string }> }) {
             ) : null}
             {table.mode !== 'practice' && myPayout ? (
               <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="mt-5 rounded-card bg-surface-2 p-4">
-                <p className="text-sm text-text-2">Your credits</p>
-                <Credits minor={myPayout.delta} sign className={`mt-1 justify-center font-display text-3xl ${myPayout.delta > 0 ? 'text-gold' : myPayout.delta < 0 ? 'text-loss' : ''}`} />
+                <p className="text-sm text-text-2">Your {table.currency}</p>
+                <Amount minor={myPayout.delta} currency={table.currency} sign className={`mt-1 justify-center font-display text-3xl ${myPayout.delta > 0 ? 'text-gold' : myPayout.delta < 0 ? 'text-loss' : ''}`} />
                 <p className="mt-2 text-xs text-text-2">
                   {myPayout.delta > 0 ? 'Added to your balance.' : myPayout.delta < 0 ? `Your stake${cost.fee ? ' and fee' : ''} for this game.` : 'Your stake came back.'}
                 </p>
@@ -483,8 +483,8 @@ function TablePageInner({ params }: { params: Promise<{ id: string }> }) {
                 onClick={async () => {
                   try {
                     const r = table.mode === 'pvp'
-                      ? await api('/api/tables/quick', { game: table.game, stake: table.stake, time: table.time ?? undefined, clientSeed: randomClientSeed() })
-                      : await api('/api/tables', { game: table.game, mode: table.mode, stake: table.stake, visibility: 'public', time: table.time ?? undefined, clientSeed: randomClientSeed() });
+                      ? await api('/api/tables/quick', { game: table.game, currency: table.currency, stake: table.stake, time: table.time ?? undefined, clientSeed: randomClientSeed() })
+                      : await api('/api/tables', { game: table.game, mode: table.mode, currency: table.currency, stake: table.stake, visibility: 'public', time: table.time ?? undefined, clientSeed: randomClientSeed() });
                     router.push(`/table/${r.id}`);
                   } catch (e: any) {
                     toast(e.message, 'error');
@@ -539,8 +539,8 @@ function Laurel() {
 }
 
 function StakeCard({ table }: { table: TableSummary }) {
-  if (table.mode === 'practice') return <Card className="p-4 text-sm text-text-2">Free practice game. No credits involved.</Card>;
-  const cost = entryCost(table.mode, table.stake);
+  if (table.mode === 'practice') return <Card className="p-4 text-sm text-text-2">Free practice game. No coins involved.</Card>;
+  const cost = entryCost(table.mode, table.stake, table.currency);
   return (
     <Card className="p-4 text-sm">
       <p className="mb-2 inline-flex items-center gap-1 font-semibold">
@@ -548,17 +548,17 @@ function StakeCard({ table }: { table: TableSummary }) {
       </p>
       <div className="flex justify-between py-1 text-text-2">
         <span>Your stake</span>
-        <Credits minor={table.stake} />
+        <Amount minor={table.stake} currency={table.currency} />
       </div>
       {cost.fee ? (
         <div className="flex justify-between py-1 text-text-2">
           <span>Evens fee</span>
-          <Credits minor={cost.fee} />
+          <Amount minor={cost.fee} currency={table.currency} />
         </div>
       ) : null}
       <div className="flex justify-between py-1 text-text-2">
         <span>If you win</span>
-        <Credits minor={table.mode === 'bot' ? table.stake * 2 : Math.floor((table.stake * table.capacity) / (table.game === 'tichu' ? 2 : 1))} className="text-win" />
+        <Amount currency={table.currency} minor={table.mode === 'bot' ? table.stake * 2 : Math.floor((table.stake * table.capacity) / (table.game === 'tichu' ? 2 : 1))} className="text-win" />
       </div>
     </Card>
   );
@@ -572,7 +572,7 @@ function WaitingRoom({ table, mySeat, onLeave, onBots, onJoin }: { table: TableS
     return () => clearInterval(t);
   }, []);
   const link = typeof window !== 'undefined' ? (table.inviteCode ? `${location.origin}/invite/${table.inviteCode}` : `${location.origin}/table/${table.id}`) : '';
-  const cost = entryCost(table.mode, table.stake);
+  const cost = entryCost(table.mode, table.stake, table.currency);
   return (
     <div className="mx-auto max-w-md pt-6">
       <Card className="p-6 text-center">
@@ -589,7 +589,7 @@ function WaitingRoom({ table, mySeat, onLeave, onBots, onJoin }: { table: TableS
         </p>
         {mySeat === null ? (
           <Button size="lg" full className="mt-5" onClick={onJoin}>
-            Join for {formatCredits(cost.total)} credits
+            Join for {formatAmount(cost.total, table.currency)}
           </Button>
         ) : (
           <>
@@ -622,7 +622,7 @@ function WaitingRoom({ table, mySeat, onLeave, onBots, onJoin }: { table: TableS
               </div>
             ) : (
               <Button variant="ghost" full className="mt-4" onClick={onLeave}>
-                Leave table{cost.total ? `, full refund of ${formatCredits(cost.total)}` : ''}
+                Leave table{cost.total ? `, full refund of ${formatAmount(cost.total, table.currency)}` : ''}
               </Button>
             )}
           </>

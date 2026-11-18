@@ -1,9 +1,9 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { animate, motion, useInView, useReducedMotion } from 'motion/react';
-import { GAMES, STAKE_LEVELS, formatCredits, pvpFee, usd, type GameKind } from '@coldcall/shared';
+import { GAMES, CURRENCIES, CURRENCY, formatAmount, formatNumber, pvpFee, type Currency, type GameKind } from '@coldcall/shared';
 import { GAME_COLOR } from './GameArt';
-import { Coin, Chip } from '@/components/ui';
+import { CoinChip, Chip } from '@/components/ui';
 
 /** Small looping animation per game, layered over the tile art. */
 export function TileLoop({ game }: { game: GameKind }) {
@@ -113,12 +113,12 @@ export function CountUp({ value, format = (n: number) => Math.round(n).toLocaleS
 }
 
 /** Real recent wins, scrolling. Hidden until real wins exist. */
-export function WinsTicker({ wins }: { wins: { name: string; game: string; amount: number; mode: string; at?: string }[] }) {
+export function WinsTicker({ wins }: { wins: { name: string; game: string; amount: number; currency: Currency; mode: string; at?: string }[] }) {
   const reduce = useReducedMotion();
   // Only real wins, and only once there are at least 10 distinct ones so the strip never looks padded.
   const seen = new Set<string>();
   const unique = wins.filter((w) => {
-    const k = `${w.name}|${w.game}|${w.amount}|${w.at ?? ''}`;
+    const k = `${w.name}|${w.game}|${w.amount}|${w.currency}|${w.at ?? ''}`;
     if (seen.has(k)) return false;
     seen.add(k);
     return true;
@@ -134,7 +134,7 @@ export function WinsTicker({ wins }: { wins: { name: string; game: string; amoun
             <strong>{w.name}</strong>
             <span className="text-text-2">won</span>
             <span className="inline-flex items-center gap-1 font-bold text-gold">
-              <Coin className="size-4" /> {formatCredits(w.amount)}
+              <CoinChip currency={w.currency} className="size-4" /> {formatAmount(w.amount, w.currency)}
             </span>
             <span className="text-text-2">
               at {GAMES[w.game as GameKind]?.name ?? w.game}
@@ -149,43 +149,57 @@ export function WinsTicker({ wins }: { wins: { name: string; game: string; amoun
   );
 }
 
-/** Honest interactive payout calculator. */
+/** Honest interactive payout calculator, per coin. LOFI and SUI are never mixed or converted. */
 export function PayoutCalculator() {
-  const [stake, setStake] = useState<number>(STAKE_LEVELS[3]);
-  const fee = pvpFee(stake);
+  const [cur, setCur] = useState<Currency>('LOFI');
+  const levels = CURRENCY[cur].stakeLevels;
+  const [stake, setStake] = useState<number>(levels[1]!);
+  const fee = pvpFee(stake, cur);
+  const pick = (c: Currency) => (setCur(c), setStake(CURRENCY[c].stakeLevels[1]!));
   return (
     <div className="rounded-sheet border border-line bg-surface p-6 sm:p-8">
       <p className="text-xs font-bold uppercase tracking-wider text-primary">Try it</p>
       <h3 className="mt-1 font-display text-2xl font-extrabold uppercase">What could you win?</h3>
-      <p className="mt-2 text-text-2">Pick a stake and see exactly what happens. Any amount from 1 credit up to $100 against people, or $50 against the bot.</p>
-      <div className="mt-5 flex flex-wrap gap-2" role="radiogroup" aria-label="Stake">
-        {STAKE_LEVELS.map((l) => (
+      <p className="mt-2 text-text-2">
+        Pick a coin and a stake and see exactly what happens. Every table is played in one coin: {formatAmount(CURRENCY[cur].minStake, cur)} up to {formatAmount(CURRENCY[cur].maxStakePvp, cur)} against people, or {formatAmount(CURRENCY[cur].maxStakeBot, cur)} against the bot.
+      </p>
+      <div className="mt-5 flex flex-wrap gap-2" role="radiogroup" aria-label="Coin">
+        {CURRENCIES.map((c) => (
+          <Chip key={c} active={cur === c} onClick={() => pick(c)}>
+            <span className="inline-flex items-center gap-1.5">
+              <CoinChip currency={c} className="size-4" /> {c}
+            </span>
+          </Chip>
+        ))}
+      </div>
+      <div className="mt-3 flex flex-wrap gap-2" role="radiogroup" aria-label="Stake">
+        {levels.map((l) => (
           <Chip key={l} active={stake === l} onClick={() => setStake(l)}>
-            {usd(l)}
+            {formatNumber(l).replace('.00', '')} {cur}
           </Chip>
         ))}
       </div>
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        <motion.div key={`p${stake}`} initial={{ scale: 0.97, opacity: 0.6 }} animate={{ scale: 1, opacity: 1 }} className="rounded-card border border-primary/40 bg-surface-2 p-5">
+        <motion.div key={`p${cur}${stake}`} initial={{ scale: 0.97, opacity: 0.6 }} animate={{ scale: 1, opacity: 1 }} className="rounded-card border border-primary/40 bg-surface-2 p-5">
           <p className="text-sm font-semibold text-text-2">Beat a real player</p>
           <p className="mt-2 flex items-center gap-2 font-display text-4xl font-extrabold text-primary">
-            <Coin className="size-8" /> {formatCredits(stake * 2)}
+            <CoinChip currency={cur} className="size-8" /> {formatNumber(stake * 2)}
           </p>
-          <p className="text-sm font-semibold text-text">credits, about {usd(stake * 2)}</p>
+          <p className="text-sm font-semibold text-text">{cur}</p>
           <p className="mt-2 text-sm text-text-2">
-            You put in {formatCredits(stake)} plus a {formatCredits(fee)} fee. Lose and you lose {formatCredits(stake + fee)}.
+            You put in {formatAmount(stake, cur)} plus a {formatAmount(fee, cur)} fee. Lose and you lose {formatAmount(stake + fee, cur)}.
           </p>
         </motion.div>
-        <motion.div key={`b${stake}`} initial={{ scale: 0.97, opacity: 0.6 }} animate={{ scale: 1, opacity: 1 }} className="rounded-card border border-accent/50 bg-surface-2 p-5">
+        <motion.div key={`b${cur}${stake}`} initial={{ scale: 0.97, opacity: 0.6 }} animate={{ scale: 1, opacity: 1 }} className="rounded-card border border-accent/50 bg-surface-2 p-5">
           <p className="text-sm font-semibold text-text-2">Beat the bot</p>
           <p className="mt-2 flex items-center gap-2 font-display text-4xl font-extrabold text-accent">
-            <Coin className="size-8" /> {formatCredits(stake * 2)}
+            <CoinChip currency={cur} className="size-8" /> {formatNumber(stake * 2)}
           </p>
-          <p className="text-sm font-semibold text-text">credits, about {usd(stake * 2)}</p>
-          <p className="mt-2 text-sm text-text-2">No fee. Lose and you lose {formatCredits(stake)}. The bot keeps games close and the house edge is a published 5%.</p>
+          <p className="text-sm font-semibold text-text">{cur}</p>
+          <p className="mt-2 text-sm text-text-2">No fee. Lose and you lose {formatAmount(stake, cur)}. The bot keeps games close and the house edge is a published 5%.</p>
         </motion.div>
       </div>
-      <p className="mt-4 text-xs text-text-2">Test money in this beta. 18+. Only play with what you are happy to lose.</p>
+      <p className="mt-4 text-xs text-text-2">Devnet test coins in this beta, with no real value. 18+. Only play with what you are happy to lose.</p>
     </div>
   );
 }
@@ -193,7 +207,7 @@ export function PayoutCalculator() {
 const FEATURES = [
   { title: 'Instant payouts', text: 'Win and the pot lands in your balance the second the game ends.', d: 'M13 2 4 14h7l-1 8 9-12h-7l1-8Z' },
   { title: 'Fair dice and cards', text: 'Every roll and shuffle is locked before the game and provable after.', d: 'M12 2 4 5v6c0 5 3.5 9 8 11 4.5-2 8-6 8-11V5l-8-3Zm-1 13-4-4 1.4-1.4L11 12.2l4.6-4.6L17 9l-6 6Z' },
-  { title: 'Public vault', text: 'Every credit is backed one to one on Solana. Anyone can check.', d: 'M4 4h16v16H4V4Zm8 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z' },
+  { title: 'Public vaults', text: 'Every LOFI and SUI you hold here is backed one to one in a public vault on Sui. Anyone can check.', d: 'M4 4h16v16H4V4Zm8 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10Zm0 3a2 2 0 1 1 0 4 2 2 0 0 1 0-4Z' },
   { title: 'Built for your phone', text: 'Play from the browser in seconds. Nothing to install.', d: 'M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2Zm5 17a1 1 0 1 0 0-2 1 1 0 0 0 0 2Z' },
   { title: 'Real opponents or a bot', text: 'Quick match at your stake, or play the bot any time of day.', d: 'M8 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm8 0a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM2 20c0-3.3 2.7-6 6-6s6 2.7 6 6H2Zm13 0c0-2-.7-3.8-1.9-5.2A5 5 0 0 1 22 19v1h-7Z' },
   { title: 'Your limits', text: 'Set limits, take breaks, and cash out whenever you want.', d: 'M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 5v5.4l4 2.4-1 1.7-5-3V7h2Z' },

@@ -1,122 +1,141 @@
 'use client';
 /**
- * Wallet layer. Three ways to hold a Solana wallet:
- *  1. Guest wallet: a key created in this browser (the stand-in for an embedded wallet on devnet).
- *  2. Browser wallet: Phantom, Solflare or any Wallet Standard extension.
- *  3. Privy (email or Google login with an embedded wallet), when NEXT_PUBLIC_PRIVY_APP_ID is set.
- * The rest of the app only sees the EvensWallet interface.
+ * Wallet layer. Two ways to hold a Sui wallet, both signing locally in this browser:
+ *  1. Google (zkLogin): a short lived key made in the browser plus a zero knowledge proof of the
+ *     Google sign in. The address comes from the Google account and a salt the server keeps stable.
+ *  2. Guest wallet: an Ed25519 key kept in this browser only.
+ * The server builds every transaction and pays its network fee. The wallet only signs the bytes.
  */
-import { Keypair, Transaction, VersionedTransaction, PublicKey } from '@solana/web3.js';
-import nacl from 'tweetnacl';
-import bs58 from 'bs58';
+import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
+import { fromBase64, toBase64 } from '@mysten/sui/utils';
+import { genAddressSeed, getZkLoginSignature, decodeJwt } from '@mysten/sui/zklogin';
 
-export interface EvensWallet {
-  kind: 'embedded' | 'external' | 'privy';
+export interface CcWallet {
+  kind: 'guest' | 'zklogin';
   label: string;
   address: string;
-  signMessage(msg: Uint8Array): Promise<Uint8Array>;
-  signTransaction(tx: Transaction): Promise<Transaction>;
+  /** Sign server built transaction bytes (base64). Returns a serialized Sui signature. */
+  signTransaction(bytesB64: string): Promise<string>;
+  /** Guest only: sign the sign in message. */
+  signPersonalMessage?(msg: Uint8Array): Promise<string>;
   disconnect(): Promise<void>;
 }
 
 const GUEST_KEY = 'coldcall:guest-wallet:v1';
+const ZK_KEY = 'coldcall:zk:v1';
+const ZK_PENDING = 'coldcall:zk-pending:v1';
+
+const read = (k: string, store: 'local' | 'session' = 'local') => {
+  try {
+    return (store === 'local' ? localStorage : sessionStorage).getItem(k);
+  } catch {
+    return null;
+  }
+};
+const write = (k: string, v: string | null, store: 'local' | 'session' = 'local') => {
+  try {
+    const s = store === 'local' ? localStorage : sessionStorage;
+    if (v === null) s.removeItem(k);
+    else s.setItem(k, v);
+  } catch {
+    /* private mode: the wallet then lives for this page only */
+  }
+};
+
+// ---------- guest ----------
 
 export function hasGuestWallet() {
-  try {
-    return !!localStorage.getItem(GUEST_KEY);
-  } catch {
-    return false;
-  }
+  return !!read(GUEST_KEY);
 }
 
-export function guestWallet(create = true): EvensWallet | null {
-  let kp: Keypair;
+export function guestWallet(create = true): CcWallet | null {
+  let kp: Ed25519Keypair;
   try {
-    const raw = localStorage.getItem(GUEST_KEY);
-    if (raw) kp = Keypair.fromSecretKey(bs58.decode(raw));
+    const raw = read(GUEST_KEY);
+    if (raw) kp = Ed25519Keypair.fromSecretKey(raw);
     else if (create) {
-      kp = Keypair.generate();
-      localStorage.setItem(GUEST_KEY, bs58.encode(kp.secretKey));
+      kp = new Ed25519Keypair();
+      write(GUEST_KEY, kp.getSecretKey());
     } else return null;
   } catch {
     return null;
   }
   return {
-    kind: 'embedded',
+    kind: 'guest',
     label: 'Wallet on this device',
-    address: kp.publicKey.toBase58(),
-    signMessage: async (m) => nacl.sign.detached(m, kp.secretKey),
-    signTransaction: async (t) => {
-      t.partialSign(kp);
-      return t;
-    },
+    address: kp.toSuiAddress(),
+    signTransaction: async (b64) => (await kp.signTransaction(fromBase64(b64))).signature,
+    signPersonalMessage: async (m) => (await kp.signPersonalMessage(m)).signature,
     disconnect: async () => {},
   };
 }
 
-/** Export the guest key so the user can move it into Phantom. Shown behind a warning. */
+/** The guest key (suiprivkey...), so the player can move it into a Sui wallet app. Shown behind a warning. */
 export function exportGuestKey(): string | null {
+  return read(GUEST_KEY);
+}
+
+// ---------- Google zkLogin ----------
+
+export interface ZkPending {
+  ephemeral: string; // suiprivkey
+  maxEpoch: number;
+  randomness: string;
+  nonce: string;
+  returnTo: string;
+}
+export interface ZkSession {
+  ephemeral: string;
+  maxEpoch: number;
+  randomness: string;
+  jwt: string;
+  salt: string;
+  address: string;
+  proof: ZkProof;
+}
+export interface ZkProof {
+  proofPoints: { a: string[]; b: string[][]; c: string[] };
+  issBase64Details: { value: string; indexMod4: number };
+  headerBase64: string;
+}
+
+export const savePending = (p: ZkPending) => write(ZK_PENDING, JSON.stringify(p), 'session');
+export const takePending = (): ZkPending | null => {
+  const raw = read(ZK_PENDING, 'session');
+  write(ZK_PENDING, null, 'session');
   try {
-    return localStorage.getItem(GUEST_KEY);
+    return raw ? (JSON.parse(raw) as ZkPending) : null;
+  } catch {
+    return null;
+  }
+};
+export const saveZk = (s: ZkSession | null) => write(ZK_KEY, s ? JSON.stringify(s) : null);
+export function loadZk(): ZkSession | null {
+  try {
+    const raw = read(ZK_KEY);
+    return raw ? (JSON.parse(raw) as ZkSession) : null;
   } catch {
     return null;
   }
 }
 
-// ---- Wallet Standard (Phantom, Solflare, Backpack...) ----
-interface StdWallet {
-  name: string;
-  icon: string;
-  accounts: { address: string; publicKey: Uint8Array }[];
-  features: Record<string, any>;
-}
-
-export function detectBrowserWallets(): Promise<StdWallet[]> {
-  return new Promise((resolve) => {
-    if (typeof window === 'undefined') return resolve([]);
-    const found: StdWallet[] = [];
-    const register = (...ws: StdWallet[]) => {
-      for (const w of ws) if (w.features['solana:signTransaction'] && w.features['standard:connect'] && !found.some((f) => f.name === w.name)) found.push(w);
-    };
-    const api = { register };
-    window.addEventListener('wallet-standard:register-wallet', (e: any) => e.detail?.(api));
-    window.dispatchEvent(new CustomEvent('wallet-standard:app-ready', { detail: api }));
-    setTimeout(() => resolve(found), 250);
-  });
-}
-
-export async function connectBrowserWallet(w: StdWallet): Promise<EvensWallet> {
-  const { accounts } = await w.features['standard:connect'].connect();
-  const account = accounts[0] ?? w.accounts[0];
-  if (!account) throw new Error('No account was shared by the wallet.');
-  const chain = 'solana:devnet';
+/** Wallet from a stored zkLogin session, or null if there is none. Expiry is checked when signing. */
+export function zkWallet(s: ZkSession | null = loadZk()): CcWallet | null {
+  if (!s) return null;
+  const kp = Ed25519Keypair.fromSecretKey(s.ephemeral);
+  const claims = decodeJwt(s.jwt);
+  const aud = Array.isArray(claims.aud) ? claims.aud[0]! : claims.aud;
+  const addressSeed = genAddressSeed(BigInt(s.salt), 'sub', claims.sub, aud).toString();
   return {
-    kind: 'external',
-    label: w.name,
-    address: account.address,
-    signMessage: async (message) => {
-      const f = w.features['solana:signMessage'];
-      if (!f) throw new Error('This wallet cannot sign messages.');
-      const [out] = await f.signMessage({ account, message });
-      return out.signature;
+    kind: 'zklogin',
+    label: 'Google account',
+    address: s.address,
+    signTransaction: async (b64) => {
+      const { signature: userSignature } = await kp.signTransaction(fromBase64(b64));
+      return getZkLoginSignature({ inputs: { ...s.proof, addressSeed }, maxEpoch: s.maxEpoch, userSignature });
     },
-    signTransaction: async (t) => {
-      const bytes = t.serialize({ requireAllSignatures: false, verifySignatures: false });
-      const [out] = await w.features['solana:signTransaction'].signTransaction({ account, transaction: bytes, chain });
-      const signed = out.signedTransaction as Uint8Array;
-      try {
-        return Transaction.from(signed);
-      } catch {
-        const v = VersionedTransaction.deserialize(signed);
-        const legacy = Transaction.from(Buffer.from(bytes));
-        legacy.addSignature(new PublicKey(account.address), Buffer.from(v.signatures[0]!));
-        return legacy;
-      }
-    },
-    disconnect: async () => {
-      await w.features['standard:disconnect']?.disconnect?.();
-    },
+    disconnect: async () => saveZk(null),
   };
 }
 
-export const PRIVY_APP_ID = process.env.NEXT_PUBLIC_PRIVY_APP_ID ?? '';
+export const b64 = toBase64;

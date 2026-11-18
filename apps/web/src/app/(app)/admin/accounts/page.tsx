@@ -1,6 +1,7 @@
 'use client';
 import { useCallback } from 'react';
-import { Card, Credits } from '@/components/ui';
+import { Card } from '@/components/ui';
+import { Credits } from '@/components/admin/parts';
 import { Addr, DataTable, ErrorBox, Field, Net, Pager, Pill, RowsSkeleton, SaferPlay, SearchInput, Select, WALLET_KIND, type AccountRow, type Col } from '@/components/admin/parts';
 import { fmtAgo, fmtDate, fmtInt, qs, useAdmin, useUrlState, type Paged } from '@/components/admin/data';
 

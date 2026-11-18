@@ -1,7 +1,8 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { Button, Credits, Sheet } from '@/components/ui';
+import { Button, Sheet } from '@/components/ui';
+import { Credits } from '@/components/admin/parts';
 import { useSession } from '@/components/app/Providers';
 import { api } from '@/lib/api';
 import { Addr, DataTable, ErrorBox, Legs, Net, Pager, Pill, RowsSkeleton, txLabel, type Col, type Leg } from './parts';

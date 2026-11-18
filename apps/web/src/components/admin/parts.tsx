@@ -2,7 +2,9 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
-import { Button, Card, Credits, InfoTip, Skeleton } from '@/components/ui';
+import { Button, Card, Amount, InfoTip, Skeleton } from '@/components/ui';
+import { useSession } from '@/components/app/Providers';
+import type { Currency } from '@coldcall/shared';
 import { ACCOUNT_KIND, explorer, fmtDate, short, TX_KIND, useAdminConfig } from './data';
 
 /* ---------- navigation ---------- */
@@ -90,7 +92,16 @@ export function Pill({ children, tone = 'neutral', title }: { children: ReactNod
   );
 }
 
-/** Signed credits: win colour for plus, loss colour for minus, words for screen readers come from Credits. */
+/**
+ * An amount in the admin area. Uses the row's own coin when given, otherwise the coin picked in the header,
+ * which is also the coin every admin request was filtered by. Never shows a number without its coin.
+ */
+export function Credits({ currency, ...p }: { minor: number; currency?: Currency; sign?: boolean; className?: string; coin?: boolean; animate?: boolean; from?: number }) {
+  const { currency: active } = useSession();
+  return <Amount {...p} currency={currency ?? active} />;
+}
+
+/** Signed amount: win colour for plus, loss colour for minus, words for screen readers come from Amount. */
 export function Net({ minor, className = '' }: { minor: number; className?: string }) {
   return <Credits minor={minor} sign className={`${minor > 0 ? 'text-win' : minor < 0 ? 'text-loss' : 'text-text-2'} ${className}`} />;
 }
@@ -256,13 +267,13 @@ export function TextInput(props: React.InputHTMLAttributes<HTMLInputElement>) {
 
 /* ---------- money and chain bits ---------- */
 
-export function Addr({ value, kind = 'address', chars = 4 }: { value: string | null | undefined; kind?: 'address' | 'tx'; chars?: number }) {
+export function Addr({ value, kind = 'address', chars = 4 }: { value: string | null | undefined; kind?: 'address' | 'tx' | 'object'; chars?: number }) {
   const cfg = useAdminConfig();
   const [copied, setCopied] = useState(false);
   if (!value) return <span className="text-text-2">None</span>;
   return (
     <span className="inline-flex items-center gap-1">
-      <a href={explorer(cfg, kind, value)} target="_blank" rel="noreferrer" className="font-mono text-[13px] hover:text-primary hover:underline" title={`${value}, open in Solana Explorer`}>
+      <a href={explorer(cfg, kind, value)} target="_blank" rel="noreferrer" className="font-mono text-[13px] hover:text-primary hover:underline" title={`${value}, open on Suiscan`}>
         {short(value, chars, chars)}
       </a>
       <button

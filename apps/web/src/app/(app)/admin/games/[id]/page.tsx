@@ -1,7 +1,8 @@
 'use client';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
-import { Card, Credits, Skeleton } from '@/components/ui';
+import { Card, Skeleton } from '@/components/ui';
+import { Credits } from '@/components/admin/parts';
 import { DataTable, ErrorBox, Legs, Net, Panel, Pill, txLabel, Addr, type Leg } from '@/components/admin/parts';
 import { GameName, Outcome, StatusPill } from '@/components/admin/lists';
 import { MODE_NAME, fmtDate, fmtDuration, fmtPct, useAdmin, type GameId } from '@/components/admin/data';

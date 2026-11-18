@@ -1,6 +1,7 @@
 'use client';
 import { useCallback } from 'react';
-import { parseCredits } from '@coldcall/shared';
+import { parseAmount } from '@coldcall/shared';
+import { useSession } from '@/components/app/Providers';
 import { Button, Card } from '@/components/ui';
 import { DataTable, ErrorBox, Field, Pager, RowsSkeleton, SearchInput, Select, TextInput } from '@/components/admin/parts';
 import { gameCols, type GameRow } from '@/components/admin/lists';
@@ -10,10 +11,11 @@ const DEFAULTS = { game: '', mode: '', status: '', min: '', max: '', from: '', t
 
 export default function GamesPage() {
   const [f, setF, ready] = useUrlState(DEFAULTS);
+  const { currency } = useSession();
   const page = Math.max(1, Number(f.page) || 1);
-  // Stake filters are typed in credits and sent in minor units. Invalid input is ignored and flagged.
-  const min = f.min ? parseCredits(f.min) : null;
-  const max = f.max ? parseCredits(f.max) : null;
+  // Stake filters are typed in the selected coin and sent in minor units. Invalid input is ignored and flagged.
+  const min = f.min ? parseAmount(f.min) : null;
+  const max = f.max ? parseAmount(f.max) : null;
   const badMin = !!f.min && min === null;
   const badMax = !!f.max && max === null;
   const path = ready
@@ -39,10 +41,10 @@ export default function GamesPage() {
           <Select label="Status" value={f.status} onChange={(status) => setF({ status, page: '1' })} options={[['', 'Any'], ['settled', 'Finished'], ['playing', 'Playing'], ['waiting', 'Waiting'], ['cancelled', 'Cancelled']]} />
         </Field>
         <Field label={badMin ? 'Stake from (check this)' : 'Stake from'}>
-          <TextInput inputMode="decimal" aria-invalid={badMin} placeholder="Credits" value={f.min} onChange={(e) => setF({ min: e.target.value, page: '1' })} />
+          <TextInput inputMode="decimal" aria-invalid={badMin} placeholder={currency} value={f.min} onChange={(e) => setF({ min: e.target.value, page: '1' })} />
         </Field>
         <Field label={badMax ? 'Stake to (check this)' : 'Stake to'}>
-          <TextInput inputMode="decimal" aria-invalid={badMax} placeholder="Credits" value={f.max} onChange={(e) => setF({ max: e.target.value, page: '1' })} />
+          <TextInput inputMode="decimal" aria-invalid={badMax} placeholder={currency} value={f.max} onChange={(e) => setF({ max: e.target.value, page: '1' })} />
         </Field>
         <div className="col-span-2 grid grid-cols-2 gap-3 md:col-span-4 xl:col-span-6 xl:grid-cols-[1fr_1fr_auto]">
           <Field label="Created from (UTC)">

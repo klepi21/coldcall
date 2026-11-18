@@ -4,7 +4,8 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useState, type ReactNode } from 'react';
 import { motion, MotionConfig } from 'motion/react';
 import { useSession } from './Providers';
-import { Credits, Wordmark, Button, Logo, Cosmos } from '@/components/ui';
+import { Amount, Wordmark, Button, Logo, Cosmos } from '@/components/ui';
+import { CurrencySwitch } from './CurrencySwitch';
 import { AuthSheet } from './AuthSheet';
 import { OnboardingSheet } from './OnboardingSheet';
 import { haptic } from '@/lib/haptics';
@@ -56,7 +57,7 @@ function ConnectionBanner() {
 }
 
 export function BalanceChip() {
-  const { me, balance, openAuth } = useSession();
+  const { me, balance, currency, openAuth } = useSession();
   if (!me) {
     return (
       <Button size="sm" onClick={() => openAuth()}>
@@ -70,10 +71,10 @@ export function BalanceChip() {
       onClick={() => haptic()}
       className="press glass group inline-flex h-11 items-center gap-2 rounded-full pl-3 pr-1.5 text-[15px] hover:brightness-110"
       style={{ '--tint': 'var(--gold)' } as React.CSSProperties}
-      aria-label="Your balance, open wallet"
+      aria-label={`Your ${currency} balance, open wallet`}
     >
       <span className="pointer-events-none absolute -left-1 top-1/2 size-8 -translate-y-1/2 rounded-full bg-gold/30 blur-md" aria-hidden />
-      <Credits minor={balance?.available ?? 0} animate className="relative text-[15px] font-bold" />
+      <Amount key={currency} minor={balance?.available ?? 0} currency={currency} animate code={false} className="relative text-[15px] font-bold" />
       <span className="btn-primary relative grid size-8 place-items-center rounded-full text-[18px] font-bold leading-none" aria-hidden>
         +
       </span>
@@ -146,7 +147,7 @@ export function AppShell({ children, bare }: { children: ReactNode; bare?: boole
 
         {/* Desktop rail */}
         <nav aria-label="Main" className="glass glass-strong glass-blur fixed bottom-3 left-3 top-3 z-40 hidden w-[84px] flex-col items-center gap-1.5 rounded-[24px] py-4 lg:flex">
-          <Link href="/" aria-label="Evens home" className="press relative mb-4 grid place-items-center">
+          <Link href="/" aria-label="Cold Call home" className="press relative mb-4 grid place-items-center">
             <span className="absolute size-10 rounded-full bg-accent/40 blur-lg" aria-hidden />
             <Logo className="relative size-11" />
           </Link>
@@ -167,19 +168,31 @@ export function AppShell({ children, bare }: { children: ReactNode; bare?: boole
           <header className="glass-blur sticky top-0 z-30 border-b border-well-line bg-[color-mix(in_srgb,var(--bg)_55%,transparent)]">
             <ConnectionBanner />
             <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between gap-3 px-4 sm:px-6">
-              <Link href={me ? '/play' : '/'} className="press lg:hidden" aria-label="Evens">
-                <Wordmark />
+              <Link href={me ? '/play' : '/'} className="press shrink-0 lg:hidden" aria-label="Cold Call">
+                {me ? (
+                  <>
+                    <Logo className="size-9 sm:hidden" />
+                    <span className="hidden sm:inline">
+                      <Wordmark />
+                    </span>
+                  </>
+                ) : (
+                  <Wordmark />
+                )}
               </Link>
               <p className="hidden min-w-0 truncate text-sm text-text-2 lg:block">{me?.onboarded ? <>Welcome back, <span className="font-semibold text-text">{me.displayName}</span></> : null}</p>
-              <div className="flex items-center gap-2">
-                <span className="hidden rounded-full px-3 py-1 text-xs font-semibold text-text-2 [box-shadow:inset_0_0_0_1px_var(--well-line)] sm:inline">Devnet beta</span>
+              <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
+                <span className="hidden rounded-full px-3 py-1 text-xs font-semibold text-text-2 [box-shadow:inset_0_0_0_1px_var(--well-line)] xl:inline">Devnet beta</span>
                 {me?.role === 'admin' ? (
                   <Link href="/admin" aria-label="Admin" aria-current={active('/admin') ? 'page' : undefined} className="press glass inline-flex h-11 items-center gap-1 rounded-full px-3 text-[13px] font-semibold lg:hidden">
                     <NavIcon d={ADMIN_NAV.icon} className="size-4 text-primary" />
                     Admin
                   </Link>
                 ) : null}
-                <LevelChip />
+                {me ? <CurrencySwitch /> : null}
+                <span className="hidden sm:contents">
+                  <LevelChip />
+                </span>
                 <BalanceChip />
               </div>
             </div>

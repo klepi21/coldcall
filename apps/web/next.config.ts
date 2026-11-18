@@ -5,7 +5,7 @@ const API = process.env.API_ORIGIN ?? 'http://localhost:4000';
 
 /** One id per build. Open tabs compare it with /version.json to pick up new releases on their own. */
 const BUILD_ID =
-  process.env.EVENS_RELEASE ??
+  process.env.COLDCALL_RELEASE ??
   (() => {
     try {
       return execSync('git rev-parse --short HEAD').toString().trim() + '-' + Date.now().toString(36);

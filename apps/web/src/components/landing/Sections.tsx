@@ -2,10 +2,12 @@
 import Link from 'next/link';
 import { useRef, type ReactNode } from 'react';
 import { motion } from 'motion/react';
-import { GAMES, formatCredits, type GameKind } from '@coldcall/shared';
+import { GAMES, formatNumber, type GameKind } from '@coldcall/shared';
 import { GameArt, GAME_COLOR } from '@/components/app/GameArt';
 import { TileLoop, CountUp } from '@/components/app/LandingFx';
-import { Coin } from '@/components/ui';
+import { CoinChip } from '@/components/ui';
+
+const Coin = ({ className }: { className?: string }) => <CoinChip currency="LOFI" className={className} />;
 import { play, haptic } from '@/lib/sound';
 import { VaultCoin, WorldGlyph } from './StaticUniverse';
 
@@ -126,12 +128,12 @@ export function LivingTiles({ onPlay }: { onPlay: () => void }) {
 const STEPS = [
   {
     t: 'Add money',
-    d: 'Money you add goes into a public vault on Solana. You get credits one to one: 1 credit is 1 cent.',
+    d: 'Get free test LOFI or SUI, then add it. Each coin goes into its own public vault on Sui, and your balance in that coin goes up by exactly the same amount.',
     icon: 'M3 7a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v1h-6a4 4 0 0 0 0 8h6v1a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3V7Zm12 3h7v4h-7a2 2 0 1 1 0-4Z',
   },
   {
     t: 'Play',
-    d: 'Pick a stake. Your credits are held for that game and the full summary is shown before you start.',
+    d: 'Pick LOFI or SUI and a stake. The whole game is played in that one coin, and the full summary is shown before you start.',
     icon: 'M7 6h10a5 5 0 0 1 4.9 6l-1 5a3 3 0 0 1-5.2 1.4L14 16h-4l-1.7 2.4A3 3 0 0 1 3.1 17l-1-5A5 5 0 0 1 7 6Zm1 3v1.5H6.5v2H8V14h2v-1.5h1.5v-2H10V9H8Zm8.5 1a1 1 0 1 0 0 2 1 1 0 0 0 0-2Zm-2 2a1 1 0 1 0 0 2 1 1 0 0 0 0-2Z',
   },
   {
@@ -147,8 +149,8 @@ export function MoneyFlow({ vault }: { vault: ReactNode }) {
       <div className="mx-auto max-w-[1200px] px-4 py-16 sm:px-6 sm:py-24">
         <Rise>
           <Kicker color="var(--gold)">How money works</Kicker>
-          <H2>Every credit sits in a vault you can check</H2>
-          <p className="mt-3 max-w-2xl text-[17px] text-text-2">Three steps, no crypto knowledge needed. In this beta every credit is test money with no real value.</p>
+          <H2>Every coin sits in a vault you can check</H2>
+          <p className="mt-3 max-w-2xl text-[17px] text-text-2">Three steps, no crypto knowledge needed. In this beta LOFI and SUI are devnet test coins with no real value. The two are never swapped.</p>
         </Rise>
 
         <div className="relative mt-10">
@@ -189,7 +191,7 @@ export function MoneyFlow({ vault }: { vault: ReactNode }) {
               <div>
                 <h3 className="font-display text-[22px] font-extrabold uppercase">Check the vault yourself</h3>
                 <p className="mt-2 max-w-lg text-[16px] leading-relaxed text-text-2">
-                  The vault is a public contract on Solana and its balance is live for anyone to see. Next to it we show what we owe players, from our own records, checked every 5 minutes.
+                  There is one public vault per coin on Sui, and their balances are live for anyone to see. Next to each we show what we hold for players in that coin, from our own records, checked every 5 minutes.
                 </p>
                 <Link href="/how-it-works#vault" className="mt-3 inline-flex h-11 items-center font-semibold text-primary">
                   How the vault works
@@ -225,9 +227,9 @@ export function TwoWays({ calculator }: { calculator: ReactNode }) {
               <p className="text-[12px] font-bold uppercase tracking-[0.14em] text-primary">Against people</p>
             </div>
             <p className="mt-4 font-display text-[24px] font-extrabold uppercase leading-tight">Winner takes the pot</p>
-            <p className="mt-2 text-[16px] leading-relaxed text-text-2">Everyone puts in the same stake. Beat them and the whole pot is yours. Evens charges a 5% fee on your stake, shown before you join.</p>
+            <p className="mt-2 text-[16px] leading-relaxed text-text-2">Everyone puts in the same stake. Beat them and the whole pot is yours. Cold Call charges a 5% fee on your stake, shown before you join.</p>
             <div className="mt-5 flex flex-wrap items-center gap-2 rounded-card bg-white/[0.04] px-4 py-3 text-[15px]">
-              <Coin className="size-5" /> You put in 5, they put in 5, <strong className="text-primary">you win 10</strong>
+              <Coin className="size-5" /> You put in 5 LOFI, they put in 5 LOFI, <strong className="text-primary">you win 10 LOFI</strong>
             </div>
           </div>
         </Rise>
@@ -246,7 +248,7 @@ export function TwoWays({ calculator }: { calculator: ReactNode }) {
               No fee. The bot matches your level so games stay close, and the house keeps a flat, published 5% edge. A chess draw returns 90% of your stake.
             </p>
             <div className="mt-5 flex flex-wrap items-center gap-2 rounded-card bg-white/[0.04] px-4 py-3 text-[15px]">
-              <Coin className="size-5" /> Put in 5 against the bot, <strong className="text-[#a993ff]">win 10 back</strong>
+              <Coin className="size-5" /> Put in 5 LOFI against the bot, <strong className="text-[#a993ff]">win 10 LOFI back</strong>
             </div>
           </div>
         </Rise>
@@ -272,7 +274,7 @@ export function SaferPlay() {
       <Rise>
         <Kicker color="#3ddcff">Safer play</Kicker>
         <H2>Play on your terms</H2>
-        <p className="mt-3 max-w-xl text-[17px] text-text-2">Treat credit games like a paid game, not income. 18+ only. Practice games are always free.</p>
+        <p className="mt-3 max-w-xl text-[17px] text-text-2">Treat games with stakes like a paid game, not income. 18+ only. Practice games are always free.</p>
       </Rise>
       <div className="mt-8 grid gap-4 md:grid-cols-3">
         {SAFE.map(([t, d, href, icon], i) => (
@@ -360,7 +362,7 @@ export function FinalCta({ onPlay, label }: { onPlay: () => void; label: string 
 
 /* ------------------------------------------------------------------ live stats */
 
-export function StatsBar({ stats }: { stats: { online: number; gamesPlayed: number; creditsWon: number } }) {
+export function StatsBar({ stats }: { stats: { online: number; gamesPlayed: number; won: { LOFI: number; SUI: number } } }) {
   return (
     <section className="border-y border-line/60 bg-surface/40">
       <div className="mx-auto grid max-w-[1200px] grid-cols-3 divide-x divide-line px-2 py-6 text-center sm:px-6">
@@ -368,7 +370,7 @@ export function StatsBar({ stats }: { stats: { online: number; gamesPlayed: numb
           [
             ['Online now', stats.online, (n: number) => Math.round(n).toLocaleString('en-US')],
             ['Games played', stats.gamesPlayed, (n: number) => Math.round(n).toLocaleString('en-US')],
-            ['Credits won', stats.creditsWon, (n: number) => formatCredits(Math.round(n)).replace('.00', '')],
+            ['LOFI won', stats.won?.LOFI ?? 0, (n: number) => formatNumber(Math.round(n)).replace('.00', '')],
           ] as const
         ).map(([label, value, fmt]) => (
           <div key={label} className="px-2">

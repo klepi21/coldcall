@@ -1,6 +1,9 @@
 'use client';
 import { useCallback, useState } from 'react';
-import { Card, Chip, Credits } from '@/components/ui';
+import { formatAmount } from '@coldcall/shared';
+import { useSession } from '@/components/app/Providers';
+import { Card, Chip } from '@/components/ui';
+import { Credits } from '@/components/admin/parts';
 import { DataTable, ErrorBox, Field, Kpi, Pager, Pill, RowsSkeleton, SearchInput, Select } from '@/components/admin/parts';
 import { DepositsList, TxList, WithdrawalsList } from '@/components/admin/lists';
 import { TX_KIND, WD_STATUS, fmtAgo, fmtDate, useAdmin, useAdminConfig, useUrlState, type Paged } from '@/components/admin/data';
@@ -16,6 +19,7 @@ const TABS = [
 export default function MoneyPage() {
   const [f, setF, ready] = useUrlState(DEFAULTS);
   const cfg = useAdminConfig();
+  const { currency } = useSession();
   const [bump, setBump] = useState(0);
   const counts = useAdmin<{ counts: { status: string; n: number; amount: number }[] }>(`/api/admin/money/withdrawals?limit=1&b=${bump}`);
   const onQ = useCallback((q: string) => setF({ q }), [setF]);
@@ -24,10 +28,10 @@ export default function MoneyPage() {
   return (
     <div className="space-y-4">
       <section aria-label="Cash out totals" className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Kpi label="Needs review" value={c('review')?.n ?? 0} sub={<>Total <Credits minor={c('review')?.amount ?? 0} coin={false} /></>} tone={c('review')?.n ? 'warn' : undefined} info={`Cash outs above ${cfg ? (cfg.reviewAbove / 100).toLocaleString('en-US') : 'the threshold of'} credits wait for an admin before a ticket is issued.`} />
-        <Kpi label="In progress" value={(c('pending')?.n ?? 0) + (c('submitted')?.n ?? 0)} sub="Ticket issued, player finishing on chain" info="A signed ticket was issued. It is valid for 10 minutes. If it is not used, the locked credits go back to the player." />
+        <Kpi label="Needs review" value={c('review')?.n ?? 0} sub={<>Total <Credits minor={c('review')?.amount ?? 0} coin={false} /></>} tone={c('review')?.n ? 'warn' : undefined} info={`${currency} cash outs above ${cfg ? formatAmount(cfg.limits[currency].reviewAbove, currency) : 'the threshold'} wait for an admin before a ticket is issued.`} />
+        <Kpi label="In progress" value={(c('pending')?.n ?? 0) + (c('submitted')?.n ?? 0)} sub="Ticket issued, player finishing on chain" info="A signed ticket was issued. It is valid for 10 minutes. If it is not used, the locked amount goes back to the player." />
         <Kpi label="Paid out" value={c('confirmed')?.n ?? 0} sub={<>Total <Credits minor={c('confirmed')?.amount ?? 0} coin={false} /></>} info="Cash outs confirmed on chain." />
-        <Kpi label="Expired" value={c('expired')?.n ?? 0} sub="Credits released back" info="Tickets that were not used in time. The lock was released back to the player's balance." />
+        <Kpi label="Expired" value={c('expired')?.n ?? 0} sub="Released back to the player" info="Tickets that were not used in time. The lock was released back to the player's balance." />
       </section>
 
       <div className="-mx-1 flex gap-2 overflow-x-auto px-1 py-1 no-scrollbar" role="tablist" aria-label="Money sections">

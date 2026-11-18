@@ -18,17 +18,17 @@ import { LivingTiles, MoneyFlow, TwoWays, SaferPlay, Faq, FinalCta, StatsBar } f
 import '@/components/landing/landing.css';
 
 const FAQ = [
-  ['What is Evens?', 'An arena for classic skill games. You play chess, backgammon, Tichu or Sea Battle against real people or a bot, for free or for credits. Win, and you take the pot.'],
+  ['What is Cold Call?', 'An arena for classic skill games. You play chess, backgammon, Tichu or Sea Battle against real people or a bot, for free or for a stake in LOFI or SUI. Win, and you take the pot.'],
   [
     'Is this gambling?',
-    'Playing for credits means you can win or lose them, so treat it like a paid game, not income. In this beta every credit is test money with no real value. Practice games are always free.',
+    'Playing for a stake means you can win or lose it, so treat it like a paid game, not income. In this beta LOFI and SUI are devnet test coins with no real value. Practice games are always free.',
   ],
-  ['Can I lose money?', 'Yes, you can lose the credits you put into a game. Before every game we show exactly what you put in, the fee, and what you get if you win, lose or draw.'],
+  ['Can I lose money?', 'Yes, you can lose the coins you put into a game. Before every game we show exactly what you put in, the fee, and what you get if you win, lose or draw.'],
   [
     'How do the bots work?',
     'The bot adjusts to your skill so games stay close. The house keeps a published 5% edge: in chess you win about 36 of 100 games and draw about 25. We never use your balance or losses to set the bot.',
   ],
-  ['Who holds my money?', 'Money you add goes into a public vault contract on Solana. Credits are backed one to one, and anyone can check the vault against what we owe players.'],
+  ['Who holds my money?', 'Coins you add go into a public vault contract on Sui, one vault per coin. Your LOFI and SUI balances are each backed one to one, and anyone can check each vault against what we hold for players.'],
   ['How do I cash out?', 'Open your wallet, tap Cash out, choose an amount, and approve. The money goes straight back to your wallet.'],
   ['How do I set limits?', 'In your profile you can set daily and weekly limits, take a break, or pause your account for months.'],
 ];
@@ -37,11 +37,12 @@ interface Stats {
   online: number;
   playing: number;
   gamesPlayed: number;
-  creditsWon: number;
+  won: { LOFI: number; SUI: number };
   recentWins: {
     name: string;
     game: string;
     amount: number;
+    currency: 'LOFI' | 'SUI';
     mode: string;
     at?: string;
   }[];
@@ -75,7 +76,7 @@ export default function Landing() {
         <span className="text-primary text-glow">One arena.</span>
       </h1>
       <p className="lp-rise lp-d2 mt-5 text-[18px] leading-relaxed text-text">
-        Play <strong>chess, backgammon, Tichu</strong> and <strong>Sea Battle</strong> against real people or a fair bot. Practice free, or put credits in and win the pot.
+        Play <strong>chess, backgammon, Tichu</strong> and <strong>Sea Battle</strong> against real people or a fair bot. Practice free, or stake LOFI or SUI and win the pot.
       </p>
       <div className="lp-rise lp-d3 mt-7 flex flex-col gap-3 sm:flex-row">
         <button
@@ -153,7 +154,7 @@ export default function Landing() {
 
           <footer className="border-t border-line">
             <div className="mx-auto flex max-w-[1200px] flex-col gap-3 px-4 py-8 text-sm text-text-2 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-              <span>Evens beta on Solana devnet. Test money only. 18+.</span>
+              <span>Cold Call beta on Sui devnet. Test coins only. 18+.</span>
               <span className="flex gap-4">
                 <Link href="/how-it-works" className="inline-flex h-11 items-center">
                   How it works

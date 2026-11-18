@@ -1,12 +1,15 @@
 'use client';
 import Link from 'next/link';
-import { formatCredits } from '@coldcall/shared';
-import { Button, Card, Credits, Skeleton } from '@/components/ui';
+import { CURRENCIES, formatNumber, formatAmount, type Currency } from '@coldcall/shared';
+import { useSession } from '@/components/app/Providers';
+import { Button, Card, Skeleton, Amount, CoinChip } from '@/components/ui';
+import { Credits } from '@/components/admin/parts';
 import { TimeChart, Meter } from '@/components/admin/Charts';
 import { DataTable, ErrorBox, Kpi, Panel, Pill, Net, type Col } from '@/components/admin/parts';
 import { GAME_IDS, GAME_NAME, GAME_VAR, MODE_NAME, fmtAgo, fmtDuration, fmtInt, fmtPct, useAdmin, type GameId } from '@/components/admin/data';
 
-const credits = (n: number) => `${formatCredits(n)} cr`;
+/** Chart values: the coin is named in each chart title. */
+const credits = (n: number) => formatNumber(n);
 const count = (n: number) => fmtInt(n);
 
 export default function AdminOverview() {
@@ -19,11 +22,15 @@ export default function AdminOverview() {
     breakdown.reload();
   };
   const d = dash.data;
+  const { currency } = useSession();
 
   return (
     <div className="space-y-5">
+      <VaultsBoth />
       <div className="flex items-center justify-between gap-3">
-        <p className="text-sm text-text-2">Live numbers from the ledger and the database. Days are UTC days. Counts leave out house and admin accounts.</p>
+        <p className="text-sm text-text-2">
+          Money numbers below are in <strong className="text-text">{currency}</strong> only. Switch the coin at the top to see the other one. Days are UTC days. Counts leave out house and admin accounts.
+        </p>
         <Button variant="secondary" size="sm" onClick={reload} loading={dash.loading && !!d}>
           Refresh
         </Button>
@@ -58,7 +65,7 @@ export default function AdminOverview() {
             <Kpi
               label="Games today"
               value={fmtInt(d.games.today)}
-              sub={`${d.games.d7} in 7 days, ${d.games.d7_credits} of them for credits`}
+              sub={`${d.games.d7} in 7 days, ${d.games.d7_credits} of them in ${currency}`}
               info="Games that finished with a result since midnight UTC, all modes. Cancelled tables are not counted."
               href="/admin/games"
             />
@@ -72,7 +79,7 @@ export default function AdminOverview() {
               label="Staked, 30 days"
               value={<Credits minor={d.staked.d30} />}
               sub={<>All time <Credits minor={d.staked.all_time} coin={false} /></>}
-              info="Total stakes players put in finished credit games (vs bot and vs people), per player seat. Fees and the house matching stake are not included."
+              info="Total stakes players put in finished staked games (vs bot and vs people), per player seat. Fees and the house matching stake are not included."
             />
             <Kpi
               label="Fee revenue, 30 days"
@@ -85,7 +92,7 @@ export default function AdminOverview() {
               value={<Net minor={d.bot.house} />}
               sub={<>Expected about <Credits minor={d.bot.expectedHouse} coin={false} /> at the disclosed 5% edge, {d.bot.games} games</>}
               tone={d.bot.house < 0 ? 'warn' : undefined}
-              info="What the house won (plus) or lost (minus) in finished bot games with credits. The disclosed expectation is 5% of the stakes. Over a few games luck dominates."
+              info="What the house won (plus) or lost (minus) in finished bot games with a stake. The disclosed expectation is 5% of the stakes. Over a few games luck dominates."
             />
             <Kpi
               label="Player return vs bot"
@@ -98,7 +105,7 @@ export default function AdminOverview() {
                     : `Disclosed minus 5%. Outside the normal range of plus or minus ${fmtPct(d.bot.band)}. Check calibration.`
               }
               tone={d.bot.withinRange === false ? 'bad' : d.bot.withinRange ? 'good' : undefined}
-              info="Average result per credit staked against the bot, from the player's side. Disclosed target is minus 5%. The normal range is a 95% band for the number of games played."
+              info="Average result per coin staked against the bot, from the player's side. Disclosed target is minus 5%. The normal range is a 95% band for the number of games played."
             />
             <Kpi
               label="Player deposits"
@@ -119,7 +126,7 @@ export default function AdminOverview() {
               value={d.vault.backed === null ? 'Unknown' : d.vault.backed ? 'Backed' : 'Short'}
               sub={d.vault.live === null ? 'Could not read the vault just now, showing the last check' : <>Vault <Credits minor={d.vault.live} coin={false} />, ledger holds <Credits minor={d.vault.held} coin={false} /></>}
               tone={d.vault.backed === false ? 'bad' : d.vault.backed ? 'good' : 'warn'}
-              info="Backed means the USDC in the on chain vault (times 100) covers everything the ledger holds: player balances, money in games, the house bankroll and fee revenue."
+              info="Backed means the coins in the on chain vault of this currency cover everything the ledger holds in it: player balances, money in games, the house bankroll and fee revenue."
             />
             <Kpi
               label="Waiting for review"
@@ -147,13 +154,13 @@ export default function AdminOverview() {
             <TimeChart title="Games finished per day by game" data={series.data.games} series={GAME_IDS.map((g) => ({ key: g, label: GAME_NAME[g], color: GAME_VAR[g] }))} format={count} height={220} />
           ) : null}
         </ChartPanel>
-        <ChartPanel title="Staked per day" info="Stakes players put into finished credit games per UTC day, in credits. Same definition as the Staked tile." loading={!series.data}>
+        <ChartPanel title="Staked per day" info="Stakes players put into finished staked games per UTC day, in the coin picked at the top. Same definition as the Staked tile." loading={!series.data}>
           {series.data ? <TimeChart title="Staked per day" data={series.data.money} series={[{ key: 'staked', label: 'Staked', color: 'var(--s-gold)' }]} format={credits} integer={false} scale={100} /> : null}
         </ChartPanel>
-        <ChartPanel title="Fees per day" info="Fees booked to the fee account per UTC day, in credits. Its own chart because fees are far smaller than stakes." loading={!series.data}>
+        <ChartPanel title="Fees per day" info="Fees booked to the fee account per UTC day, in the coin picked at the top. Its own chart because fees are far smaller than stakes." loading={!series.data}>
           {series.data ? <TimeChart title="Fees per day" data={series.data.money} series={[{ key: 'fees', label: 'Fees', color: 'var(--s-lime)' }]} format={credits} integer={false} scale={100} /> : null}
         </ChartPanel>
-        <ChartPanel className="lg:col-span-2" title="Deposits and cash outs per day" info="Player deposits credited and cash outs paid per UTC day, in credits. House funding is left out." loading={!series.data}>
+        <ChartPanel className="lg:col-span-2" title="Deposits and cash outs per day" info="Player deposits credited and cash outs paid per UTC day, in the coin picked at the top. House funding is left out." loading={!series.data}>
           {series.data ? (
             <TimeChart
               title="Deposits and cash outs per day"
@@ -210,6 +217,46 @@ function Attention({ d }: { d: any }) {
   );
 }
 
+/** Both vaults side by side: each coin is checked against its own ledger, never against the other. */
+function VaultsBoth() {
+  const r = useAdmin<{ vaults: any[] }>('/api/admin/vaults');
+  if (!r.data) return r.error ? <ErrorBox message={r.error} onRetry={r.reload} /> : <Skeleton className="h-[120px]" />;
+  return (
+    <section aria-label="Reserve check per coin" className="grid gap-3 sm:grid-cols-2">
+      {CURRENCIES.map((c: Currency) => {
+        const v = r.data!.vaults.find((x) => x.currency === c);
+        if (!v) return null;
+        const vault = v.live ?? v.lastCheck?.vault_minor ?? null;
+        return (
+          <Card key={c} tint={v.backed === false ? 'var(--loss)' : 'var(--gold)'} className="p-4">
+            <div className="flex items-center justify-between gap-3">
+              <p className="inline-flex items-center gap-2 font-semibold">
+                <CoinChip currency={c} className="size-5" /> {c} vault
+              </p>
+              <Pill tone={v.backed === null ? 'warn' : v.backed ? 'good' : 'bad'}>{v.backed === null ? 'Unknown' : v.backed ? 'Backed' : 'Short'}</Pill>
+            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-1 text-[13px]">
+              <dt className="text-text-2">On chain</dt>
+              <dd className="text-right">{vault === null ? 'Unknown' : <Amount minor={vault} currency={c} />}</dd>
+              <dt className="text-text-2">Ledger holds</dt>
+              <dd className="text-right"><Amount minor={v.held} currency={c} /></dd>
+              <dt className="text-text-2">Owed to players</dt>
+              <dd className="text-right"><Amount minor={v.owedToPlayers} currency={c} coin={false} /></dd>
+              <dt className="text-text-2">House bankroll</dt>
+              <dd className="text-right"><Amount minor={v.houseBankroll} currency={c} coin={false} /></dd>
+              <dt className="text-text-2">Fee revenue</dt>
+              <dd className="text-right"><Amount minor={v.feeRevenue} currency={c} coin={false} /></dd>
+            </dl>
+            <a href={v.vaultUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-[13px] font-semibold text-primary hover:underline">
+              Open the {c} vault on Suiscan
+            </a>
+          </Card>
+        );
+      })}
+    </section>
+  );
+}
+
 function VaultPanel({ v, houseFunding }: { v: any; houseFunding: number }) {
   const parts = [
     { label: 'Player balances', minor: v.available, color: 'var(--s-lime)' },
@@ -223,8 +270,8 @@ function VaultPanel({ v, houseFunding }: { v: any; houseFunding: number }) {
   const surplus = vault === null ? null : vault - v.held;
   return (
     <Panel
-      title="Vault and what the ledger holds"
-      info="The top bar is the USDC in the on chain vault. The bottom bar is everything the ledger says is held, split by account. Backed when the top bar is at least as long as the bottom one."
+      title={`${v.currency} vault and what the ledger holds`}
+      info={`The top bar is the ${v.currency} in the on chain vault. The bottom bar is everything the ledger holds in ${v.currency}, split by account. Backed when the top bar is at least as long as the bottom one.`}
       action={v.lastCheck ? <span className="text-[13px] text-text-2">Last reserve check {fmtAgo(v.lastCheck.checked_at)}</span> : null}
     >
       <div className="space-y-3">
@@ -242,7 +289,7 @@ function VaultPanel({ v, houseFunding }: { v: any; houseFunding: number }) {
             <span className="text-text-2">Ledger holds</span>
             <Credits minor={v.held} />
           </div>
-          <div className="flex h-3 gap-[2px] overflow-hidden rounded-full bg-well" role="img" aria-label={parts.map((p) => `${p.label} ${formatCredits(p.minor)} credits`).join(', ')}>
+          <div className="flex h-3 gap-[2px] overflow-hidden rounded-full bg-well" role="img" aria-label={parts.map((p) => `${p.label} ${formatAmount(p.minor, v.currency)}`).join(', ')}>
             {parts.map((p) => (p.minor > 0 ? <div key={p.label} style={{ width: `${(p.minor / scale) * 100}%`, background: p.color }} /> : null))}
           </div>
           <ul className="mt-2 grid grid-cols-1 gap-x-6 gap-y-1 text-[13px] sm:grid-cols-2 lg:grid-cols-3">

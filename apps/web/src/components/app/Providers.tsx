@@ -2,10 +2,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { api, ApiError, wsUrl } from '@/lib/api';
-import { guestWallet, hasGuestWallet, type EvensWallet } from '@/lib/wallet';
+import { DEFAULT_CURRENCY, isCurrency, type Currency } from '@coldcall/shared';
+import { guestWallet, hasGuestWallet, zkWallet, type CcWallet } from '@/lib/wallet';
 import { setSoundEnabled } from '@/lib/sound';
-import bs58 from 'bs58';
-import { PrivyLayer } from './PrivyLayer';
 import { UpdateWatcher } from './UpdateWatcher';
 
 export interface Me {
@@ -17,8 +16,9 @@ export interface Me {
   role: string;
   onboarded: boolean;
   ratings: Record<string, { r: number; n: number }>;
-  settings: { sound?: boolean; theme?: 'system' | 'dark' | 'light'; confirmMoves?: boolean; boardTheme?: 'marble' | 'night'; hints?: boolean; render3d?: boolean; pendingLimits?: any };
-  limits: { depositDaily: number | null; lossDaily: number | null; lossWeekly: number | null };
+  settings: { currency?: Currency; sound?: boolean; theme?: 'system' | 'dark' | 'light'; confirmMoves?: boolean; boardTheme?: 'marble' | 'night'; hints?: boolean; render3d?: boolean; pendingLimits?: any };
+  /** Spending limits, one set per currency. */
+  limits: Record<Currency, { depositDaily: number | null; lossDaily: number | null; lossWeekly: number | null; pending: Record<string, number | null> | null; pendingAt: string | null }>;
   cooloffUntil: string | null;
   excludedUntil: string | null;
 }
@@ -27,13 +27,23 @@ export interface Balance {
   locked: number;
   inGames: number;
 }
+export type Balances = Record<Currency, Balance>;
+const ZERO: Balance = { available: 0, locked: 0, inGames: 0 };
 
 interface Session {
   ready: boolean;
   me: Me | null;
+  /** Balance in the active currency. */
   balance: Balance | null;
-  wallet: EvensWallet | null;
-  signIn: (w: EvensWallet) => Promise<Me>;
+  balances: Balances | null;
+  /** The coin the player is looking at and playing with: wallet, stakes, results and history. */
+  currency: Currency;
+  setCurrency: (c: Currency) => void;
+  wallet: CcWallet | null;
+  /** Guest wallet sign in (signs a one time message). */
+  signIn: (w: CcWallet) => Promise<Me>;
+  /** Google sign in finished on /auth/google: adopt the zkLogin wallet. */
+  adoptWallet: (w: CcWallet) => Promise<void>;
   signOut: () => Promise<void>;
   refresh: () => Promise<void>;
   setMe: (m: Me) => void;
@@ -134,11 +144,22 @@ function applyTheme(t?: string) {
   } catch {}
 }
 
+const CUR_KEY = 'coldcall:currency';
+function storedCurrency(): Currency {
+  try {
+    const v = localStorage.getItem(CUR_KEY);
+    return isCurrency(v) ? v : DEFAULT_CURRENCY;
+  } catch {
+    return DEFAULT_CURRENCY;
+  }
+}
+
 export function Providers({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
   const [me, setMe] = useState<Me | null>(null);
-  const [balance, setBalance] = useState<Balance | null>(null);
-  const [wallet, setWallet] = useState<EvensWallet | null>(null);
+  const [balances, setBalances] = useState<Balances | null>(null);
+  const [currency, setCurrencyState] = useState<Currency>(DEFAULT_CURRENCY);
+  const [wallet, setWallet] = useState<CcWallet | null>(null);
   const [toasts, setToasts] = useState<{ id: number; text: string; kind: string }[]>([]);
   const [authOpen, setAuthOpen] = useState(false);
   const socket = useMemo(() => new SocketHub(), []);
@@ -152,24 +173,41 @@ export function Providers({ children }: { children: ReactNode }) {
 
   const refresh = useCallback(async () => {
     try {
-      const r = await api<{ user: Me; balance: Balance }>('/api/me');
+      const r = await api<{ user: Me; balances: Balances }>('/api/me');
       setMe(r.user);
-      setBalance(r.balance);
+      setBalances(r.balances);
+      if (isCurrency(r.user.settings?.currency)) setCurrencyState(r.user.settings.currency);
+      return r.user;
     } catch (e) {
       if (e instanceof ApiError && e.status === 401) {
         setMe(null);
-        setBalance(null);
+        setBalances(null);
       }
+      return null;
     }
   }, []);
 
   useEffect(() => {
+    setCurrencyState(storedCurrency());
     (async () => {
-      await refresh();
-      if (hasGuestWallet()) setWallet(guestWallet(false));
+      const u = await refresh();
+      // Give the session its signer back: the Google key or the guest key kept in this browser.
+      if (u?.walletKind === 'zklogin') setWallet(zkWallet());
+      else if (hasGuestWallet()) setWallet(guestWallet(false));
       setReady(true);
     })();
   }, [refresh]);
+
+  const setCurrency = useCallback(
+    (c: Currency) => {
+      setCurrencyState(c);
+      try {
+        localStorage.setItem(CUR_KEY, c);
+      } catch {}
+      if (me) api('/api/me', { settings: { currency: c } }, 'PATCH').then((r: { user: Me }) => setMe(r.user)).catch(() => {});
+    },
+    [me],
+  );
 
   useEffect(() => {
     applyTheme(me?.settings?.theme);
@@ -179,7 +217,11 @@ export function Providers({ children }: { children: ReactNode }) {
   useEffect(() => {
     socket.connect();
     return socket.on((m) => {
-      if (m.t === 'balance') setBalance((b) => ({ inGames: b?.inGames ?? 0, available: m.available, locked: m.locked }));
+      if (m.t === 'balance' && isCurrency(m.currency))
+        setBalances((b) => {
+          const all = b ?? { LOFI: ZERO, SUI: ZERO };
+          return { ...all, [m.currency]: { inGames: all[m.currency as Currency].inGames, available: m.available, locked: m.locked } };
+        });
     });
   }, [socket]);
 
@@ -189,10 +231,11 @@ export function Providers({ children }: { children: ReactNode }) {
   }, [me?.id, socket]);
 
   const signIn = useCallback(
-    async (w: EvensWallet) => {
+    async (w: CcWallet) => {
+      if (!w.signPersonalMessage) throw new Error('This wallet signs in with Google.');
       const n = await api<{ nonce: string; message: string; issuedAt: string }>(`/api/auth/nonce?address=${w.address}`);
-      const sig = await w.signMessage(new TextEncoder().encode(n.message));
-      const r = await api<{ user: Me }>('/api/auth/verify', { address: w.address, nonce: n.nonce, issuedAt: n.issuedAt, signature: bs58.encode(sig), walletKind: w.kind });
+      const signature = await w.signPersonalMessage(new TextEncoder().encode(n.message));
+      const r = await api<{ user: Me }>('/api/auth/verify', { address: w.address, nonce: n.nonce, issuedAt: n.issuedAt, signature });
       setWallet(w);
       setMe(r.user);
       await refresh();
@@ -201,28 +244,46 @@ export function Providers({ children }: { children: ReactNode }) {
     [refresh],
   );
 
+  const adoptWallet = useCallback(
+    async (w: CcWallet) => {
+      setWallet(w);
+      await refresh();
+    },
+    [refresh],
+  );
+
   const signOut = useCallback(async () => {
     await api('/api/auth/logout', {});
     await wallet?.disconnect();
     setMe(null);
-    setBalance(null);
+    setBalances(null);
+    setWallet(null);
     socket.reconnect();
   }, [wallet, socket]);
 
-  // A returning email / Google user: Privy hands back their embedded wallet, adopt it as the signer.
-  const myAddress = me?.walletAddress;
-  const adoptPrivy = useCallback(
-    (w: EvensWallet) => {
-      if (myAddress === w.address) setWallet((cur) => (cur?.address === w.address && cur.kind === 'privy' ? cur : w));
-    },
-    [myAddress],
-  );
-
-  const value: Session = { ready, me, balance, wallet, signIn, signOut, refresh, setMe, toast, socket, authOpen, openAuth: (o = true) => setAuthOpen(o) };
+  const balance = balances ? balances[currency] : null;
+  const value: Session = {
+    ready,
+    me,
+    balance,
+    balances,
+    currency,
+    setCurrency,
+    wallet,
+    signIn,
+    adoptWallet,
+    signOut,
+    refresh: async () => void (await refresh()),
+    setMe,
+    toast,
+    socket,
+    authOpen,
+    openAuth: (o = true) => setAuthOpen(o),
+  };
 
   return (
     <Ctx.Provider value={value}>
-      <PrivyLayer onWallet={adoptPrivy}>{children}</PrivyLayer>
+      {children}
       <UpdateWatcher />
       <div className="pointer-events-none fixed inset-x-0 bottom-[calc(96px+env(safe-area-inset-bottom))] z-[60] flex flex-col items-center gap-2 px-4 lg:bottom-6" aria-live="polite">
         <AnimatePresence>
@@ -233,7 +294,7 @@ export function Providers({ children }: { children: ReactNode }) {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: 10, scale: 0.98 }}
               transition={{ type: 'spring', stiffness: 420, damping: 30 }}
-              className={`pointer-events-auto max-w-md rounded-[14px] px-4 py-3 text-[15px] font-medium shadow-modal ${t.kind === 'error' ? 'bg-loss text-white' : t.kind === 'win' ? 'bg-gold text-[#14192a] shadow-[0_10px_36px_-8px_rgba(255,210,63,0.6)]' : 'glass glass-strong glass-blur text-text'}`}
+              className={`pointer-events-none max-w-md rounded-[14px] px-4 py-3 text-[15px] font-medium shadow-modal ${t.kind === 'error' ? 'bg-loss text-white' : t.kind === 'win' ? 'bg-gold text-[#14192a] shadow-[0_10px_36px_-8px_rgba(255,210,63,0.6)]' : 'glass glass-strong glass-blur text-text'}`}
             >
               {t.text}
             </motion.div>
