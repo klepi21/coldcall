@@ -113,14 +113,14 @@ export const RULES: Record<GameKind, GameRules> = {
   },
   seabattle: {
     quick: {
-      goal: 'Find and sink all five enemy ships before they sink yours.',
-      turn: 'Pick a square in enemy waters and fire. You hear if it is a miss, a hit, or a ship sunk.',
+      goal: 'Find and sink all five enemy icebreakers before they sink yours.',
+      turn: 'Pick a square on the enemy lake and throw. You see if it is a miss, a hit, or a ship sunk.',
       win: 'The first player to sink the whole enemy fleet wins.',
     },
     full: [
       { id: 'fleet', title: 'Your fleet', body: [
-        'Each player has a 10 by 10 grid, columns A to J and rows 1 to 10.',
-        'Five ships: Carrier (5 squares), Warship (4), Destroyer (3), Submarine (3) and Patrol boat (2).',
+        'Each player has a frozen lake cut into a 10 by 10 grid of ice tiles, columns A to J and rows 1 to 10.',
+        'Five icebreakers: Carrier (5 squares), Warship (4), Destroyer (3), Submarine (3) and Patrol boat (2).',
         'Ships lie across or up and down, never diagonally.',
         'Ships may not overlap and may not touch each other, not even at the corners.',
       ] },
@@ -131,7 +131,7 @@ export const RULES: Record<GameKind, GameRules> = {
       ] },
       { id: 'firing', title: 'Firing', body: [
         'Players take turns firing one shot. The first player fires first.',
-        'A white splash is a miss. A fire is a hit. When every square of a ship is hit, it sinks and is revealed.',
+        'A snow puff is a miss. Cracked ice with dark water is a hit. When every square of a ship is hit, it sinks through the ice and is revealed.',
         'Because ships cannot touch, the squares around a sunk ship are marked as empty for you automatically.',
         'In Cold Call a hit does not give an extra shot. Turns always alternate.',
       ] },
@@ -149,7 +149,7 @@ export const RULES: Record<GameKind, GameRules> = {
     ],
     tutorial: [
       { title: 'Place your fleet', text: 'Drag ships onto your grid, tap to turn them, or use Auto place. Then tap Ready.' },
-      { title: 'Fire in enemy waters', text: 'Tap a square to aim, then fire. Splash means miss, fire means hit.' },
+      { title: 'Throw at the enemy lake', text: 'Tap a square to aim, then fire. A snow puff means miss, cracked ice means hit.' },
       { title: 'Sink them all', text: 'Sunk ships are revealed. Sink all five to win.' },
     ],
   },

@@ -46,3 +46,9 @@ Google OAuth client: authorized JS origins `http://localhost:3000` and the produ
 - `cd apps/server && npx tsx --env-file=.env scripts/grant-admin.ts <0x address>` (add `--revoke` to remove).
 - House bankroll: fund a vault on chain with `vault::fund` (cc-admin). The scanner books the `Funded` event to the house bankroll of that coin.
 - Pause: `vault::set_paused` with the AdminCap (per coin vault). Deposits and cash outs stop; balances are safe.
+
+## Deploy (shared VPS, separate app)
+- First time: `./scripts/deploy.sh --setup` creates the `coldcall` user, `/opt/coldcall/{config,app}`, the `coldcall_devnet` database with its own `coldcall` role, the `coldcall-api` (127.0.0.1:4100) and `coldcall-web` (127.0.0.1:3100) systemd units, and a Caddy site file `/etc/caddy/coldcall.caddy` for `coldcall.45-81-6-214.sslip.io` (the main Caddyfile only gains one `import` line, validated before reload, restored if rejected).
+- Then fill `/opt/coldcall/config/server.env` (`CC_GAME_KEY`, `GOOGLE_CLIENT_ID`, `ADMIN_WALLETS`; the database URL and `ZK_SALT_SECRET` are generated) and check `web.env`.
+- Every release: `./scripts/deploy.sh` ships the committed HEAD plus `cold_call.config.json`, builds next to the live release, switches, health checks and rolls back on failure. Previous release: `/opt/coldcall/prev`.
+- Logs: `ssh evens 'journalctl -u coldcall-api -f'`. The script never touches Evens.

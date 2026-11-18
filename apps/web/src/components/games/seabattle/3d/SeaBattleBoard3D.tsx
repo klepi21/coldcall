@@ -484,7 +484,7 @@ function Battle({
         <div className="min-w-0 lg:order-2 lg:flex-1">
           <PanelTitle
             color={COLORS.lime}
-            title={spectator ? seatNames[opp] ?? 'Seat 2' : 'Enemy waters'}
+            title={spectator ? seatNames[opp] ?? 'Seat 2' : 'Enemy lake'}
             sub={aim && !result && !spectator ? `Aim ${cellName(aim.row, aim.col)}` : myTurn ? 'Your shot' : `${theirs.afloat.length} of 5 afloat`}
           />
           <div
@@ -497,7 +497,7 @@ function Battle({
           >
             <div ref={box} className="relative aspect-[5/4] w-full overflow-hidden rounded-[18px] bg-[#030810] sm:aspect-[4/3]">
               {glReady ? (
-                <SeaCanvas loop={loop} onLost={onLost} dep={[theirs.marks, aim, hover, flight, impact, sceneShips]} label={`Enemy waters in 3D. ${theirs.afloat.length} of 5 enemy ships afloat.`}>
+                <SeaCanvas loop={loop} onLost={onLost} dep={[theirs.marks, aim, hover, flight, impact, sceneShips]} label={`Enemy lake in 3D. ${theirs.afloat.length} of 5 enemy ships afloat.`}>
                   <Scene
                     mode="battle"
                     marks={theirs.marks}
@@ -520,7 +520,7 @@ function Battle({
               {result ? <ResultBanner won={result.winners.includes(me)} spectator={spectator} shots={theirs.shotsTaken} reduce={reduce} /> : null}
 
               {!spectator && !result ? (
-                <div role="grid" aria-label="Enemy waters. Use the arrow keys to aim and Enter to fire." className="sr-only">
+                <div role="grid" aria-label="Enemy lake. Use the arrow keys to aim and Enter to fire." className="sr-only">
                   {Array.from({ length: 10 }, (_, r) => (
                     <div role="row" key={r}>
                       {Array.from({ length: 10 }, (_, c) => {
@@ -565,7 +565,7 @@ function Battle({
                 </div>
                 <button
                   type="button"
-                  onClick={() => (aim ? shoot(aim.row, aim.col) : setNote('Tap a square in enemy waters to aim first.'))}
+                  onClick={() => (aim ? shoot(aim.row, aim.col) : setNote('Tap a square on the enemy lake to aim first.'))}
                   aria-disabled={!myTurn || !aimLegal}
                   className={`h-14 min-w-[150px] rounded-chip px-6 text-[17px] font-extrabold uppercase tracking-wider transition active:scale-[0.97] ${myTurn && aimLegal ? 'bg-primary text-primary-ink shadow-glow' : 'bg-surface-2 text-text-2'}`}
                 >

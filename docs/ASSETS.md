@@ -7,9 +7,9 @@
 | Chess pieces | drawn for Cold Call (`components/games/chess/pieces.tsx`) | original |
 | Backgammon board, checkers, dice | drawn for Cold Call (`components/games/backgammon`) | original |
 | Tichu card faces and backs | drawn for Cold Call (`components/games/tichu/cards.tsx`), following the standard Tichu deck conventions (Jade, Swords, Pagodas, Stars, Mah Jong, Dog, Phoenix, Dragon) with original artwork | original |
-| Sea Battle ships, grid and effects | drawn for Cold Call (`components/games/seabattle`) | original |
+| Ice Floe Battle ships, grid and effects | drawn for Cold Call (`components/games/seabattle`) | original |
 | QR codes | generated in the browser with the `qrcode` npm package | MIT |
-| 3D boards (chess, backgammon, Sea Battle) | all geometry, materials and textures generated in code with Three.js, no external models, HDRs or images | original |
+| 3D boards (chess, backgammon, Ice Floe Battle) | all geometry, materials and textures generated in code with Three.js, no external models, HDRs or images | original |
 | Sounds | generated live with the Web Audio API (`lib/sound.ts`), no recordings | original |
 | Fonts: Unbounded, Inter | Google Fonts | SIL Open Font License 1.1 |
 | Chess engine | Stockfish 19 via the `stockfish` npm package, run on the server | GPL v3 (server side use; if the engine is ever shipped to browsers, the GPL source offer applies) |
@@ -30,3 +30,8 @@
 | `brand/brand-board.png` | composed in code (`brand/src/compose.py`), 18 Nov 2026 | original, made for this project |
 | Note | No Higgsfield or other AI generation was used for the Cold Call brand (the account had no credits on 18 Nov 2026), so no generated assets to list | |
 | LOFI and SUI coin chips | `apps/web/public/brand/lofi-chip.png`, `sui-chip.png`, made by the brand work for Cold Call; shown next to every amount, with a lettered fallback | original |
+| Cold Call wordmark, CC chip, app icons, favicon, og image, hero | `apps/web/public/brand/*`, `apps/web/public/img/cc-chip.png`, icons in `apps/web/public` and `src/app`; drawn in code by the brand work (`brand/src`) | original |
+| Lucky Lo mascot poses (neutral, win, deal, shrug, bust, shades) | `apps/web/public/brand/mascot-*.png`, `apps/web/public/img/mascot-*.png`; vector art from `brand/src/mascot.py` | original |
+| Lilita One font | `apps/web/src/fonts/LilitaOne-Regular.ttf`, self hosted | SIL Open Font License 1.1 (`OFL-LilitaOne.txt`) |
+| Inter font | subset and self hosted by Next at build time (copy in `apps/web/src/fonts`) | SIL Open Font License 1.1 (`OFL-Inter.txt`) |
+| Snow themes: ice chess pieces and board, frosted pine backgammon, Tichu snowflake back and Lucky Lo specials, Ice Floe Battle frozen lake, cracks and snow puffs, falling snow | SVG, shaders and CSS in `apps/web/src/components/games` and `globals.css`, drawn for Cold Call | original |

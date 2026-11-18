@@ -48,13 +48,13 @@ export function battleStatus(args: {
       tone: 'turn',
       status:
         ls.result === 'miss'
-          ? `${oppName} missed at ${where}. Your turn. Pick a square in enemy waters.`
+          ? `${oppName} missed at ${where}. Your turn. Pick a square on the enemy lake.`
           : ls.result === 'hit'
             ? `${oppName} hit your ${ls.shipName ?? 'ship'} at ${where}. Your turn, fire back.`
             : `${oppName} sank your ${ls.shipName ?? 'ship'}. Your turn, fire back.`,
     };
   }
-  return view.turn === me ? { tone: 'turn', status: 'Your turn. Pick a square in enemy waters.' } : { tone: 'wait', status: `${oppName} fires first.` };
+  return view.turn === me ? { tone: 'turn', status: 'Your turn. Pick a square on the enemy lake.' } : { tone: 'wait', status: `${oppName} fires first.` };
 }
 
 export function toneClass(tone: Tone, error: boolean) {

@@ -5,7 +5,7 @@
  *
  * Placing: drag ships from the dock onto your grid, tap a placed ship to turn it, or tap a dock
  * ship then a square. "Auto place" shuffles a fair random layout locally so you can review it;
- * "Ready" sends the full fleet. Firing: tap a square in enemy waters to aim, tap again (or press
+ * "Ready" sends the full fleet. Firing: tap a square on the enemy lake to aim, tap again (or press
  * Fire) to shoot. With confirm moves on, only the Fire button shoots. Arrow keys move the aim on
  * the enemy grid and Enter fires.
  */
@@ -535,7 +535,7 @@ function SpectatorPlacing({ view, uid, seatNames }: { view: SbView; uid: string;
       <p role="status" aria-live="polite" className="rounded-card bg-surface px-4 py-3 font-semibold">
         Both captains are placing their fleets in secret.
       </p>
-      <Grid uid={`${uid}s`} radar label="Ocean" />
+      <Grid uid={`${uid}s`} radar label="Frozen lake" />
       <div className="flex justify-center gap-6 text-sm">
         {[0, 1].map((s) => (
           <span key={s} className="flex items-center gap-2">
@@ -690,13 +690,13 @@ function Battle({
     const where = cellName(ls.row, ls.col);
     status =
       ls.result === 'miss'
-        ? `${oppName} missed at ${where}. Your turn. Pick a square in enemy waters.`
+        ? `${oppName} missed at ${where}. Your turn. Pick a square on the enemy lake.`
         : ls.result === 'hit'
           ? `${oppName} hit your ${ls.shipName ?? 'ship'} at ${where}. Your turn, fire back.`
           : `${oppName} sank your ${ls.shipName ?? 'ship'}. Your turn, fire back.`;
   } else {
     tone = view.turn === me ? 'turn' : 'wait';
-    status = view.turn === me ? 'Your turn. Pick a square in enemy waters.' : `${oppName} fires first.`;
+    status = view.turn === me ? 'Your turn. Pick a square on the enemy lake.' : `${oppName} fires first.`;
   }
   const shownStatus = note ?? error ?? status;
   const noteTone = note || error;
@@ -801,7 +801,7 @@ function Battle({
         <div className="min-w-0 lg:flex-1 lg:max-w-[max(440px,calc(100dvh-250px))]">
           <div className="mb-3 lg:hidden">{statusBar}</div>
           <div className="hidden lg:block">
-            <PanelTitle color={COLORS.lime} title={spectator ? seatNames[opp] ?? 'Seat 2' : 'Enemy waters'} sub={myTurn ? 'Your shot' : `${theirs.afloat.length} of 5 afloat`} />
+            <PanelTitle color={COLORS.lime} title={spectator ? seatNames[opp] ?? 'Seat 2' : 'Enemy lake'} sub={myTurn ? 'Your shot' : `${theirs.afloat.length} of 5 afloat`} />
           </div>
           <div
             ref={scope}
@@ -814,7 +814,7 @@ function Battle({
             <div
               tabIndex={spectator ? -1 : 0}
               onKeyDown={onKey}
-              aria-label="Enemy waters. Use the arrow keys to aim and Enter to fire."
+              aria-label="Enemy lake. Use the arrow keys to aim and Enter to fire."
               className="rounded-[16px] bg-[#050d22] p-1.5 outline-none focus-visible:ring-2 focus-visible:ring-[#7fe3ff]"
             >
               <Grid
@@ -828,7 +828,7 @@ function Battle({
                 onCellTap={(r, c) => tapCell(r, c)}
                 onCellMove={(r, c) => setHover({ row: r, col: c })}
                 onLeave={() => setHover(null)}
-                label={`Enemy waters. ${theirs.afloat.length} of 5 enemy ships afloat.`}
+                label={`Enemy lake. ${theirs.afloat.length} of 5 enemy ships afloat.`}
               >
                 {effectsFor(opp)}
               </Grid>
@@ -849,7 +849,7 @@ function Battle({
               </div>
               <button
                 type="button"
-                onClick={() => (aim ? shoot(aim.row, aim.col) : setNote('Tap a square in enemy waters to aim first.'))}
+                onClick={() => (aim ? shoot(aim.row, aim.col) : setNote('Tap a square on the enemy lake to aim first.'))}
                 aria-disabled={!myTurn || !aimLegal}
                 className={`h-14 min-w-[150px] rounded-chip px-6 text-[17px] font-extrabold uppercase tracking-wider transition active:scale-[0.97] ${myTurn && aimLegal ? 'bg-primary text-primary-ink shadow-glow' : 'bg-surface-2 text-text-2'}`}
               >

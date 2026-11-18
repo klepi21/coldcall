@@ -23,8 +23,8 @@ This is the source text for the in-app "How it works" page. If any number here c
 ## The bot
 - One flat, disclosed house edge of 5% at every stake, in both coins: expected return per game is minus 5% of the stake.
 - Chess: Davidson model (draw factor 2/3). The engine Elo is solved so that win minus loss minus 0.1 x draw = minus 0.05. That is about 36% wins, 25% draws, 39% losses. Stockfish 19 with UCI_Elo (1320 to 3190); below 1320 we use Skill Level, which is approximate.
-- Backgammon, Tichu and Sea Battle: target win chance 47.5% using a level ladder (level L is about 1100 + 60L Elo).
-- Sea Battle bot: reads only the public view of its seat, never the hidden enemy fleet. Its fleet is a random valid placement from the game seed (checkable on the verify page).
+- Backgammon, Tichu and Ice Floe Battle: target win chance 47.5% using a level ladder (level L is about 1100 + 60L Elo).
+- Ice Floe Battle bot: reads only the public view of its seat, never the hidden enemy fleet. Its fleet is a random valid placement from the game seed (checkable on the verify page).
 - Inputs: only the player's skill rating for that game. Never balance, deposits, losses, spending or the coin.
 - The setting is locked before the game starts and shown on the verify page.
 - Anti sandbagging: practice games do not change ratings, and a rating cannot drop more than 150 below its peak.
