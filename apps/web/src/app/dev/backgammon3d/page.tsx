@@ -4,6 +4,7 @@ import { backgammonBot, backgammonEngine, IllegalMoveError, Rng, type BgConfig, 
 import dynamic from 'next/dynamic';
 import type { BoardSettings } from '@/components/games/types';
 import { Frame3D } from '@/components/games/backgammon/3d/Frame3D';
+const AUTO = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('auto') === '1'; // dev only: the bot plays every seat, for the demo video
 
 const BackgammonBoard3D = dynamic(() => import('@/components/games/backgammon/3d/BackgammonBoard3D').then((m) => ({ default: m.BackgammonBoard3D })), {
   ssr: false,
@@ -132,28 +133,29 @@ export default function Backgammon3DDevPage() {
 
   // Bot: one step every 500ms, with a slightly longer first think.
   useEffect(() => {
-    if (!state || backgammonEngine.result(state) || state.turn !== bot) return;
+    const actor = AUTO && state ? state.turn : bot;
+    if (!state || backgammonEngine.result(state) || state.turn !== actor) return;
     const key = `${state.history.length}-${state.turn}`;
     const t = setTimeout(
       () => {
         const st = stateRef.current;
         const rng = rngRef.current;
-        if (!st || !rng || st.turn !== bot || backgammonEngine.result(st)) return;
-        const legal = backgammonEngine.legalMoves(st, bot);
+        if (!st || !rng || st.turn !== actor || backgammonEngine.result(st)) return;
+        const legal = backgammonEngine.legalMoves(st, actor);
         let next = planRef.current?.key === key ? planRef.current.queue[0] : undefined;
         if (!next || !legal.some((m) => sameMove(m, next!))) {
-          const queue = backgammonBot({ state: st, seat: bot, level: 6, rng });
+          const queue = backgammonBot({ state: st, seat: actor, level: 6, rng });
           planRef.current = { key, queue };
           next = queue[0];
         }
         if (!next) return;
         planRef.current!.queue = planRef.current!.queue.slice(1);
-        apply(bot, next);
+        apply(actor, next);
       },
       state.steps.length === 0 ? 1100 : 500,
     );
     return () => clearTimeout(t);
-  }, [state, bot, apply]);
+  }, [state, bot, apply]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const view = useMemo(() => (state ? backgammonEngine.publicView(state, me) : null), [state, me]);
   const legal = useMemo(() => (state ? backgammonEngine.legalMoves(state, me) : []), [state, me]);

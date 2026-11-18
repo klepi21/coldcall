@@ -51,4 +51,4 @@ Google OAuth client: authorized JS origins `http://localhost:3000` and the produ
 - First time: `./scripts/deploy.sh --setup` creates the `coldcall` user, `/opt/coldcall/{config,app}`, the `coldcall_devnet` database with its own `coldcall` role, the `coldcall-api` (127.0.0.1:4100) and `coldcall-web` (127.0.0.1:3100) systemd units, and a Caddy site file `/etc/caddy/coldcall.caddy` for `coldcall.45-81-6-214.sslip.io` (the main Caddyfile only gains one `import` line, validated before reload, restored if rejected).
 - Then fill `/opt/coldcall/config/server.env` (`CC_GAME_KEY`, `GOOGLE_CLIENT_ID`, `ADMIN_WALLETS`; the database URL and `ZK_SALT_SECRET` are generated) and check `web.env`.
 - Every release: `./scripts/deploy.sh` ships the committed HEAD plus `cold_call.config.json`, builds next to the live release, switches, health checks and rolls back on failure. Previous release: `/opt/coldcall/prev`.
-- Logs: `ssh evens 'journalctl -u coldcall-api -f'`. The script never touches Evens.
+- Logs: `ssh coldcall 'journalctl -u coldcall-api -f'`. The script never touches other apps on the server.

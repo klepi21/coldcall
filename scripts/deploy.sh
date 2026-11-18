@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Deploys the committed HEAD of Cold Call to the shared VPS (ssh alias "evens") as a SEPARATE app.
+# Deploys the committed HEAD of Cold Call to its VPS (ssh alias "coldcall", override with COLDCALL_HOST) as a separate app.
 #
 #   ./scripts/deploy.sh --setup   first time only: user, folders, database, systemd units, Caddy site
 #   ./scripts/deploy.sh           every release
@@ -8,20 +8,20 @@
 #   /opt/coldcall/app       live release        /opt/coldcall/prev   previous release
 #   /opt/coldcall/next      release being built /opt/coldcall/config server.env, web.env, cold_call.config.json
 #   services coldcall-api (port 4100) and coldcall-web (port 3100), Postgres database coldcall_devnet, user coldcall
-# It never reads, writes or restarts anything of Evens (/opt/evens, evens-api, evens-web, evens_devnet).
+# It never reads, writes or restarts anything outside /opt/coldcall, the coldcall services and the coldcall database.
 # Secrets stay on the server in /opt/coldcall/config and are never in git.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-HOST=evens
+HOST=${COLDCALL_HOST:-coldcall}
 ROOT=/opt/coldcall
 DOMAIN=coldcall.45-81-6-214.sslip.io
 API_PORT=4100
 WEB_PORT=3100
 
-# Guard: refuse to run if any path or name here could point at Evens.
+# Guard: refuse to run if any path or name here could point at another app on the same server.
 for v in "$ROOT" coldcall-api coldcall-web coldcall_devnet; do
-  case "$v" in *evens*) echo "Refusing: '$v' looks like an Evens name"; exit 1 ;; esac
+  case "$v" in *coldcall*) ;; *) echo "Refusing: '$v' is not a Cold Call name"; exit 1 ;; esac
 done
 
 if [ "${1:-}" = "--setup" ]; then
@@ -191,7 +191,7 @@ if ! curl -sf -o /dev/null "http://127.0.0.1:$WEB_PORT/" || ! curl -sf -o /dev/n
     rm -rf failed && mv app failed && mv prev app
     systemctl restart coldcall-web coldcall-api
   else
-    echo "First release: nothing to roll back to. Cold Call stays down; Evens is not affected."
+    echo "First release: nothing to roll back to. Cold Call stays down; nothing else on the server is affected."
     systemctl stop coldcall-web coldcall-api || true
   fi
   exit 1

@@ -12,6 +12,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { IllegalMoveError, Rng, tichuBot, tichuBotInterrupt, tichuDeck, tichuEngine, type TichuMove, type TichuState } from '@coldcall/games';
 import { TichuTable } from '@/components/games/tichu/TichuTable';
 import { CardBack, CardFace } from '@/components/games/tichu/cards';
+const AUTO = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('auto') === '1'; // dev only: the bot plays every seat, for the demo video
 
 const NAMES = ['You', 'Iris (Bot)', 'Theo (Bot)', 'Mara (Bot)'];
 const LEVELS = [6, 5, 7, 6];
@@ -112,7 +113,7 @@ export default function TichuDevPage() {
   // Bot loop: one action per state, after a human like pause.
   useEffect(() => {
     if (!g || !s || tichuEngine.result(s) || params?.get('pause')) return;
-    const bots = tichuEngine.toAct(s).filter((x) => x !== ME);
+    const bots = tichuEngine.toAct(s).filter((x) => AUTO || x !== ME);
     const delay = s.phase === 'grand' || s.phase === 'passing' ? 450 : 600 + Math.round(g.botRng.float() * 500);
     const t = setTimeout(() => {
       const cur = g.s;

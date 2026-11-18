@@ -21,6 +21,7 @@ const ChessBoard3D = dynamic(() => import('@/components/games/chess/3d/ChessBoar
   loading: () => <div className="aspect-[50/37] w-full" aria-hidden />,
 });
 
+const AUTO = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('auto') === '1'; // dev only: the bot plays every seat, for the demo video
 const rng = () => Rng.fromSeeds('00'.repeat(32), ['dev']);
 const parseMove = (s: string): ChessMove => ({ from: s.slice(0, 2), to: s.slice(2, 4), ...(s[4] ? { promotion: s[4] as ChessMove['promotion'] } : {}) });
 
@@ -119,22 +120,23 @@ export default function Chess3DDevPage() {
 
   // Bot reply
   useEffect(() => {
-    if (!botOn || !toAct.includes(botSeat)) return;
+    const actor = AUTO ? toAct[0] : botSeat;
+    if (!botOn || actor === undefined || !toAct.includes(actor)) return;
     const t = setTimeout(() => {
       setState((s) => {
-        const moves = chessEngine.legalMoves(s, botSeat);
+        const moves = chessEngine.legalMoves(s, actor);
         if (!moves.length) return s;
         const caps = moves.filter((m) => {
           try {
-            return !!chessEngine.applyMove(s, botSeat, m, rng()).history.at(-1)?.captured;
+            return !!chessEngine.applyMove(s, actor, m, rng()).history.at(-1)?.captured;
           } catch {
             return false;
           }
         });
         const pool = caps.length && Math.random() < 0.6 ? caps : moves;
-        return chessEngine.applyMove(s, botSeat, pool[Math.floor(Math.random() * pool.length)]!, rng());
+        return chessEngine.applyMove(s, actor, pool[Math.floor(Math.random() * pool.length)]!, rng());
       });
-    }, 600);
+    }, AUTO ? 900 : 600);
     return () => clearTimeout(t);
   }, [toAct, botSeat, botOn]);
 

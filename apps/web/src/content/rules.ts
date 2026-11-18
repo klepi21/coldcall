@@ -87,7 +87,7 @@ export const RULES: Record<GameKind, GameRules> = {
         'When all 15 of your checkers are in your home board, you can start taking them off.',
         'A die can take off a checker from the matching point. A higher die can take off your furthest checker if there are none further back.',
       ] },
-      { id: 'evens', title: 'The Cold Call version', body: [
+      { id: 'house', title: 'The Cold Call version', body: [
         'Each game is a single game. A gammon or backgammon is shown in the result but pays the same as a normal win.',
         'There is no doubling cube in this beta.',
         'You can undo your moves during your turn until the last die is used.',
@@ -135,7 +135,7 @@ export const RULES: Record<GameKind, GameRules> = {
         'Because ships cannot touch, the squares around a sunk ship are marked as empty for you automatically.',
         'In Cold Call a hit does not give an extra shot. Turns always alternate.',
       ] },
-      { id: 'evens', title: 'The Cold Call version', body: [
+      { id: 'house', title: 'The Cold Call version', body: [
         'Each turn has 45 seconds. If time runs out we fire a shot for you. After three missed turns in a game with a stake, it counts as leaving.',
         'Against the bot, the house keeps a published 5% edge: you win about 47 of 100 games.',
       ] },
