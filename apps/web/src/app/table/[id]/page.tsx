@@ -296,7 +296,11 @@ function TablePageInner({ params }: { params: Promise<{ id: string }> }) {
   const iWon = mySeat !== null && !!result?.result.winners.includes(mySeat);
 
   return (
-    <div className="min-h-dvh felt">
+    <div className="page-root relative isolate min-h-dvh felt">
+      {/* light snowfall behind the table; it stops under reduced motion */}
+      <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden opacity-60" aria-hidden>
+        <div className="snowfall snowfall-1" />
+      </div>
       {/* Top bar */}
       <header className="glass-blur sticky top-0 z-30 flex h-14 items-center justify-between gap-2 bg-[color-mix(in_srgb,var(--bg)_70%,transparent)] px-3 pt-[env(safe-area-inset-top)] sm:px-5">
         <button onClick={() => (playing && mySeat !== null ? setConfirmLeave(true) : leave())} className="inline-flex h-10 items-center gap-1 rounded-chip px-2 font-semibold text-text-2 hover:bg-surface-2 hover:text-text" aria-label="Leave table">
