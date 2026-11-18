@@ -10,7 +10,7 @@ import { AdminTabs } from '@/components/admin/parts';
  * because the neons almost vanish on a light background.
  */
 const TOKENS = `
-.admin-root{--s-chess:#c6ff3d;--s-seabattle:#3ddcff;--s-backgammon:#ff8a3d;--s-tichu:#ff4d8d;--s-accent:#9b85ff;--s-lime:#c6ff3d;--s-gold:#ffd23f}
+.admin-root{--s-chess:#7fe3ff;--s-seabattle:#4da2ff;--s-backgammon:#8fa8ff;--s-tichu:#c9a7ff;--s-accent:#9b85ff;--s-lime:#7fe3ff;--s-gold:#f5c542}
 :root[data-theme="light"] .admin-root{--s-chess:#3f7d00;--s-seabattle:#1d6fd6;--s-backgammon:#e07a00;--s-tichu:#c0157a;--s-accent:#5b3df5;--s-lime:#3f7d00;--s-gold:#a87400}
 `;
 

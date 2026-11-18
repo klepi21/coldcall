@@ -13,12 +13,12 @@ const FILTERS: { id: 'all' | 'general' | ProgressGame; label: string }[] = [
   { id: 'chess', label: 'Chess' },
   { id: 'backgammon', label: 'Backgammon' },
   { id: 'tichu', label: 'Tichu' },
-  { id: 'seabattle', label: 'Sea Battle' },
+  { id: 'seabattle', label: 'Ice Floe Battle' },
 ];
 
 function Tile({ a, i }: { a: Ach; i: number }) {
   const reduce = useReducedMotion();
-  const color = a.game ? GAME_COLOR[a.game] : '#ffd23f';
+  const color = a.game ? GAME_COLOR[a.game] : '#f5c542';
   return (
     <motion.li
       initial={reduce ? { opacity: 0 } : { opacity: 0, y: 12 }}

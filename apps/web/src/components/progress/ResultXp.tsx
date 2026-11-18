@@ -64,7 +64,7 @@ export function ResultXp({ tableId, celebrate }: { tableId: string; celebrate: b
   if (!m) {
     if (gaveUp) return null;
     return (
-      <div className="mt-5 rounded-card p-4" style={{ background: tint('#7c5cff', 8) }} aria-busy>
+      <div className="mt-5 rounded-card p-4" style={{ background: tint('#5a8fe0', 8) }} aria-busy>
         <div className="mx-auto h-4 w-32 animate-pulse rounded-full bg-surface-2" />
         <div className="mt-3 h-2 animate-pulse rounded-full bg-surface-2" />
       </div>
@@ -91,7 +91,7 @@ export function ResultXp({ tableId, celebrate }: { tableId: string; celebrate: b
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, delay: 0.2 }}
       className="relative mt-5 overflow-hidden rounded-card p-4 text-left"
-      style={{ background: `linear-gradient(140deg, ${tint('#7c5cff', 16)}, ${tint('#c6ff3d', 6)})`, boxShadow: `inset 0 0 0 1px ${tint('#7c5cff', 30)}` }}
+      style={{ background: `linear-gradient(140deg, ${tint('#5a8fe0', 16)}, ${tint('#7fe3ff', 6)})`, boxShadow: `inset 0 0 0 1px ${tint('#5a8fe0', 30)}` }}
     >
       <div className="flex items-center gap-3">
         <span className="relative">
@@ -119,7 +119,7 @@ export function ResultXp({ tableId, celebrate }: { tableId: string; celebrate: b
             animate={{ opacity: 1, scale: 1 }}
             transition={reduce ? { duration: 0.2 } : { type: 'spring', stiffness: 320, damping: 18 }}
             className="mt-3 rounded-chip px-3 py-2 text-center"
-            style={{ background: tint('#ffd23f', 16), boxShadow: `inset 0 0 0 1px ${tint('#ffd23f', 45)}` }}
+            style={{ background: tint('#f5c542', 16), boxShadow: `inset 0 0 0 1px ${tint('#f5c542', 45)}` }}
           >
             <p className="font-display text-[17px] font-extrabold uppercase text-gold">Level up! Level {m.level}</p>
             {m.unlocks.length ? <p className="mt-0.5 text-sm text-text-2">New: {m.unlocks.map((u) => u.name).join(', ')}</p> : null}
@@ -147,9 +147,9 @@ export function ResultXp({ tableId, celebrate }: { tableId: string; celebrate: b
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ delay: 0.9 + i * 0.15, duration: 0.28 }}
               className="relative flex items-center gap-3 rounded-chip p-2.5"
-              style={{ background: tint('#ffd23f', 12), boxShadow: `inset 0 0 0 1px ${tint('#ffd23f', 40)}` }}
+              style={{ background: tint('#f5c542', 12), boxShadow: `inset 0 0 0 1px ${tint('#f5c542', 40)}` }}
             >
-              <span className="relative inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-[#ffd23f] text-[#1a1408]" style={{ boxShadow: '0 0 16px rgba(255,210,63,.45)' }}>
+              <span className="relative inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-[#f5c542] text-[#1a1408]" style={{ boxShadow: '0 0 16px rgba(245, 197, 66,.45)' }}>
                 <Icon name={a.icon} className="size-5" />
                 {loud && i === 0 ? <Burst count={12} /> : null}
               </span>
@@ -165,8 +165,8 @@ export function ResultXp({ tableId, celebrate }: { tableId: string; celebrate: b
       {m.newAchievements.length > 2 ? (
         <motion.ul initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.3 }} className="mt-2 flex flex-wrap gap-1.5" aria-label="More achievements unlocked">
           {m.newAchievements.slice(2).map((a) => (
-            <li key={a.code} className="inline-flex h-8 items-center gap-1.5 rounded-full pl-1 pr-3 text-[13px] font-semibold" style={{ background: tint('#ffd23f', 12), boxShadow: `inset 0 0 0 1px ${tint('#ffd23f', 35)}` }}>
-              <span className="inline-flex size-6 items-center justify-center rounded-full bg-[#ffd23f] text-[#1a1408]">
+            <li key={a.code} className="inline-flex h-8 items-center gap-1.5 rounded-full pl-1 pr-3 text-[13px] font-semibold" style={{ background: tint('#f5c542', 12), boxShadow: `inset 0 0 0 1px ${tint('#f5c542', 35)}` }}>
+              <span className="inline-flex size-6 items-center justify-center rounded-full bg-[#f5c542] text-[#1a1408]">
                 <Icon name={a.icon} className="size-3.5" />
               </span>
               {a.name}

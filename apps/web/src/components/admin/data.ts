@@ -5,7 +5,7 @@ import { useSession } from '@/components/app/Providers';
 
 export type GameId = 'chess' | 'backgammon' | 'tichu' | 'seabattle';
 export const GAME_IDS: GameId[] = ['chess', 'seabattle', 'backgammon', 'tichu'];
-export const GAME_NAME: Record<GameId, string> = { chess: 'Chess', backgammon: 'Backgammon', tichu: 'Tichu', seabattle: 'Sea Battle' };
+export const GAME_NAME: Record<GameId, string> = { chess: 'Chess', backgammon: 'Backgammon', tichu: 'Tichu', seabattle: 'Ice Floe Battle' };
 /** Series colours come from CSS variables scoped in the admin layout, so light theme gets its own validated steps. */
 export const GAME_VAR: Record<GameId, string> = { chess: 'var(--s-chess)', backgammon: 'var(--s-backgammon)', tichu: 'var(--s-tichu)', seabattle: 'var(--s-seabattle)' };
 export const MODE_NAME: Record<string, string> = { practice: 'Practice', bot: 'Vs bot', pvp: 'Vs people' };

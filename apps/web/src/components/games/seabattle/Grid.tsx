@@ -200,11 +200,11 @@ function Radar({ uid }: { uid: string }) {
   return (
     <g pointerEvents="none">
       {[0.18, 0.36, 0.54, 0.72].map((f) => (
-        <circle key={f} cx={cx} cy={cx} r={GRID * f} fill="none" stroke="rgba(198, 255, 61, 0.14)" strokeWidth={1.2} />
+        <circle key={f} cx={cx} cy={cx} r={GRID * f} fill="none" stroke="rgba(127, 227, 255, 0.14)" strokeWidth={1.2} />
       ))}
       <g className="sb-sweep" style={{ transformOrigin: `${cx}px ${cx}px` }}>
         <path d={`M${cx} ${cx} L${cx + R} ${cx} A${R} ${R} 0 0 0 ${cx + R * Math.cos(-0.7)} ${cx + R * Math.sin(-0.7)} Z`} fill={`url(#${uid}-sweep)`} />
-        <line x1={cx} y1={cx} x2={cx + R} y2={cx} stroke="rgba(198, 255, 61, 0.55)" strokeWidth={1.5} />
+        <line x1={cx} y1={cx} x2={cx + R} y2={cx} stroke="rgba(127, 227, 255, 0.55)" strokeWidth={1.5} />
       </g>
     </g>
   );
@@ -213,11 +213,11 @@ function Radar({ uid }: { uid: string }) {
 function Crosshair({ row, col, active }: { row: number; col: number; active: boolean }) {
   const x = col * C + C / 2;
   const y = row * C + C / 2;
-  const col1 = active ? COLORS.lime : 'rgba(198, 255, 61, 0.45)';
+  const col1 = active ? COLORS.lime : 'rgba(127, 227, 255, 0.45)';
   return (
-    <g pointerEvents="none" style={{ filter: active ? 'drop-shadow(0 0 4px rgba(198,255,61,0.8))' : undefined }}>
-      <rect x={col * C} y={0} width={C} height={GRID} fill="rgba(198, 255, 61, 0.05)" />
-      <rect x={0} y={row * C} width={GRID} height={C} fill="rgba(198, 255, 61, 0.05)" />
+    <g pointerEvents="none" style={{ filter: active ? 'drop-shadow(0 0 4px rgba(127, 227, 255,0.8))' : undefined }}>
+      <rect x={col * C} y={0} width={C} height={GRID} fill="rgba(127, 227, 255, 0.05)" />
+      <rect x={0} y={row * C} width={GRID} height={C} fill="rgba(127, 227, 255, 0.05)" />
       <circle cx={x} cy={y} r={14} fill="none" stroke={col1} strokeWidth={2.2} />
       <circle cx={x} cy={y} r={2.5} fill={col1} />
       {[

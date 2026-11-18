@@ -55,7 +55,7 @@ export default function ProfilePage() {
       <Glass spill tint="var(--accent)" className="overflow-hidden rounded-[24px] p-5 sm:p-6">
         <div className="relative flex items-center gap-4">
           <span className="relative grid size-[72px] shrink-0 place-items-center">
-            <span className="w-spin absolute inset-0 rounded-full opacity-90" style={{ background: 'conic-gradient(from 0deg, #c6ff3d, #3ddcff, #ff4d8d, #ff8a3d, #c6ff3d)', ['--dur' as string]: '12s' }} aria-hidden />
+            <span className="w-spin absolute inset-0 rounded-full opacity-90" style={{ background: 'conic-gradient(from 0deg, #7fe3ff, #4da2ff, #c9a7ff, #8fa8ff, #7fe3ff)', ['--dur' as string]: '12s' }} aria-hidden />
             <span className="absolute inset-[3px] rounded-full bg-[var(--bg)]" aria-hidden />
             <span className="relative font-display text-[26px] font-extrabold uppercase text-text">{me.displayName.slice(0, 1).toUpperCase()}</span>
           </span>
@@ -67,9 +67,9 @@ export default function ProfilePage() {
         <div className="relative mt-4 grid grid-cols-3 gap-2" aria-label={`Skill ratings: chess ${me.ratings?.chess?.r ?? 1500}, backgammon ${me.ratings?.backgammon?.r ?? 1500}, Tichu ${me.ratings?.tichu?.r ?? 1500}`}>
           {(
             [
-              ['chess', 'Chess', '#c6ff3d'],
-              ['backgammon', 'Backgammon', '#ff8a3d'],
-              ['tichu', 'Tichu', '#ff4d8d'],
+              ['chess', 'Chess', '#7fe3ff'],
+              ['backgammon', 'Backgammon', '#8fa8ff'],
+              ['tichu', 'Tichu', '#c9a7ff'],
             ] as const
           ).map(([k, label, c]) => (
             <div key={k} className="well min-w-0 rounded-[14px] px-2 py-2.5 sm:px-3" style={{ '--tint': c } as React.CSSProperties} aria-hidden>
@@ -93,7 +93,7 @@ export default function ProfilePage() {
         <Toggle label="Sound" checked={s.sound !== false} onChange={(v) => save({ settings: { sound: v } })} />
         <Toggle label="Confirm moves in games with stakes" hint="Ask before sending a move, so a slip of the finger costs nothing." checked={s.confirmMoves ?? true} onChange={(v) => save({ settings: { confirmMoves: v } })} />
         <Toggle label="Hints in practice" checked={s.hints ?? true} onChange={(v) => save({ settings: { hints: v } })} />
-        <Toggle label="3D boards" hint="Chess, backgammon and Sea Battle in 3D. Turn off for a lighter 2D board on older phones." checked={s.render3d ?? true} onChange={(v) => save({ settings: { render3d: v } })} />
+        <Toggle label="3D boards" hint="Chess, backgammon and Ice Floe Battle in 3D. Turn off for a lighter 2D board on older phones." checked={s.render3d ?? true} onChange={(v) => save({ settings: { render3d: v } })} />
         <div className="py-3">
           <p className="font-medium">Theme</p>
           <div className="mt-2 flex gap-2">

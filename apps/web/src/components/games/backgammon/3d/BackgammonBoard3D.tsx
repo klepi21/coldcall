@@ -80,7 +80,7 @@ export function BackgammonBoard3D(props: BoardProps<BgView, BgMove>) {
 }
 
 function usePrimaryColor(): string {
-  const [c, setC] = useState('#C6FF3D');
+  const [c, setC] = useState('#7fe3ff');
   useEffect(() => {
     const root = document.documentElement;
     const read = () => {

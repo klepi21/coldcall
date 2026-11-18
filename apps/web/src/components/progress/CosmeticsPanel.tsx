@@ -9,12 +9,12 @@ import { setProgressData, useProgress } from './store';
 import { Icon, tint } from './parts';
 
 const SLOTS: { slot: CosmeticSlot; label: string; line: string; color: string }[] = [
-  { slot: 'title', label: 'Titles', line: 'Shown under your name.', color: '#c6ff3d' },
-  { slot: 'frame', label: 'Profile frames', line: 'A ring around your avatar.', color: '#7c5cff' },
-  { slot: 'chessTheme', label: 'Chess boards', line: 'A new look for your chess board.', color: '#c6ff3d' },
-  { slot: 'dice', label: 'Dice', line: 'Your backgammon dice.', color: '#ff8a3d' },
-  { slot: 'cardBack', label: 'Card backs', line: 'The back of your Tichu cards.', color: '#ff4d8d' },
-  { slot: 'shipSkin', label: 'Ship skins', line: 'How your Sea Battle fleet looks.', color: '#3ddcff' },
+  { slot: 'title', label: 'Titles', line: 'Shown under your name.', color: '#7fe3ff' },
+  { slot: 'frame', label: 'Profile frames', line: 'A ring around your avatar.', color: '#5a8fe0' },
+  { slot: 'chessTheme', label: 'Chess boards', line: 'A new look for your chess board.', color: '#7fe3ff' },
+  { slot: 'dice', label: 'Dice', line: 'Your backgammon dice.', color: '#8fa8ff' },
+  { slot: 'cardBack', label: 'Card backs', line: 'The back of your Tichu cards.', color: '#c9a7ff' },
+  { slot: 'shipSkin', label: 'Ship skins', line: 'How your Ice Floe Battle fleet looks.', color: '#4da2ff' },
 ];
 
 /** Titles, frames and looks you can equip. Locked ones say exactly how to get them. All cosmetic, none can be bought. */

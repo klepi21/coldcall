@@ -1,6 +1,6 @@
 'use client';
 /**
- * 3D Sea Battle board (WebGL via react-three-fiber). Same contract as the 2D SeaBattleBoard: the
+ * 3D Ice Floe Battle board (WebGL via react-three-fiber). Same contract as the 2D SeaBattleBoard: the
  * server is the authority and this component only sends intents.
  *
  * Placing: the proven 2D placing UI (drag, turn, auto place, Ready) is rendered as is, with a 3D
@@ -60,7 +60,7 @@ class GlBoundary extends Component<{ fallback: ReactNode; children: ReactNode },
     return { failed: true };
   }
   componentDidCatch(e: unknown) {
-    console.warn('Sea Battle 3D failed, showing the 2D board instead.', e);
+    console.warn('Ice Floe Battle 3D failed, showing the 2D board instead.', e);
   }
   render() {
     return this.state.failed ? this.props.fallback : this.props.children;
@@ -287,7 +287,7 @@ function FleetPreview({ view, me, reduce, glReady, onLost }: { view: SbView; me:
   const ships: SceneShip[] = useMemo(() => (real ? mine : PARADE).map((s) => ({ ship: s, look: 'own' as const })), [real, mine]);
   return (
     <div className="mx-auto w-full max-w-[1120px] px-2 lg:px-0">
-      <div ref={box} className="relative aspect-[16/8] w-full overflow-hidden rounded-[20px] bg-[#030810] sm:aspect-[16/5]" style={{ boxShadow: '0 0 0 1px rgba(124,92,255,0.45), 0 0 36px rgba(124,92,255,0.22)' }}>
+      <div ref={box} className="relative aspect-[16/8] w-full overflow-hidden rounded-[20px] bg-[#030810] sm:aspect-[16/5]" style={{ boxShadow: '0 0 0 1px rgba(90, 143, 224,0.45), 0 0 36px rgba(90, 143, 224,0.22)' }}>
         {glReady ? (
           <SeaCanvas loop={loop} onLost={onLost} dep={ships} label={real ? 'Your fleet in position, shown in 3D.' : 'Your five ships, shown in 3D.'}>
             <Scene mode="preview" ships={ships} grid={real ? 0.5 : 0} reduce={reduce} />
@@ -451,7 +451,7 @@ function Battle({
   const shownAim = !result && !spectator ? aim : null;
 
   const inset = (
-    <div className="rounded-[14px] bg-[#050d22] p-1" style={{ boxShadow: '0 0 0 1.5px rgba(124,92,255,0.6), 0 0 18px rgba(124,92,255,0.25)' }}>
+    <div className="rounded-[14px] bg-[#050d22] p-1" style={{ boxShadow: '0 0 0 1.5px rgba(90, 143, 224,0.6), 0 0 18px rgba(90, 143, 224,0.25)' }}>
       <Grid uid={`${uid}m`} marks={mine.marks} ships={myShips} lastShot={lastOn(me)} compact label={`My fleet. ${mine.afloat.length} of 5 ships afloat.`}>
         {incomingFlight && !reduce ? <Shell key={`s${incomingFlight.key}`} row={incomingFlight.row} col={incomingFlight.col} from="top" duration={FLIGHT_MS / 1000} /> : null}
         {fx
@@ -489,10 +489,10 @@ function Battle({
           />
           <div
             ref={scope}
-            className="relative rounded-[20px] p-[2px] transition-shadow has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#C6FF3D]"
+            className="relative rounded-[20px] p-[2px] transition-shadow has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-[#7fe3ff]"
             style={{
-              background: 'linear-gradient(160deg, rgba(198,255,61,0.45), rgba(61,220,255,0.18))',
-              boxShadow: myTurn ? '0 0 0 1px rgba(198,255,61,0.8), 0 0 40px rgba(198,255,61,0.28)' : '0 0 0 1px rgba(61,220,255,0.25)',
+              background: 'linear-gradient(160deg, rgba(127, 227, 255,0.45), rgba(61,220,255,0.18))',
+              boxShadow: myTurn ? '0 0 0 1px rgba(127, 227, 255,0.8), 0 0 40px rgba(127, 227, 255,0.28)' : '0 0 0 1px rgba(61,220,255,0.25)',
             }}
           >
             <div ref={box} className="relative aspect-[5/4] w-full overflow-hidden rounded-[18px] bg-[#030810] sm:aspect-[4/3]">

@@ -52,7 +52,7 @@ export function ScoreSummary({
         initial={{ y: 24, opacity: 0, scale: 0.97 }}
         animate={{ y: 0, opacity: 1, scale: 1 }}
         transition={{ duration: 0.28, ease: [0.2, 0.8, 0.2, 1] }}
-        className="w-full max-w-sm rounded-sheet border border-[#7C5CFF]/60 bg-surface p-5 shadow-modal" style={{ boxShadow: '0 0 40px rgba(124,92,255,.35), 0 24px 64px rgba(0,0,0,.6)' }}
+        className="w-full max-w-sm rounded-sheet border border-[#5a8fe0]/60 bg-surface p-5 shadow-modal" style={{ boxShadow: '0 0 40px rgba(90, 143, 224,.35), 0 24px 64px rgba(0,0,0,.6)' }}
       >
         {over ? (
           <div className="mb-3 text-center">

@@ -3,7 +3,7 @@ import { useEffect, useState, type CSSProperties } from 'react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
 import { GAMES, CURRENCY, outcomeSummary, entryCost, formatAmount, formatNumber, parseAmount, validStake, maxStake, type Mode, type GameKind } from '@coldcall/shared';
-import { Sheet, Button, Chip, Row, Amount, InfoTip, CoinChip, CountUp } from '@/components/ui';
+import { Sheet, Button, Chip, Row, Amount, InfoTip, CoinChip, CountUp, Mascot } from '@/components/ui';
 import { WORLD, WorldArt } from './WorldArt';
 import { feedback } from '@/lib/haptics';
 import { useSession } from './Providers';
@@ -98,6 +98,7 @@ export function GameSetupSheet({ game, open, onClose, initialMode = 'practice' }
           <p className="t-eyebrow game-ink absolute bottom-2 left-5 sm:left-6" style={{ '--tint': w.c } as CSSProperties}>
             {w.world}
           </p>
+          <Mascot pose="deal" className="absolute -bottom-3 right-3 size-24 sm:size-28 [@media(max-height:740px)]:size-16" />
         </div>
       }
     >
@@ -135,8 +136,8 @@ export function GameSetupSheet({ game, open, onClose, initialMode = 'practice' }
                   type="button"
                   aria-pressed={on}
                   onClick={() => (!on && feedback('select'), setCustom(null), setStake(l))}
-                  className={`press relative flex h-[60px] flex-col items-center justify-center gap-0.5 overflow-hidden rounded-[14px] px-1 sm:h-[68px] sm:px-2 ${on ? 'text-[#14110a] shadow-[0_10px_28px_-10px_rgba(255,210,63,0.8),inset_0_1px_0_rgba(255,255,255,0.6)]' : 'btn-secondary'}`}
-                  style={on ? { background: 'linear-gradient(180deg, #ffe58a 0%, #ffd23f 55%, #f0b919 100%)' } : undefined}
+                  className={`press relative flex h-[60px] flex-col items-center justify-center gap-0.5 overflow-hidden rounded-[14px] px-1 sm:h-[68px] sm:px-2 ${on ? 'text-[#14110a] shadow-[0_10px_28px_-10px_rgba(245, 197, 66,0.8),inset_0_1px_0_rgba(255,255,255,0.6)]' : 'btn-secondary'}`}
+                  style={on ? { background: 'linear-gradient(180deg, #ffe58a 0%, #f5c542 55%, #f0b919 100%)' } : undefined}
                 >
                   <span className="font-display text-[15px] font-extrabold leading-none tabular sm:text-[17px]">{formatNumber(l).replace('.00', '')}</span>
                   <span className={`inline-flex items-center gap-1 text-[11px] font-semibold leading-tight ${on ? 'opacity-75' : 'text-text-2'}`}>

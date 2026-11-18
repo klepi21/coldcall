@@ -8,7 +8,7 @@ import { GAMES, entryCost, formatAmount, type TableSummary } from '@coldcall/sha
 import { useSession } from '@/components/app/Providers';
 import { AuthSheet } from '@/components/app/AuthSheet';
 import { OnboardingSheet } from '@/components/app/OnboardingSheet';
-import { Button, Card, Amount, Sheet, Spinner, InfoTip, Logo } from '@/components/ui';
+import { Button, Card, Amount, Sheet, Spinner, InfoTip, Logo, Mascot } from '@/components/ui';
 import { api, randomClientSeed } from '@/lib/api';
 import { play, haptic } from '@/lib/sound';
 import type { BoardSettings } from '@/components/games/types';
@@ -441,15 +441,22 @@ function TablePageInner({ params }: { params: Promise<{ id: string }> }) {
       <Sheet open={resultOpen && !!result} onClose={() => setResultOpen(false)}>
         {result && (
           <div className="text-center">
-            <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }} className="mx-auto mb-3 inline-flex size-20 items-center justify-center rounded-full" style={{ background: iWon ? 'color-mix(in srgb, var(--gold) 20%, transparent)' : 'var(--surface-2)' }}>
-              {iWon ? <Laurel /> : result.result.draw ? <span className="font-display text-3xl">=</span> : <span className="text-3xl">🤝</span>}
+            <motion.div initial={{ scale: 0.6, opacity: 0, y: 12 }} animate={{ scale: 1, opacity: 1, y: 0 }} transition={{ type: 'spring', stiffness: 260, damping: 18 }} className="relative mx-auto -mt-2 mb-1 grid size-36 place-items-center">
+              {iWon ? (
+                <>
+                  <span className="frost-burst left-1/2 top-1/2 -ml-16 -mt-16 size-32" aria-hidden />
+                  <span className="frost-burst left-1/2 top-1/2 -ml-16 -mt-16 size-32 [animation-delay:180ms]" aria-hidden />
+                </>
+              ) : null}
+              <span className="absolute inset-6 rounded-full blur-2xl" style={{ background: iWon ? 'color-mix(in srgb, var(--win) 30%, transparent)' : 'color-mix(in srgb, var(--accent) 18%, transparent)' }} aria-hidden />
+              <Mascot pose={iWon ? 'win' : 'shrug'} className="relative size-36" priority />
             </motion.div>
-            <h2 className="font-display text-2xl font-extrabold uppercase">
-              {mySeat === null ? `${result.result.winners.map((w) => seatNames[w]).join(' and ')} won` : iWon ? 'You won' : result.result.draw ? 'A draw' : 'Good game'}
+            <h2 className="font-display text-3xl">
+              {mySeat === null ? `${result.result.winners.map((w) => seatNames[w]).join(' and ')} won` : iWon ? 'Nice hand. You won.' : result.result.draw ? 'A draw' : 'That one got away'}
             </h2>
             <p className="mt-1 text-text-2">
               {result.result.draw ? `The game ended ${REASONS[result.result.reason] ?? ''}.` : `${iWon ? 'You' : result.result.winners.map((w) => seatNames[w]).join(' and ')} won ${REASONS[result.result.reason] ?? ''}.`}
-              {!iWon && !result.result.draw && mySeat !== null ? ' Every game makes you sharper.' : ''}
+              {!iWon && !result.result.draw && mySeat !== null ? ' Rematch?' : ''}
             </p>
             {result.result.score ? (
               <p className="mt-2 text-sm text-text-2">

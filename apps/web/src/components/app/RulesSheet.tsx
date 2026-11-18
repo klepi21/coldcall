@@ -62,7 +62,7 @@ export function RulesBody({ game, initialTab = 'quick', seedCommit }: { game: Ga
           <p>
             {game === 'chess'
               ? 'Chess has no luck. Against the bot, its strength is set from your skill rating only, before the game starts, and it never changes during the game.'
-              : game === 'seabattle' ? 'Sea Battle has no dice or cards. Your ships are hidden on the server and only revealed when sunk. Bot placements come from a secret seed that we reveal after the game.' : `Every ${game === 'backgammon' ? 'dice roll' : 'shuffle'} comes from a secret seed. Before the game starts we publish a lock (a fingerprint) of that seed, so we cannot change it later.`}
+              : game === 'seabattle' ? 'Ice Floe Battle has no dice or cards. Your ships are hidden on the server and only revealed when sunk. Bot placements come from a secret seed that we reveal after the game.' : `Every ${game === 'backgammon' ? 'dice roll' : 'shuffle'} comes from a secret seed. Before the game starts we publish a lock (a fingerprint) of that seed, so we cannot change it later.`}
           </p>
           {(game === 'backgammon' || game === 'tichu') && <p>When the game ends we reveal the seed. Anyone can recompute every {game === 'backgammon' ? 'roll' : 'deal'} and check it matches.</p>}
           {seedCommit ? (

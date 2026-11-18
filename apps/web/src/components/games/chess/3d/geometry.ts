@@ -367,8 +367,8 @@ export const BOARD = {
 };
 
 export const SURFACE = {
-  marble: { light: '#EDE6D8', dark: '#9C8F7B', frame: '#17161C', coord: 'rgba(214,208,196,0.62)', inlay: 'rgba(198,255,61,0.7)', vein: 'rgba(90,74,52,0.08)' },
-  night: { light: '#2B3A5C', dark: '#1A2540', frame: '#0E1018', coord: 'rgba(150,166,204,0.7)', inlay: 'rgba(124,92,255,0.85)', vein: 'rgba(200,214,255,0.02)' },
+  marble: { light: '#EDE6D8', dark: '#9C8F7B', frame: '#17161C', coord: 'rgba(214,208,196,0.62)', inlay: 'rgba(127, 227, 255,0.7)', vein: 'rgba(90,74,52,0.08)' },
+  night: { light: '#2B3A5C', dark: '#1A2540', frame: '#0E1018', coord: 'rgba(150,166,204,0.7)', inlay: 'rgba(90, 143, 224,0.85)', vein: 'rgba(200,214,255,0.02)' },
 } as const;
 
 function rng(seed: number) {

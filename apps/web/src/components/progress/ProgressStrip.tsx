@@ -30,7 +30,7 @@ export function ProgressStrip({ className = '' }: { className?: string }) {
   const done = data.challenges.items.filter((c) => c.done).length;
   return (
     <section aria-label="Your level and daily challenges" className={`${glass} overflow-hidden p-4 sm:p-5 ${className}`}>
-      <div className="pointer-events-none absolute -left-16 -top-20 size-56 rounded-full bg-[#7c5cff]/20 blur-3xl" aria-hidden />
+      <div className="pointer-events-none absolute -left-16 -top-20 size-56 rounded-full bg-[#5a8fe0]/20 blur-3xl" aria-hidden />
       <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:gap-6">
         <Link href="/progress" className="flex min-w-0 items-center gap-3 rounded-chip lg:w-[300px] lg:shrink-0" aria-label={`Level ${data.level}. Open your progress.`}>
           <LevelBadge level={data.level} pct={pct} size={56} />

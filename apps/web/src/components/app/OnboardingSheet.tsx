@@ -2,45 +2,21 @@
 import { useEffect, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { Sheet, Button } from '@/components/ui';
+import { Sheet, Button, Mascot, type MascotPose } from '@/components/ui';
 import { useSession } from './Providers';
 import { api } from '@/lib/api';
 
 const CARDS = [
-  { title: 'Pick a game', text: 'Chess, Backgammon or Tichu. Each one has a 60 second tutorial and full rules.', art: 'board' },
-  { title: 'Play free or for a stake', text: 'Practice is always free. Pick LOFI or SUI to play for a stake, and you see exactly what you can win or lose before you start.', art: 'coin' },
-  { title: 'Cash out anytime', text: 'Your LOFI and SUI are each backed one to one in a public vault on Sui. Cash out to your wallet at any time, up to the daily limit.', art: 'vault' },
+  { title: 'Pick a game', text: 'Chess, Backgammon, Tichu or Ice Floe Battle. Each one has a short tutorial and full rules.', pose: 'deal' as const },
+  { title: 'Play free or for a stake', text: 'Practice is always free. Pick LOFI or SUI to play for a stake, and you see exactly what you can win or lose before you start. Test coins only, this is devnet.', pose: 'neutral' as const },
+  { title: 'Cash out anytime', text: 'Your LOFI and SUI are each backed one to one in a public vault on Sui. Cash out to your wallet at any time, up to the daily limit.', pose: 'win' as const },
 ];
 
-function Art({ kind }: { kind: string }) {
+function Art({ pose }: { pose: MascotPose }) {
   return (
-    <div className="relative mx-auto grid h-32 w-48 place-items-center" aria-hidden>
-    <span className="absolute size-28 rounded-full blur-2xl" style={{ background: kind === 'board' ? 'rgba(198,255,61,.3)' : kind === 'coin' ? 'rgba(255,210,63,.35)' : 'rgba(124,92,255,.4)' }} />
-    <svg viewBox="0 0 120 80" className="w-bob relative h-28 w-auto" style={{ ['--dur' as string]: '4.5s' }}>
-      {kind === 'board' && (
-        <g>
-          {Array.from({ length: 16 }, (_, i) => (
-            <rect key={i} x={28 + (i % 4) * 16} y={8 + Math.floor(i / 4) * 16} width="16" height="16" fill={(i + Math.floor(i / 4)) % 2 ? '#1a1630' : '#efe9dd'} opacity={(i + Math.floor(i / 4)) % 2 ? 1 : 0.9} />
-          ))}
-          <circle cx="60" cy="40" r="9" fill="var(--primary)" />
-        </g>
-      )}
-      {kind === 'coin' && (
-        <g>
-          <circle cx="60" cy="40" r="30" fill="var(--gold)" />
-          <circle cx="60" cy="40" r="22" fill="none" stroke="rgba(0,0,0,.25)" strokeWidth="2" />
-          <rect x="46" y="31" width="28" height="6" rx="3" fill="rgba(0,0,0,.45)" />
-          <rect x="46" y="43" width="28" height="6" rx="3" fill="rgba(0,0,0,.45)" />
-        </g>
-      )}
-      {kind === 'vault' && (
-        <g>
-          <rect x="30" y="12" width="60" height="56" rx="10" fill="#1a1630" stroke="var(--gold)" strokeWidth="2" />
-          <circle cx="60" cy="40" r="14" fill="none" stroke="var(--primary)" strokeWidth="4" />
-          <path d="M60 26v28M46 40h28" stroke="var(--primary)" strokeWidth="3" />
-        </g>
-      )}
-    </svg>
+    <div className="relative mx-auto grid h-40 w-48 place-items-center" aria-hidden>
+      <span className="absolute size-32 rounded-full bg-accent/25 blur-2xl" />
+      <Mascot pose={pose} className="w-bob relative size-40" priority />
     </div>
   );
 }
@@ -86,7 +62,7 @@ export function OnboardingSheet({ onDone, doneLabel }: { onDone?: () => void; do
       <AnimatePresence mode="wait">
         {step < 3 ? (
           <motion.div key={step} initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} transition={{ duration: 0.2 }} className="text-center">
-            <Art kind={CARDS[step]!.art} />
+            <Art pose={CARDS[step]!.pose} />
             <h2 className="t-title mt-4 text-[22px]">{CARDS[step]!.title}</h2>
             <p className="mx-auto mt-2 max-w-xs text-text-2">{CARDS[step]!.text}</p>
             <div className="mt-5 flex justify-center gap-1.5" aria-hidden>
@@ -125,7 +101,7 @@ export function OnboardingSheet({ onDone, doneLabel }: { onDone?: () => void; do
             <label className="mt-3 flex items-start gap-3">
               <input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} className="mt-1 size-5 accent-[var(--primary)]" />
               <span>
-                I read <a href="/how-it-works" target="_blank" className="font-semibold text-primary">how Cold Call works</a>, including fees, bot targets and that this beta uses devnet test coins only.
+                I accept the <a href="/terms" target="_blank" className="font-semibold text-primary">terms</a> and read <a href="/how-it-works" target="_blank" className="font-semibold text-primary">how Cold Call works</a>, including fees, bot targets and that this beta uses devnet test coins only.
               </span>
             </label>
             {err ? <p className="mt-3 text-sm font-medium text-loss">{err}</p> : null}

@@ -61,19 +61,19 @@ export function ProgressToasts() {
             <Link
               href="/progress"
               className={`relative flex min-h-11 items-center gap-3 overflow-visible rounded-full py-1.5 pl-1.5 pr-5 shadow-modal backdrop-blur-xl ${
-                t.kind === 'xp' ? 'bg-[#0d0b1c]/90 ring-1 ring-[#c6ff3d]/40' : 'bg-[#1a1408]/92 ring-1 ring-[#ffd23f]/55'
+                t.kind === 'xp' ? 'bg-[#0d0b1c]/90 ring-1 ring-[#7fe3ff]/40' : 'bg-[#1a1408]/92 ring-1 ring-[#f5c542]/55'
               }`}
             >
               {t.kind !== 'xp' ? <Burst count={14} /> : null}
               {t.kind === 'level' ? (
                 <LevelBadge level={t.level ?? 1} pct={1} size={36} />
               ) : (
-                <span className={`inline-flex size-9 items-center justify-center rounded-full ${t.kind === 'xp' ? 'bg-[#c6ff3d] text-[#0a0a0f]' : 'bg-[#ffd23f] text-[#1a1408]'}`}>
+                <span className={`inline-flex size-9 items-center justify-center rounded-full ${t.kind === 'xp' ? 'bg-[#7fe3ff] text-[#0a0a0f]' : 'bg-[#f5c542] text-[#1a1408]'}`}>
                   <Icon name={t.kind === 'xp' ? 'spark' : (t.icon ?? 'star')} className="size-5" />
                 </span>
               )}
               <span className="min-w-0">
-                <span className={`block font-display text-[15px] font-bold leading-tight ${t.kind === 'xp' ? 'text-[#c6ff3d]' : 'text-[#ffd23f]'}`}>{t.title}</span>
+                <span className={`block font-display text-[15px] font-bold leading-tight ${t.kind === 'xp' ? 'text-[#7fe3ff]' : 'text-[#f5c542]'}`}>{t.title}</span>
                 {t.text ? <span className="block max-w-[240px] truncate text-xs text-white/70">{t.text}</span> : null}
               </span>
             </Link>

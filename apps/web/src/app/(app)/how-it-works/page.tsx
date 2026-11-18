@@ -114,10 +114,10 @@ export default function HowItWorks() {
         <ul className="list-disc space-y-1 pl-5">
           <li>Chess: you win about 36 of 100 games, draw about 25, and lose about 39.</li>
           <li>Backgammon and Tichu: you win about 47 of 100 games.</li>
-          <li>Sea Battle: you win about 47 of 100 games.</li>
+          <li>Ice Floe Battle: you win about 47 of 100 games.</li>
         </ul>
-        <p className="font-semibold text-text">The Sea Battle bot never peeks</p>
-        <p>The Sea Battle bot only knows what you would know in its seat: where it has fired, what it hit or missed, and which of your ships are still afloat. It never sees where your fleet is hidden.</p>
+        <p className="font-semibold text-text">The Ice Floe Battle bot never peeks</p>
+        <p>The Ice Floe Battle bot only knows what you would know in its seat: where it has fired, what it hit or missed, and which of your ships are still afloat. It never sees where your fleet is hidden.</p>
         <p>Its fleet is placed at random from the locked game seed, so it cannot move ships during the game, and you can check the placement on the verify page afterwards. To aim, it works out where your remaining ships could still fit and fires at the likeliest squares. Weaker levels add more random shots, and that is how it is matched to your skill.</p>
         <p>The bot strength is set from your skill rating for that game, before the game starts, and never changes during a game. We never use your balance, deposits, losses or spending to set it.</p>
         <p>Practice games do not change your rating, and a rating cannot drop more than 150 points below its best, so nobody can lose on purpose to get an easier bot.</p>

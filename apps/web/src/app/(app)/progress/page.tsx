@@ -73,8 +73,8 @@ export default function ProgressPage() {
     <div className="mx-auto max-w-[1200px] space-y-8 pb-10">
       {/* Hero */}
       <section className={`${glass} overflow-hidden p-5 sm:p-8`}>
-        <div className="pointer-events-none absolute -left-24 -top-24 size-72 rounded-full bg-[#7c5cff]/25 blur-3xl" aria-hidden />
-        <div className="pointer-events-none absolute -bottom-28 right-0 size-72 rounded-full bg-[#c6ff3d]/10 blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute -left-24 -top-24 size-72 rounded-full bg-[#5a8fe0]/25 blur-3xl" aria-hidden />
+        <div className="pointer-events-none absolute -bottom-28 right-0 size-72 rounded-full bg-[#7fe3ff]/10 blur-3xl" aria-hidden />
         <div className="relative grid min-w-0 gap-6 lg:grid-cols-[minmax(0,1fr)_360px] lg:items-center">
           <div className="flex min-w-0 items-center gap-4 sm:gap-6">
             <span className="shrink-0 sm:hidden">
@@ -109,7 +109,7 @@ export default function ProgressPage() {
             ))}
           </dl>
         </div>
-        <div className="relative mt-5 rounded-chip p-3.5 text-[15px] leading-snug sm:p-4" style={{ background: 'color-mix(in srgb, #c6ff3d 8%, transparent)', boxShadow: 'inset 0 0 0 1px color-mix(in srgb, #c6ff3d 25%, transparent)' }}>
+        <div className="relative mt-5 rounded-chip p-3.5 text-[15px] leading-snug sm:p-4" style={{ background: 'color-mix(in srgb, #7fe3ff 8%, transparent)', boxShadow: 'inset 0 0 0 1px color-mix(in srgb, #7fe3ff 25%, transparent)' }}>
           <p>
             <span className="font-semibold">What is XP?</span> Points you earn by playing. Every finished game gives XP, and playing well gives more. XP fills your bar and raises your level.
           </p>

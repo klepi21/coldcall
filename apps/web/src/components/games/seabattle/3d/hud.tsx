@@ -155,7 +155,7 @@ export function PanelTitle({ color, title, sub, small }: { color: string; title:
 
 export function ResultBanner({ won, spectator, shots, reduce }: { won: boolean; spectator: boolean; shots: number; reduce: boolean }) {
   const good = won || spectator;
-  const color = good ? '#C6FF3D' : '#FF4D6D';
+  const color = good ? '#7fe3ff' : '#FF4D6D';
   // Sits at the bottom of the sea so the revealed fleet stays visible.
   return (
     <motion.div
@@ -166,7 +166,7 @@ export function ResultBanner({ won, spectator, shots, reduce }: { won: boolean; 
     >
       <div
         className="flex items-center gap-3 rounded-[16px] px-4 py-2.5 backdrop-blur-[2px]"
-        style={{ background: 'rgba(7, 7, 12, 0.78)', boxShadow: good ? '0 0 0 2px #C6FF3D, 0 0 40px rgba(198,255,61,0.4)' : '0 0 0 2px #FF4D6D, 0 0 36px rgba(255,77,109,0.32)' }}
+        style={{ background: 'rgba(7, 7, 12, 0.78)', boxShadow: good ? '0 0 0 2px #7fe3ff, 0 0 40px rgba(127, 227, 255,0.4)' : '0 0 0 2px #FF4D6D, 0 0 36px rgba(255,77,109,0.32)' }}
       >
         <span style={{ color }}>
           <Icon name={good ? 'trophy' : 'anchor'} size={30} />

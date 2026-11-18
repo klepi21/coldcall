@@ -372,11 +372,11 @@ export function TichuTable(props: TichuTableProps) {
           <AnimatePresence>
             {flash ? (
               <motion.div key={flash} className="pointer-events-none absolute inset-0 z-30 flex items-center justify-center overflow-hidden" initial={{ opacity: 1 }} animate={{ opacity: 0 }} transition={{ duration: 1.1, ease: 'easeIn' }}>
-                <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 50% 45%, rgba(198,255,61,.55), rgba(124,92,255,.35) 35%, transparent 70%)' }} />
+                <div className="absolute inset-0" style={{ background: 'radial-gradient(circle at 50% 45%, rgba(127, 227, 255,.55), rgba(90, 143, 224,.35) 35%, transparent 70%)' }} />
                 {!reduce ? (
                   <motion.div
                     className="absolute rounded-full border-4 border-primary"
-                    style={{ width: 120, height: 120, boxShadow: '0 0 40px rgba(198,255,61,.8), inset 0 0 30px rgba(124,92,255,.7)' }}
+                    style={{ width: 120, height: 120, boxShadow: '0 0 40px rgba(127, 227, 255,.8), inset 0 0 30px rgba(90, 143, 224,.7)' }}
                     initial={{ scale: 0.3, opacity: 1 }}
                     animate={{ scale: 6, opacity: 0 }}
                     transition={{ duration: 0.8, ease: 'easeOut' }}
@@ -384,7 +384,7 @@ export function TichuTable(props: TichuTableProps) {
                 ) : null}
                 <motion.span
                   className="relative text-[56px] font-black uppercase italic tracking-tight text-primary sm:text-[88px]"
-                  style={{ textShadow: '0 0 18px rgba(198,255,61,.9), 0 0 42px rgba(124,92,255,.9)' }}
+                  style={{ textShadow: '0 0 18px rgba(127, 227, 255,.9), 0 0 42px rgba(90, 143, 224,.9)' }}
                   initial={reduce ? { opacity: 1 } : { scale: 0.4, rotate: -8 }}
                   animate={reduce ? { opacity: 1 } : { scale: [0.4, 1.25, 1], rotate: [-8, 3, 0] }}
                   transition={{ duration: 0.45 }}
@@ -653,17 +653,17 @@ const TABLE_STYLE = {
   '--surface': '#12121C',
   '--surface-2': '#1D1D2C',
   '--line': '#2C2C42',
-  '--primary': '#C6FF3D',
+  '--primary': '#7fe3ff',
   '--primary-ink': '#0A0A0F',
-  '--accent': '#7C5CFF',
-  '--gold': '#FFD23F',
-  '--win': '#C6FF3D',
+  '--accent': '#5a8fe0',
+  '--gold': '#f5c542',
+  '--win': '#7fe3ff',
   '--loss': '#FF4D6D',
   '--shadow-card': '0 2px 14px rgba(0,0,0,.5)',
   '--shadow-modal': '0 24px 64px rgba(0,0,0,.65)',
   background: `${FELT_NOISE}, radial-gradient(110% 80% at 50% 45%, #1E1842 0%, #131030 40%, #0B0A18 75%, #07070C 100%)`,
-  border: '1.5px solid rgba(124,92,255,.75)',
-  boxShadow: '0 0 0 1px rgba(124,92,255,.35), 0 0 34px rgba(124,92,255,.35), inset 0 0 0 1px rgba(198,255,61,.12), inset 0 0 80px rgba(124,92,255,.18)',
+  border: '1.5px solid rgba(90, 143, 224,.75)',
+  boxShadow: '0 0 0 1px rgba(90, 143, 224,.35), 0 0 34px rgba(90, 143, 224,.35), inset 0 0 0 1px rgba(127, 227, 255,.12), inset 0 0 80px rgba(90, 143, 224,.18)',
   colorScheme: 'dark',
 } as React.CSSProperties;
 
@@ -675,10 +675,10 @@ function TableInlay() {
           <feGaussianBlur stdDeviation="0.6" />
         </filter>
       </defs>
-      <ellipse cx="50" cy="48" rx="45" ry="34" fill="none" stroke="#7C5CFF" strokeOpacity="0.55" strokeWidth="3" vectorEffect="non-scaling-stroke" filter="url(#tichu-neon)" />
+      <ellipse cx="50" cy="48" rx="45" ry="34" fill="none" stroke="#5a8fe0" strokeOpacity="0.55" strokeWidth="3" vectorEffect="non-scaling-stroke" filter="url(#tichu-neon)" />
       <ellipse cx="50" cy="48" rx="45" ry="34" fill="none" stroke="#A58DFF" strokeOpacity="0.7" strokeWidth="1" vectorEffect="non-scaling-stroke" />
-      <ellipse cx="50" cy="48" rx="43.3" ry="32.4" fill="none" stroke="#C6FF3D" strokeOpacity="0.18" strokeWidth="1" strokeDasharray="3 7" vectorEffect="non-scaling-stroke" />
-      <ellipse cx="50" cy="48" rx="28" ry="19" fill="#7C5CFF" fillOpacity="0.07" />
+      <ellipse cx="50" cy="48" rx="43.3" ry="32.4" fill="none" stroke="#7fe3ff" strokeOpacity="0.18" strokeWidth="1" strokeDasharray="3 7" vectorEffect="non-scaling-stroke" />
+      <ellipse cx="50" cy="48" rx="28" ry="19" fill="#5a8fe0" fillOpacity="0.07" />
     </svg>
   );
 }
@@ -689,7 +689,7 @@ function ScoreBlock({ label, value, tone, align = 'left' }: { label: string; val
       className={`flex min-w-0 flex-col rounded-2xl px-3 py-1.5 shadow-card ${align === 'right' ? 'items-end' : 'items-start'}`}
       style={
         tone === 'us'
-          ? { background: 'linear-gradient(135deg, #D8FF6A, #9FE01F)', color: '#0A0A0F', boxShadow: '0 0 22px rgba(198,255,61,.35)' }
+          ? { background: 'linear-gradient(135deg, #D8FF6A, #9FE01F)', color: '#0A0A0F', boxShadow: '0 0 22px rgba(127, 227, 255,.35)' }
           : { background: 'linear-gradient(135deg, #FF6A86, #D9264B)', color: '#FFFFFF', boxShadow: '0 0 22px rgba(255,77,109,.35)' }
       }
     >
@@ -819,7 +819,7 @@ function SeatPanel({ pos, seat, view, name, bubble, narrow, short }: { pos: Pos;
         className={`flex size-10 items-center justify-center rounded-full text-lg font-black sm:size-12 sm:text-xl ${partner ? 'text-[#0A0A0F]' : 'text-white'}`}
         style={{
           background: partner ? 'linear-gradient(135deg, #D8FF6A, #8FD10F)' : 'linear-gradient(135deg, #FF6A86, #C21F44)',
-          boxShadow: `0 0 0 2px #0B0A18, 0 0 0 3.5px ${partner ? '#C6FF3D' : '#FF4D6D'}, 0 0 16px ${partner ? 'rgba(198,255,61,.45)' : 'rgba(255,77,109,.45)'}`,
+          boxShadow: `0 0 0 2px #0B0A18, 0 0 0 3.5px ${partner ? '#7fe3ff' : '#FF4D6D'}, 0 0 16px ${partner ? 'rgba(127, 227, 255,.45)' : 'rgba(255,77,109,.45)'}`,
         }}
       >
         {name.slice(0, 1)}
@@ -845,7 +845,7 @@ function SeatPanel({ pos, seat, view, name, bubble, narrow, short }: { pos: Pos;
     <div className={`flex min-w-0 flex-col ${horizontal ? 'items-start' : 'items-center text-center'}`}>
       <span className="max-w-[9rem] truncate text-sm font-semibold leading-tight">{name}</span>
       <span
-        className={`mt-0.5 rounded-full px-1.5 py-px text-[10px] font-extrabold uppercase leading-[13px] tracking-[0.08em] ${narrow && !partner && !short ? 'rounded-lg py-0.5 text-center' : 'whitespace-nowrap'} ${partner ? 'bg-[#C6FF3D] text-[#0A0A0F]' : 'bg-[#FF4D6D] text-white'}`}
+        className={`mt-0.5 rounded-full px-1.5 py-px text-[10px] font-extrabold uppercase leading-[13px] tracking-[0.08em] ${narrow && !partner && !short ? 'rounded-lg py-0.5 text-center' : 'whitespace-nowrap'} ${partner ? 'bg-[#7fe3ff] text-[#0A0A0F]' : 'bg-[#FF4D6D] text-white'}`}
       >
         {partner ? 'Partner' : short ? 'Opponent' : narrow ? (
           <>
@@ -876,7 +876,7 @@ function SeatPanel({ pos, seat, view, name, bubble, narrow, short }: { pos: Pos;
   return (
     <div
       className={`flex ${horizontal ? 'items-center gap-2.5' : `flex-col items-center ${short ? 'gap-1' : 'gap-1.5'}`} rounded-card border px-2 ${short ? 'py-1' : 'py-1.5'} transition-all duration-200 ${isTurn ? 'border-primary bg-primary/10' : 'border-transparent'}`}
-      style={isTurn ? { boxShadow: '0 0 0 1px rgba(198,255,61,.4), 0 0 26px rgba(198,255,61,.35), inset 0 0 18px rgba(198,255,61,.12)' } : undefined}
+      style={isTurn ? { boxShadow: '0 0 0 1px rgba(127, 227, 255,.4), 0 0 26px rgba(127, 227, 255,.35), inset 0 0 18px rgba(127, 227, 255,.12)' } : undefined}
       aria-label={`${name}, ${partner ? 'partner' : pos === 1 ? 'opponent on your left' : 'opponent on your right'}, ${count} cards${isTurn ? ', their turn' : ''}`}
     >
       {avatar}
@@ -1092,7 +1092,7 @@ function CentrePrompt(p: {
 }
 
 function Panel({ children }: { children: React.ReactNode }) {
-  return <div className="mx-2 max-w-[19rem] rounded-card border border-[#7C5CFF]/60 bg-surface/90 p-4 text-center backdrop-blur" style={{ boxShadow: '0 0 28px rgba(124,92,255,.35)' }}>{children}</div>;
+  return <div className="mx-2 max-w-[19rem] rounded-card border border-[#5a8fe0]/60 bg-surface/90 p-4 text-center backdrop-blur" style={{ boxShadow: '0 0 28px rgba(90, 143, 224,.35)' }}>{children}</div>;
 }
 
 /* ---------- action bar ---------- */
@@ -1127,7 +1127,7 @@ function ActionBar(p: {
 }) {
   const { view, me, selection } = p;
   const btn = 'inline-flex h-12 items-center justify-center gap-2 rounded-chip px-4 text-[15px] font-semibold transition active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100';
-  const primary = `${btn} whitespace-nowrap bg-primary text-primary-ink font-extrabold uppercase tracking-[0.04em] shadow-[0_0_0_1px_rgba(198,255,61,.5),0_0_22px_rgba(198,255,61,.35)] hover:brightness-110`;
+  const primary = `${btn} whitespace-nowrap bg-primary text-primary-ink font-extrabold uppercase tracking-[0.04em] shadow-[0_0_0_1px_rgba(127, 227, 255,.5),0_0_22px_rgba(127, 227, 255,.35)] hover:brightness-110`;
   const secondary = `${btn} whitespace-nowrap bg-surface-2 text-text hover:bg-line max-sm:!px-3`;
   const tichuBtn = p.canTichu ? (
     <span className="inline-flex items-center">

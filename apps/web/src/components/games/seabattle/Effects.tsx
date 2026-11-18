@@ -29,7 +29,7 @@ export function Shell({ row, col, from, duration }: { row: number; col: number; 
       animate={{ x: xs, y: ys, scale: sc }}
       transition={{ duration, ease: 'linear' }}
     >
-      <circle r={9} fill="rgba(198, 255, 61, 0.25)" />
+      <circle r={9} fill="rgba(127, 227, 255, 0.25)" />
       <circle r={5} fill="#f6ffe0" stroke={COLORS.lime} strokeWidth={2} />
     </motion.g>
   );

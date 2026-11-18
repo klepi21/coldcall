@@ -5,9 +5,9 @@ import { formatAmount, type TableSummary } from '@coldcall/shared';
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://coldcall.45-81-6-214.sslip.io';
 const API = process.env.API_ORIGIN ?? 'http://localhost:4000';
 
-const GAME_NAME: Record<TableSummary['game'], string> = { chess: 'Chess', backgammon: 'Backgammon', tichu: 'Tichu', seabattle: 'Sea Battle' };
+const GAME_NAME: Record<TableSummary['game'], string> = { chess: 'Chess', backgammon: 'Backgammon', tichu: 'Tichu', seabattle: 'Ice Floe Battle' };
 
-export function shareMeta({ title, description, image = '/og/default.png', path = '/' }: { title: string; description: string; image?: string; path?: string }): Metadata {
+export function shareMeta({ title, description, image = '/brand/og.jpg', path = '/' }: { title: string; description: string; image?: string; path?: string }): Metadata {
   return {
     title,
     description,
@@ -31,7 +31,7 @@ export async function tableShareMeta(opts: { tableId?: string; inviteCode?: stri
   let id = opts.tableId;
   if (!id && opts.inviteCode) id = (await fetchJson<{ id: string }>(`/api/invite/${opts.inviteCode}`))?.id;
   const t = id ? (await fetchJson<{ table: TableSummary }>(`/api/tables/${id}`))?.table : null;
-  if (!t) return shareMeta({ title: 'Join a game on Cold Call', description: 'Chess, backgammon, Tichu and Sea Battle against real people. Winner takes the pot.', path: opts.path });
+  if (!t) return shareMeta({ title: 'Join a game on Cold Call', description: 'Chess, backgammon, Tichu and Ice Floe Battle against real people. Winner takes the pot.', path: opts.path });
 
   const game = GAME_NAME[t.game];
   const host = t.seats.find((s) => s.userId && !s.isBot)?.name;
@@ -41,5 +41,5 @@ export async function tableShareMeta(opts: { tableId?: string; inviteCode?: stri
     t.status === 'waiting'
       ? `${stake}. ${t.mode === 'pvp' ? 'Winner takes the pot.' : ''} Tap to take your seat.`.replace(/\s+/g, ' ')
       : `${game} on Cold Call. ${stake}. Tap to watch or play your own game.`;
-  return shareMeta({ title, description, image: `/og/${t.game}.png`, path: opts.path });
+  return shareMeta({ title, description, path: opts.path });
 }

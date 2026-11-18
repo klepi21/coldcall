@@ -9,7 +9,7 @@ export function ChallengeList({ items, compact = false }: { items: ChallengeInfo
   return (
     <ul className={`grid gap-2 ${compact ? 'sm:grid-cols-3' : ''}`}>
       {items.map((c, i) => {
-        const color = c.game ? GAME_COLOR[c.game] : '#7c5cff';
+        const color = c.game ? GAME_COLOR[c.game] : '#5a8fe0';
         const pct = c.progress / c.target;
         return (
           <motion.li
@@ -18,9 +18,9 @@ export function ChallengeList({ items, compact = false }: { items: ChallengeInfo
             animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
             transition={{ duration: 0.28, delay: i * 0.04 }}
             className="flex items-center gap-3 rounded-chip p-3"
-            style={{ background: c.done ? tint('#c6ff3d', 10) : tint('#ffffff', 4), boxShadow: `inset 0 0 0 1px ${c.done ? tint('#c6ff3d', 35) : tint(color, 22)}` }}
+            style={{ background: c.done ? tint('#7fe3ff', 10) : tint('#ffffff', 4), boxShadow: `inset 0 0 0 1px ${c.done ? tint('#7fe3ff', 35) : tint(color, 22)}` }}
           >
-            <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full" style={{ background: c.done ? '#c6ff3d' : tint(color, 18), color: c.done ? '#0a0a0f' : ink(color) }}>
+            <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-full" style={{ background: c.done ? '#7fe3ff' : tint(color, 18), color: c.done ? '#0a0a0f' : ink(color) }}>
               <Icon name={c.done ? 'check' : c.game === 'seabattle' ? 'target' : c.game === 'chess' ? 'king' : c.game === 'backgammon' ? 'dice' : c.game === 'tichu' ? 'card' : 'spark'} className="size-[18px]" />
             </span>
             <span className="min-w-0 flex-1">
@@ -30,7 +30,7 @@ export function ChallengeList({ items, compact = false }: { items: ChallengeInfo
               </span>
               {!compact ? <span className="mt-0.5 block text-sm text-text-2">{c.how}</span> : null}
               <span className="mt-1.5 flex items-center gap-2">
-                <XpBar pct={pct} height={5} color={c.done ? '#c6ff3d' : color} />
+                <XpBar pct={pct} height={5} color={c.done ? '#7fe3ff' : color} />
                 <span className="shrink-0 text-[11px] font-bold tabular" style={{ color: c.done ? 'var(--text-2)' : 'var(--primary)' }}>
                   +{c.xp} XP
                 </span>

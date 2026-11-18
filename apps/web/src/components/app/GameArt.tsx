@@ -3,10 +3,10 @@ import type { GameKind } from '@coldcall/shared';
 
 /** Per game neon accent, used for tiles, glows and badges. */
 export const GAME_COLOR: Record<GameKind, string> = {
-  chess: '#c6ff3d',
-  backgammon: '#ff8a3d',
-  tichu: '#ff4d8d',
-  seabattle: '#3ddcff',
+  chess: '#7fe3ff',
+  backgammon: '#8fa8ff',
+  tichu: '#c9a7ff',
+  seabattle: '#4da2ff',
 };
 
 /** Original arena style illustrations: dark stage, neon outlines, one hero object per game. */
@@ -30,7 +30,7 @@ export function GameArt({ game, className = '' }: { game: GameKind; className?: 
           </feMerge>
         </filter>
         <pattern id={`${id}-grid`} width="20" height="20" patternUnits="userSpaceOnUse">
-          <path d="M20 0H0V20" fill="none" stroke="#7c5cff" strokeOpacity="0.14" />
+          <path d="M20 0H0V20" fill="none" stroke="#5a8fe0" strokeOpacity="0.14" />
         </pattern>
       </defs>
       <rect width="320" height="200" fill={`url(#${id}-bg)`} />
@@ -122,7 +122,7 @@ export function GameArt({ game, className = '' }: { game: GameKind; className?: 
           </g>
           <g transform="translate(232 60)">
             <circle r="13" fill="#ff5a36" opacity=".9" />
-            <circle r="7" fill="#ffd23f" />
+            <circle r="7" fill="#f5c542" />
           </g>
         </g>
       )}

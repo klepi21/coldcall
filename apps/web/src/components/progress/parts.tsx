@@ -3,8 +3,8 @@ import { useEffect, useRef, useState } from 'react';
 import { animate, motion, useReducedMotion } from 'motion/react';
 import type { ProgressGame } from '@coldcall/shared';
 
-export const GAME_COLOR: Record<ProgressGame, string> = { chess: '#c6ff3d', backgammon: '#ff8a3d', tichu: '#ff4d8d', seabattle: '#3ddcff' };
-export const GAME_NAME: Record<ProgressGame, string> = { chess: 'Chess', backgammon: 'Backgammon', tichu: 'Tichu', seabattle: 'Sea Battle' };
+export const GAME_COLOR: Record<ProgressGame, string> = { chess: '#7fe3ff', backgammon: '#8fa8ff', tichu: '#c9a7ff', seabattle: '#4da2ff' };
+export const GAME_NAME: Record<ProgressGame, string> = { chess: 'Chess', backgammon: 'Backgammon', tichu: 'Tichu', seabattle: 'Ice Floe Battle' };
 
 /** Dark glass panel: blur, faint tinted border, 1px highlight on the top edge. */
 export const glass =
@@ -43,8 +43,8 @@ export function LevelBadge({ level, pct, size = 40, glow = true, className = '' 
       <svg viewBox="0 0 100 100" className="absolute inset-0 size-full -rotate-90">
         <defs>
           <linearGradient id="lvl-ring" x1="0" y1="0" x2="1" y2="1">
-            <stop offset="0" stopColor="#c6ff3d" />
-            <stop offset="1" stopColor="#7c5cff" />
+            <stop offset="0" stopColor="#7fe3ff" />
+            <stop offset="1" stopColor="#5a8fe0" />
           </linearGradient>
           <radialGradient id="lvl-core" cx="50%" cy="35%" r="70%">
             <stop offset="0" stopColor="#2a2350" />
@@ -65,10 +65,10 @@ export function LevelBadge({ level, pct, size = 40, glow = true, className = '' 
           initial={false}
           animate={{ strokeDashoffset: c * (1 - p) }}
           transition={{ duration: reduce ? 0 : 0.7, ease: [0.2, 0.8, 0.2, 1] }}
-          style={glow ? { filter: 'drop-shadow(0 0 4px rgba(198,255,61,.55))' } : undefined}
+          style={glow ? { filter: 'drop-shadow(0 0 4px rgba(127, 227, 255,.55))' } : undefined}
         />
       </svg>
-      <span className="relative font-display font-extrabold leading-none text-white" style={{ fontSize: size * 0.36, textShadow: glow ? '0 0 10px rgba(198,255,61,.55)' : undefined }}>
+      <span className="relative font-display font-extrabold leading-none text-white" style={{ fontSize: size * 0.36, textShadow: glow ? '0 0 10px rgba(127, 227, 255,.55)' : undefined }}>
         {level}
       </span>
     </span>
@@ -83,7 +83,7 @@ export function XpBar({ pct, from, height = 8, className = '', color, delay = 0 
     <div className={`relative w-full overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--text)_10%,transparent)] ${className}`} style={{ height }}>
       <motion.div
         className="absolute inset-y-0 left-0 rounded-full"
-        style={{ background: color ?? 'linear-gradient(90deg, #c6ff3d, #7c5cff)', boxShadow: `0 0 12px ${color ?? 'rgba(198,255,61,.5)'}` }}
+        style={{ background: color ?? 'linear-gradient(90deg, #7fe3ff, #5a8fe0)', boxShadow: `0 0 12px ${color ?? 'rgba(127, 227, 255,.5)'}` }}
         initial={{ width: `${(from ?? p) * 100}%` }}
         animate={{ width: `${p * 100}%` }}
         transition={{ duration: reduce ? 0 : 0.9, delay: reduce ? 0 : delay, ease: [0.2, 0.8, 0.2, 1] }}

@@ -3,87 +3,94 @@
 /* Cold Call design tokens. Source of truth: brand/BRAND.md ("Arena": dark by default, light on request).
    v3 "Four Worlds" layer (brand/DIRECTION_V3.md): glass, light, depth. */
 :root {
-  --bg: #07070c;
-  --surface: #111119;
-  --surface-2: #1b1b27;
-  --line: #2a2a3b;
-  --text: #f4f4fb;
-  --text-2: #9a9ab3;
-  --primary: #c6ff3d;
-  --primary-ink: #0a0a0f;
-  --accent: #7c5cff;
-  --gold: #ffd23f;
-  --win: #c6ff3d;
-  --loss: #ff4d6d;
-  --warn: #ffb020;
-  --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.45);
-  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.6);
-  --glow: 0 0 0 1px rgba(198, 255, 61, 0.35), 0 0 24px rgba(198, 255, 61, 0.25);
-  --glow-accent: 0 0 0 1px rgba(124, 92, 255, 0.45), 0 0 28px rgba(124, 92, 255, 0.3);
-  --felt: radial-gradient(120% 80% at 50% -10%, #1c1640 0%, #0d0b1c 55%, #07070c 100%);
+  /* Cold Call palette (brand/BRAND_COLDCALL.md): Glacier Navy, Deep Ice, Lofi Blue, Frost Cyan, Snow,
+     Chip Gold (money only), Sui Blue (SUI only), Thaw Green (wins), Bust Red (losses), Ink. */
+  --bg: #0b1a2e;
+  --surface: #13294a;
+  --surface-2: #1a3560;
+  --line: #24406a;
+  --text: #f2f7fc;
+  --text-2: #a9c3e4;
+  --primary: #5a8fe0;
+  --primary-ink: #080e1a;
+  --accent: #7fe3ff;
+  --gold: #f5c542;
+  --sui: #4da2ff;
+  --win: #3ddc97;
+  --loss: #ff5a6e;
+  --warn: #ffb547;
+  --ink: #080e1a;
+  --shadow-card: 0 2px 16px rgba(4, 10, 22, 0.5);
+  --shadow-modal: 0 24px 64px rgba(4, 10, 22, 0.65);
+  --glow: 0 0 0 1px rgba(127, 227, 255, 0.35), 0 0 24px rgba(127, 227, 255, 0.22);
+  --glow-accent: 0 0 0 1px rgba(90, 143, 224, 0.45), 0 0 28px rgba(90, 143, 224, 0.3);
+  --felt: radial-gradient(120% 80% at 50% -10%, #1d3a66 0%, #10223d 55%, #0b1a2e 100%);
 
-  /* v3 glass */
-  --glass-fill: linear-gradient(180deg, rgba(30, 26, 52, 0.72), rgba(14, 12, 26, 0.78));
-  --glass-fill-strong: linear-gradient(180deg, rgba(28, 24, 50, 0.9), rgba(12, 11, 22, 0.94));
-  --glass-edge: rgba(255, 255, 255, 0.09);
-  --glass-rim: rgba(255, 255, 255, 0.16);
-  --glass-rim-2: rgba(124, 92, 255, 0.28);
-  --glass-shadow: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 18px 48px -18px rgba(0, 0, 0, 0.7);
-  --well: rgba(255, 255, 255, 0.045);
-  --well-hover: rgba(255, 255, 255, 0.08);
-  --well-line: rgba(255, 255, 255, 0.08);
-  --primary-grad: linear-gradient(180deg, #dcff7a 0%, #c6ff3d 45%, #a6e81d 100%);
-  --primary-glow: 0 0 0 1px rgba(198, 255, 61, 0.5), 0 8px 28px -6px rgba(198, 255, 61, 0.55), 0 1px 0 rgba(255, 255, 255, 0.55) inset;
-  --gold-glow: 0 0 32px rgba(255, 210, 63, 0.35);
-  --nebula-1: rgba(124, 92, 255, 0.34);
-  --nebula-2: rgba(196, 56, 255, 0.16);
-  --nebula-3: rgba(61, 140, 255, 0.14);
-  --nebula-4: rgba(198, 255, 61, 0.05);
-  --star: rgba(255, 255, 255, 0.85);
-  --star-dim: rgba(190, 180, 255, 0.5);
-  --backdrop-base: radial-gradient(140% 90% at 50% 0%, #120e26 0%, #07070c 60%);
+  /* frosted glass */
+  --glass-fill: linear-gradient(180deg, rgba(26, 53, 96, 0.62), rgba(15, 33, 60, 0.74));
+  --glass-fill-strong: linear-gradient(180deg, rgba(24, 48, 88, 0.95), rgba(13, 29, 53, 0.97));
+  --glass-edge: rgba(242, 247, 252, 0.08);
+  --glass-rim: rgba(242, 247, 252, 0.2);
+  --glass-rim-2: rgba(127, 227, 255, 0.3);
+  --glass-shadow: 0 1px 0 rgba(242, 247, 252, 0.08) inset, 0 18px 48px -18px rgba(2, 8, 20, 0.75);
+  --well: rgba(242, 247, 252, 0.05);
+  --well-hover: rgba(242, 247, 252, 0.09);
+  --well-line: rgba(169, 195, 228, 0.14);
+  --primary-grad: linear-gradient(180deg, #9cc2f7 0%, #6f9fe8 45%, #5a8fe0 100%);
+  --primary-glow: 0 0 0 1.5px #080e1a, 0 4px 0 0 #2f5a9e, 0 10px 24px -8px rgba(90, 143, 224, 0.6), 0 1px 0 rgba(255, 255, 255, 0.6) inset;
+  --gold-glow: 0 0 32px rgba(245, 197, 66, 0.35);
+  --nebula-1: rgba(90, 143, 224, 0.3);
+  --nebula-2: rgba(127, 227, 255, 0.12);
+  --nebula-3: rgba(77, 162, 255, 0.14);
+  --nebula-4: rgba(61, 220, 151, 0.05);
+  --star: rgba(242, 247, 252, 0.85);
+  --star-dim: rgba(169, 195, 228, 0.5);
+  --snow: rgba(242, 247, 252, 0.9);
+  --backdrop-base: radial-gradient(140% 90% at 50% 0%, #17325a 0%, #0b1a2e 55%, #080e1a 100%);
   color-scheme: dark;
 }
 
 :root[data-theme="light"] {
-  --bg: #f4f4f8;
+  --bg: #eef4fb;
   --surface: #ffffff;
-  --surface-2: #ebebf2;
-  --line: #d9d9e6;
-  --text: #0c0c14;
-  --text-2: #55556e;
-  --primary: #5b3df5;
+  --surface-2: #e3edf8;
+  --line: #c9d9ec;
+  --text: #0b1a2e;
+  --text-2: #3d5578;
+  --primary: #2f6fd0;
   --primary-ink: #ffffff;
-  --accent: #5b3df5;
-  --gold: #b07d00;
-  --win: #1f8f3a;
-  --loss: #d61f45;
-  --warn: #a15c00;
-  --shadow-card: 0 2px 12px rgba(12, 12, 20, 0.08);
-  --shadow-modal: 0 24px 64px rgba(12, 12, 20, 0.18);
-  --glow: 0 0 0 1px rgba(91, 61, 245, 0.35), 0 0 20px rgba(91, 61, 245, 0.18);
-  --glow-accent: 0 0 0 1px rgba(91, 61, 245, 0.35), 0 0 20px rgba(91, 61, 245, 0.18);
-  --felt: radial-gradient(120% 80% at 50% -10%, #ffffff 0%, #eeeef6 70%, #e6e6f0 100%);
+  --accent: #0b7fa6;
+  --gold: #9a6e00;
+  --sui: #1f6fd0;
+  --win: #11845a;
+  --loss: #d22c48;
+  --warn: #9a5800;
+  --shadow-card: 0 2px 12px rgba(11, 26, 46, 0.08);
+  --shadow-modal: 0 24px 64px rgba(11, 26, 46, 0.18);
+  --glow: 0 0 0 1px rgba(47, 111, 208, 0.35), 0 0 20px rgba(47, 111, 208, 0.18);
+  --glow-accent: 0 0 0 1px rgba(47, 111, 208, 0.35), 0 0 20px rgba(47, 111, 208, 0.18);
+  --felt: radial-gradient(120% 80% at 50% -10%, #ffffff 0%, #eaf2fb 70%, #dde9f6 100%);
 
-  --glass-fill: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.72));
-  --glass-fill-strong: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(250, 250, 255, 0.94));
-  --glass-edge: rgba(91, 61, 245, 0.1);
+  --glass-fill: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(248, 252, 255, 0.74));
+  --glass-fill-strong: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(246, 250, 255, 0.95));
+  --glass-edge: rgba(47, 111, 208, 0.1);
   --glass-rim: rgba(255, 255, 255, 1);
-  --glass-rim-2: rgba(91, 61, 245, 0.22);
-  --glass-shadow: 0 1px 0 rgba(255, 255, 255, 1) inset, 0 14px 40px -18px rgba(40, 30, 110, 0.28);
-  --well: rgba(91, 61, 245, 0.05);
-  --well-hover: rgba(91, 61, 245, 0.1);
-  --well-line: rgba(91, 61, 245, 0.12);
-  --primary-grad: linear-gradient(180deg, #7a62ff 0%, #5b3df5 50%, #4a2de0 100%);
-  --primary-glow: 0 0 0 1px rgba(91, 61, 245, 0.5), 0 8px 24px -8px rgba(91, 61, 245, 0.55), 0 1px 0 rgba(255, 255, 255, 0.35) inset;
-  --gold-glow: 0 0 28px rgba(176, 125, 0, 0.18);
-  --nebula-1: rgba(124, 92, 255, 0.2);
-  --nebula-2: rgba(255, 120, 200, 0.14);
-  --nebula-3: rgba(61, 200, 255, 0.14);
-  --nebula-4: rgba(255, 200, 80, 0.1);
-  --star: rgba(91, 61, 245, 0.28);
-  --star-dim: rgba(91, 61, 245, 0.16);
-  --backdrop-base: radial-gradient(140% 90% at 50% 0%, #fbfaff 0%, #eeedf7 70%);
+  --glass-rim-2: rgba(47, 111, 208, 0.24);
+  --glass-shadow: 0 1px 0 rgba(255, 255, 255, 1) inset, 0 14px 40px -18px rgba(20, 50, 100, 0.28);
+  --well: rgba(47, 111, 208, 0.05);
+  --well-hover: rgba(47, 111, 208, 0.1);
+  --well-line: rgba(47, 111, 208, 0.14);
+  --primary-grad: linear-gradient(180deg, #4a86e0 0%, #2f6fd0 55%, #255fb8 100%);
+  --primary-glow: 0 0 0 1.5px #0b1a2e, 0 4px 0 0 #1b4a8f, 0 10px 22px -10px rgba(47, 111, 208, 0.55), 0 1px 0 rgba(255, 255, 255, 0.35) inset;
+  --gold-glow: 0 0 28px rgba(154, 110, 0, 0.18);
+  --nebula-1: rgba(90, 143, 224, 0.18);
+  --nebula-2: rgba(127, 227, 255, 0.22);
+  --nebula-3: rgba(77, 162, 255, 0.12);
+  --nebula-4: rgba(245, 197, 66, 0.06);
+  --star: rgba(47, 111, 208, 0.25);
+  --star-dim: rgba(47, 111, 208, 0.15);
+  --snow: rgba(90, 143, 224, 0.45);
+  --backdrop-base: radial-gradient(140% 90% at 50% 0%, #ffffff 0%, #eaf2fb 60%, #dfeaf7 100%);
   color-scheme: light;
 }
 
@@ -101,10 +108,12 @@
   --color-win: var(--win);
   --color-loss: var(--loss);
   --color-warn: var(--warn);
+  --color-sui: var(--sui);
+  --color-ink: var(--ink);
   --color-well: var(--well);
   --color-well-hover: var(--well-hover);
   --color-well-line: var(--well-line);
-  --font-display: var(--font-unbounded), system-ui, sans-serif;
+  --font-display: var(--font-lilita), system-ui, sans-serif;
   --font-sans: var(--font-inter), system-ui, sans-serif;
   --radius-chip: 10px;
   --radius-card: 16px;
@@ -122,6 +131,8 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -webkit-tap-highlight-color: transparent;
+  /* Lilita One has a single weight: never fake a bold version of it. */
+  font-synthesis-weight: none;
 }
 
 body {
@@ -133,7 +144,7 @@ body {
 }
 
 :focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
   border-radius: 6px;
 }
@@ -160,7 +171,7 @@ body {
 
 /* Arena effects (kept for the game tables and the landing page) */
 .arena-grid {
-  background-image: linear-gradient(rgba(124, 92, 255, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(124, 92, 255, 0.08) 1px, transparent 1px);
+  background-image: linear-gradient(rgba(127, 227, 255, 0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(127, 227, 255, 0.07) 1px, transparent 1px);
   background-size: 32px 32px;
 }
 .text-glow {
@@ -171,7 +182,7 @@ body {
 }
 @keyframes pulse-glow {
   0%, 100% { box-shadow: var(--glow); }
-  50% { box-shadow: 0 0 0 1px rgba(198, 255, 61, 0.6), 0 0 36px rgba(198, 255, 61, 0.45); }
+  50% { box-shadow: 0 0 0 1px rgba(127, 227, 255, 0.6), 0 0 36px rgba(127, 227, 255, 0.45); }
 }
 .pulse-glow {
   animation: pulse-glow 2.4s ease-in-out infinite;
@@ -189,45 +200,52 @@ body {
    ===================================================================== */
 
 @layer components {
-  /* ---------- Type scale (Unbounded display, Inter UI) ---------- */
+  /* ---------- Type scale (Lilita One display, Inter UI) ---------- */
   .t-hero {
     font-family: var(--font-display);
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: -0.02em;
-    line-height: 0.98;
-    font-size: clamp(34px, 8.4vw, 64px);
+    font-weight: 400;
+    letter-spacing: 0.005em;
+    line-height: 1;
+    font-size: clamp(38px, 9.4vw, 72px);
   }
   .t-display {
     font-family: var(--font-display);
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: -0.015em;
-    line-height: 1.02;
-    font-size: clamp(28px, 6.6vw, 44px);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    line-height: 1.04;
+    font-size: clamp(32px, 7.4vw, 48px);
   }
   .t-title {
     font-family: var(--font-display);
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: -0.01em;
-    line-height: 1.1;
-    font-size: clamp(18px, 4.4vw, 22px);
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    line-height: 1.12;
+    font-size: clamp(20px, 4.8vw, 24px);
   }
   .t-eyebrow {
-    font-family: var(--font-display);
+    font-family: var(--font-sans);
     font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.16em;
+    letter-spacing: 0.14em;
     font-size: 11px;
     line-height: 1.2;
     color: var(--text-2);
   }
   .t-num {
     font-family: var(--font-display);
-    font-weight: 800;
+    font-weight: 400;
     font-variant-numeric: tabular-nums;
-    letter-spacing: -0.02em;
+    letter-spacing: 0.01em;
+  }
+  /* Icy fill like the wordmark: Snow to Frost Cyan with an Ink edge. */
+  .t-ice {
+    background: linear-gradient(180deg, #ffffff 0%, #f2f7fc 40%, #7fe3ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    -webkit-text-stroke: 0.035em #080e1a;
+    paint-order: stroke fill;
+    filter: drop-shadow(0 0.06em 0 #5a8fe0);
   }
   .t-grad {
     background: linear-gradient(100deg, var(--text) 0%, var(--text) 40%, color-mix(in srgb, var(--accent) 70%, var(--text)) 100%);
@@ -236,13 +254,13 @@ body {
     color: transparent;
   }
   .t-grad-primary {
-    background: linear-gradient(100deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 55%, #ffffff) 100%);
+    background: linear-gradient(100deg, #7fe3ff 0%, #9cc2f7 60%, #f2f7fc 100%);
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
   :root[data-theme="light"] .t-grad-primary {
-    background: linear-gradient(100deg, #5b3df5 0%, #b03df5 100%);
+    background: linear-gradient(100deg, #2f6fd0 0%, #0b7fa6 100%);
     -webkit-background-clip: text;
     background-clip: text;
   }
@@ -384,7 +402,7 @@ body {
   100% { transform: translateX(100%); }
 }
 
-/* ---------- Persistent app backdrop: violet nebula, stars, slow light ---------- */
+/* ---------- Persistent app backdrop: night sky over the mountain, soft aurora, falling snow ---------- */
 .cosmos {
   position: fixed;
   inset: 0;
@@ -507,4 +525,66 @@ body {
    Do not give page content its own z-index: sheets inside pages must stack above the nav bars. */
 .page-root {
   position: relative;
+}
+
+/* ---------- Falling snow ----------
+   Two layers of tiny flakes drawn with repeated radial gradients and moved with a transform only,
+   so it costs almost nothing on phones. Under reduced motion the flakes stay still. */
+.snowfall {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background-repeat: repeat;
+  will-change: transform;
+}
+.snowfall-1 {
+  background-image:
+    radial-gradient(1.6px 1.6px at 20px 30px, var(--snow), transparent 70%),
+    radial-gradient(1.2px 1.2px at 120px 90px, var(--snow), transparent 70%),
+    radial-gradient(2px 2px at 200px 160px, var(--snow), transparent 70%),
+    radial-gradient(1.3px 1.3px at 60px 220px, var(--snow), transparent 70%),
+    radial-gradient(1.7px 1.7px at 260px 260px, var(--snow), transparent 70%);
+  background-size: 300px 300px;
+  top: -900px;
+  opacity: 0.55;
+  animation: snow-fall 30s linear infinite;
+}
+.snowfall-2 {
+  background-image:
+    radial-gradient(2.4px 2.4px at 40px 60px, var(--snow), transparent 70%),
+    radial-gradient(2.8px 2.8px at 300px 200px, var(--snow), transparent 70%),
+    radial-gradient(2.2px 2.2px at 180px 380px, var(--snow), transparent 70%);
+  background-size: 420px 440px;
+  top: -880px;
+  opacity: 0.45;
+  animation: snow-fall-2 40s linear infinite;
+}
+@keyframes snow-fall {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, 900px, 0); }
+}
+@keyframes snow-fall-2 {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(0, 880px, 0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .snowfall-1, .snowfall-2 { animation: none !important; }
+}
+
+/* Frost burst on wins: a ring of ice that blooms out once. */
+@keyframes frost-burst {
+  0% { transform: scale(0.3); opacity: 0.9; }
+  100% { transform: scale(2.4); opacity: 0; }
+}
+.frost-burst {
+  pointer-events: none;
+  position: absolute;
+  border-radius: 9999px;
+  background: radial-gradient(closest-side, rgba(127, 227, 255, 0), rgba(127, 227, 255, 0.55) 70%, rgba(242, 247, 252, 0) 100%);
+  animation: frost-burst 1.1s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .frost-burst { display: none; }
 }

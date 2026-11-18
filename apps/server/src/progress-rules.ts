@@ -253,7 +253,7 @@ export const ACHIEVEMENTS: AchDef[] = [
   { code: 'games_10', name: 'Warming up', how: 'Finish 10 games of anything.', game: null, icon: 'flame', xp: 50, target: 10, metric: (s) => sum(s, 'games') },
   { code: 'games_50', name: 'Regular', how: 'Finish 50 games of anything.', game: null, icon: 'flame', xp: 100, target: 50, metric: (s) => sum(s, 'games') },
   { code: 'games_100', name: 'Club stalwart', how: 'Finish 100 games of anything.', game: null, icon: 'crown', xp: 150, target: 100, metric: (s) => sum(s, 'games') },
-  { code: 'explorer', name: 'Explorer', how: 'Finish a game of all four: chess, backgammon, Tichu and Sea Battle.', game: null, icon: 'compass', xp: 50, target: 4, metric: (s) => GAME_IDS.filter((g) => s.stats[g].games > 0).length },
+  { code: 'explorer', name: 'Explorer', how: 'Finish a game of all four: chess, backgammon, Tichu and Ice Floe Battle.', game: null, icon: 'compass', xp: 50, target: 4, metric: (s) => GAME_IDS.filter((g) => s.stats[g].games > 0).length },
   { code: 'all_rounder', name: 'All rounder', how: 'Win at least one game of each of the four games.', game: null, icon: 'star', xp: 100, target: 4, metric: (s) => GAME_IDS.filter((g) => s.stats[g].wins > 0).length, reward: 'Title: All rounder' },
   { code: 'streak_3', name: 'Hat trick', how: 'Win 3 games in a row of the same game.', game: null, icon: 'bolt', xp: 50, target: 3, metric: (s) => Math.max(...GAME_IDS.map((g) => s.stats[g].best_streak)) },
   { code: 'streak_5', name: 'Unstoppable', how: 'Win 5 games in a row of the same game.', game: null, icon: 'bolt', xp: 100, target: 5, metric: (s) => Math.max(...GAME_IDS.map((g) => s.stats[g].best_streak)), reward: 'Frame: Prism and title: On fire' },
@@ -275,11 +275,11 @@ export const ACHIEVEMENTS: AchDef[] = [
   { code: 'tichu_made', name: 'Called it', how: 'Call Tichu and go out first in that round.', game: 'tichu', icon: 'card', xp: 50, target: 1, metric: (s) => ex(s, 'tichu', 'tichusMade') + ex(s, 'tichu', 'grandsMade'), reward: 'Title: The caller' },
   { code: 'grand_made', name: 'Grand gesture', how: 'Call Grand Tichu before seeing all your cards, then go out first.', game: 'tichu', icon: 'dragon', xp: 100, target: 1, metric: (s) => ex(s, 'tichu', 'grandsMade'), reward: 'Dragon card back' },
   { code: 'double_victory', name: 'One two', how: 'You and your partner go out first and second in the same round.', game: 'tichu', icon: 'card', xp: 50, target: 1, metric: (s) => ex(s, 'tichu', 'doubleVictories') },
-  // Sea Battle
-  { code: 'sb_win', name: 'Fleet sunk', how: 'Sink a whole fleet in Sea Battle.', game: 'seabattle', icon: 'anchor', xp: 25, target: 1, metric: (s) => ex(s, 'seabattle', 'fleetsSunk') },
+  // Ice Floe Battle
+  { code: 'sb_win', name: 'Fleet sunk', how: 'Sink a whole fleet in Ice Floe Battle.', game: 'seabattle', icon: 'anchor', xp: 25, target: 1, metric: (s) => ex(s, 'seabattle', 'fleetsSunk') },
   { code: 'sb_sharp', name: 'Admiral', how: 'Sink a whole fleet in under 40 shots.', game: 'seabattle', icon: 'target', xp: 75, target: 1, metric: (s) => (ex(s, 'seabattle', 'bestShots') && ex(s, 'seabattle', 'bestShots') < 40 ? 1 : 0), reward: 'Title: Admiral' },
-  { code: 'sb_run5', name: 'Broadside', how: 'Hit 5 times in a row in one Sea Battle game.', game: 'seabattle', icon: 'target', xp: 50, target: 5, metric: (s) => ex(s, 'seabattle', 'bestHitRun'), reward: 'Stealth ship skin' },
-  { code: 'sb_flawless', name: 'Untouched', how: 'Win a Sea Battle game without losing a single ship.', game: 'seabattle', icon: 'shield', xp: 100, target: 1, metric: (s) => ex(s, 'seabattle', 'flawless') },
+  { code: 'sb_run5', name: 'Broadside', how: 'Hit 5 times in a row in one Ice Floe Battle game.', game: 'seabattle', icon: 'target', xp: 50, target: 5, metric: (s) => ex(s, 'seabattle', 'bestHitRun'), reward: 'Stealth ship skin' },
+  { code: 'sb_flawless', name: 'Untouched', how: 'Win a Ice Floe Battle game without losing a single ship.', game: 'seabattle', icon: 'shield', xp: 100, target: 1, metric: (s) => ex(s, 'seabattle', 'flawless') },
 ];
 
 export const achievementInfo = (a: AchDef): AchievementInfo => ({ code: a.code, name: a.name, how: a.how, game: a.game, icon: a.icon, xp: a.xp, reward: a.reward ?? null });
@@ -309,12 +309,12 @@ export const CHALLENGE_SLOTS: ChallengeDef[][] = [
     { code: 'win_any', name: 'Get a win', how: 'Win any game. A practice game against the bot counts.', game: null, target: 1, step: winIn(null) },
     { code: 'win_chess', name: 'Win at chess', how: 'Win a chess game. Practice counts.', game: 'chess', target: 1, step: winIn('chess') },
     { code: 'win_backgammon', name: 'Win at backgammon', how: 'Win a backgammon game. Practice counts.', game: 'backgammon', target: 1, step: winIn('backgammon') },
-    { code: 'win_seabattle', name: 'Win at Sea Battle', how: 'Sink the whole enemy fleet. Practice counts.', game: 'seabattle', target: 1, step: winIn('seabattle') },
+    { code: 'win_seabattle', name: 'Win at Ice Floe Battle', how: 'Sink the whole enemy fleet. Practice counts.', game: 'seabattle', target: 1, step: winIn('seabattle') },
     { code: 'win_2', name: 'Two wins', how: 'Win 2 games of anything today.', game: null, target: 2, step: winIn(null) },
   ],
   [
     { code: 'sb_under_40', name: 'Sharp sinking', how: 'Sink a fleet in under 40 shots.', game: 'seabattle', target: 1, step: (p, f) => p + (f.seabattle?.fleetSunk && f.seabattle.shots < 40 ? 1 : 0) },
-    { code: 'sb_run5', name: 'Five in a row', how: 'Hit 5 in a row in Sea Battle.', game: 'seabattle', target: 5, step: (p, f) => Math.max(p, f.seabattle?.bestRun ?? 0) },
+    { code: 'sb_run5', name: 'Five in a row', how: 'Hit 5 in a row in Ice Floe Battle.', game: 'seabattle', target: 5, step: (p, f) => Math.max(p, f.seabattle?.bestRun ?? 0) },
     { code: 'chess_mate', name: 'Checkmate', how: 'Win a chess game by checkmate.', game: 'chess', target: 1, step: (p, f) => p + (f.chess?.checkmate ? 1 : 0) },
     { code: 'chess_promote', name: 'Promotion', how: 'Promote a pawn in a chess game you finish.', game: 'chess', target: 1, step: (p, f) => p + (f.chess?.promotions ? 1 : 0) },
     { code: 'tichu_call', name: 'Call and make it', how: 'Call Tichu and go out first in that round.', game: 'tichu', target: 1, step: (p, f) => p + (f.tichu ? f.tichu.tichusMade + f.tichu.grandsMade : 0) },

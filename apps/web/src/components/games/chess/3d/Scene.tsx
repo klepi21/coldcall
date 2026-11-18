@@ -54,8 +54,8 @@ export interface SceneProps {
   onViewChange: (moved: boolean) => void;
 }
 
-const LIME = '#C6FF3D';
-const VIOLET = '#7C5CFF';
+const LIME = '#7fe3ff';
+const VIOLET = '#5a8fe0';
 
 export const sqToXZ = (sq: string): [number, number] => {
   const f = sq.charCodeAt(0) - 97;
@@ -344,7 +344,7 @@ function SquareTint({ sq, color, opacity, y = 0.003 }: { sq: string; color: stri
 function Overlays(props: Pick<SceneProps, 'selected' | 'targets' | 'lastSq' | 'checkSq' | 'hint' | 'cursor' | 'theme' | 'reduce'> & { dragOver: string | null }) {
   const { selected, targets, lastSq, checkSq, hint, cursor, theme, reduce, dragOver } = props;
   const invalidate = useThree((s) => s.invalidate);
-  const glow = useMemo(() => glowTexture('rgba(198,255,61,0.9)', 'rgba(198,255,61,0.25)'), []);
+  const glow = useMemo(() => glowTexture('rgba(127, 227, 255,0.9)', 'rgba(127, 227, 255,0.25)'), []);
   const red = useMemo(() => glowTexture('rgba(255,77,109,1)', 'rgba(255,77,109,0.45)'), []);
   const frameGeo = useMemo(() => new THREE.ShapeGeometry(squareFrame(0.92, 0.055)), []);
   const checkMat = useRef<THREE.MeshBasicMaterial>(null);

@@ -34,7 +34,7 @@ function WorldTile({ game, i, openTables, onOpen }: { game: GameKind; i: number;
         <button type="button" onClick={() => (haptic(), onOpen(game, 'bot'))} className="relative block w-full text-left" aria-label={`Play ${m.name}`}>
           <WorldArt game={game} className="h-[210px] w-full [mask-image:linear-gradient(to_bottom,#000_62%,transparent_98%)] sm:h-[230px] xl:h-[250px]" />
           <span className="absolute left-3 top-3 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white">{m.teams ? '2 vs 2' : '1 vs 1'}</span>
-          <span className="absolute right-3 top-3 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#ffd23f]">Win 2x</span>
+          <span className="absolute right-3 top-3 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-[#f5c542]">Win 2x</span>
         </button>
         {/* the world's light spilling onto the panel */}
         <span className="pointer-events-none absolute inset-x-0 top-[110px] h-56 sm:top-[130px] xl:top-[150px]" style={{ background: `radial-gradient(65% 42% at 50% 50%, color-mix(in srgb, ${w.c} 20%, transparent), transparent)` }} aria-hidden />

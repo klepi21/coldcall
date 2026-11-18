@@ -1,5 +1,5 @@
 /**
- * Night ocean for the 3D Sea Battle board: one ShaderMaterial on a displaced plane.
+ * Night ocean for the 3D Ice Floe Battle board: one ShaderMaterial on a displaced plane.
  * Waves are a small sum of directional sines (kept calm over the 10 by 10 battle grid so the grid
  * stays readable, rougher towards the horizon). The same height function exists in JS (waveHeight)
  * so ships, markers and the crosshair ride the real surface.

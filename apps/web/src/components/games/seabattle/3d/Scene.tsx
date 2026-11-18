@@ -64,7 +64,7 @@ export function Scene(props: SceneProps) {
       <ambientLight intensity={0.35} color="#8fa6d8" />
       <hemisphereLight args={['#4a6cb0', '#05060a', 0.9]} />
       <directionalLight position={[-5, 7, -9]} intensity={2.1} color="#c4d2ff" />
-      <directionalLight position={[6, 4, 8]} intensity={0.55} color="#7c5cff" />
+      <directionalLight position={[6, 4, 8]} intensity={0.55} color="#5a8fe0" />
       <Sky reduce={reduce} />
       <Ocean {...props} shared={shared} />
       {props.ships.map((s) => (
@@ -392,7 +392,7 @@ function MissBuoys({ marks, reduce }: { marks?: SbMark[]; reduce: boolean }) {
 function Crosshair({ cell, active, reduce }: { cell: Cell; active: boolean; reduce: boolean }) {
   const g = useRef<THREE.Group>(null);
   const spin = useRef<THREE.Group>(null);
-  const mat = useMemo(() => new THREE.MeshBasicMaterial({ color: '#C6FF3D', transparent: true, depthTest: false, toneMapped: false }), []);
+  const mat = useMemo(() => new THREE.MeshBasicMaterial({ color: '#7fe3ff', transparent: true, depthTest: false, toneMapped: false }), []);
   const beam = useMemo(
     () =>
       new THREE.ShaderMaterial({

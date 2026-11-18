@@ -8,7 +8,7 @@ import { SeaBattleBoard } from '@/components/games/seabattle';
 import type { BoardSettings } from '@/components/games/types';
 
 /**
- * Local preview of Sea Battle: the engine runs in the browser and a bot plays seat 1.
+ * Local preview of Ice Floe Battle: the engine runs in the browser and a bot plays seat 1.
  * Query parameters for screenshots: ?phase=firing (both fleets auto placed), ?shots=N (fast
  * forward N bot shots per side), ?over=1 (play to the end), ?aim=E5, ?confirm=1, ?theme=light,
  * ?level=0..10 (bot level, default 6), ?slowbot=1 (bot never finishes placing, to see the waiting state).
@@ -114,7 +114,7 @@ export default function SeaBattleDevPage() {
     <main className="felt min-h-dvh text-text">
       <div className="mx-auto flex w-full max-w-[1160px] flex-col gap-3 px-1 py-3 sm:px-4 sm:py-5">
         <div className="flex flex-wrap items-center justify-between gap-2 px-3">
-          <h1 className="font-display text-lg font-semibold">Sea Battle preview</h1>
+          <h1 className="font-display text-lg font-semibold">Ice Floe Battle preview</h1>
           <div className="flex flex-wrap items-center gap-1.5">
             <Toggle on={confirmMoves} onClick={() => setConfirmMoves((c) => !c)}>Confirm moves</Toggle>
             <Toggle on={theme === 'light'} onClick={() => setTheme((t) => (t === 'light' ? 'dark' : 'light'))}>Light theme</Toggle>

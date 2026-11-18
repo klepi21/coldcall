@@ -13,7 +13,7 @@ import { play } from '@/lib/sound';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
 const variants: Record<Variant, string> = {
-  primary: 'btn-primary font-bold',
+  primary: 'btn-primary',
   secondary: 'btn-secondary',
   ghost: 'bg-transparent text-text hover:bg-well-hover',
   danger: 'bg-loss text-white hover:brightness-110 shadow-[0_8px_24px_-8px_rgba(255,77,109,0.6)]',
@@ -25,7 +25,7 @@ const variants: Record<Variant, string> = {
  */
 export const Button = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTMLButtonElement> & { variant?: Variant; size?: 'md' | 'lg' | 'sm'; loading?: boolean; full?: boolean }>(
   function Button({ variant = 'primary', size = 'md', loading, full, className = '', children, disabled, onClick, ...rest }, ref) {
-    const sz = size === 'lg' ? 'h-14 px-6 text-[17px] rounded-[14px]' : size === 'sm' ? 'h-9 px-3 text-sm rounded-chip' : 'h-11 px-5 text-[15px] rounded-chip';
+    const sz = size === 'lg' ? 'h-14 px-6 text-[19px] rounded-[14px]' : size === 'sm' ? 'h-9 px-3 text-[15px] rounded-chip' : 'h-11 px-5 text-[17px] rounded-chip';
     return (
       <button
         ref={ref}
@@ -35,7 +35,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonHTMLAttributes<HTMLBut
           if (variant === 'primary' || variant === 'danger') feedback('press');
           onClick?.(e);
         }}
-        className={`press inline-flex select-none items-center justify-center gap-2 font-semibold disabled:cursor-not-allowed disabled:opacity-45 ${sz} ${variants[variant]} ${full ? 'w-full' : ''} ${className}`}
+        className={`press inline-flex select-none items-center justify-center gap-2 font-display tracking-[0.01em] disabled:cursor-not-allowed disabled:opacity-45 ${sz} ${variants[variant]} ${full ? 'w-full' : ''} ${className}`}
         {...rest}
       >
         {loading ? <Spinner /> : null}
@@ -218,13 +218,23 @@ export function TiltCard({ children, className = '', tint, max = 7, style, ...re
 /* ---------- Backdrop ---------- */
 
 /** The persistent app backdrop: violet nebula, two star layers, one slow drifting light. CSS only. */
-export function Cosmos() {
+/** Night sky over the mountain lounge: soft aurora, stars, distant peaks and gentle falling snow. */
+export function Cosmos({ snow = true }: { snow?: boolean }) {
   return (
     <div className="cosmos" aria-hidden>
       <div className="cosmos-nebula" />
       <div className="cosmos-light" />
       <div className="cosmos-stars" />
-      <div className="cosmos-stars-2" />
+      <svg className="absolute inset-x-0 bottom-0 h-[34vh] w-full opacity-[0.22]" viewBox="0 0 1440 300" preserveAspectRatio="none">
+        <path d="M0 300V190l120-70 90 50 160-120 110 80 90-40 170 130 120-90 140 70 150-110 130 90 160-60v190Z" fill="var(--surface-2)" />
+        <path d="M0 300v-60l180-60 150 70 210-90 160 80 200-70 170 60 190-50 180 70v50Z" fill="var(--surface)" opacity="0.9" />
+      </svg>
+      {snow ? (
+        <>
+          <div className="snowfall snowfall-1" />
+          <div className="snowfall snowfall-2" />
+        </>
+      ) : null}
       <div className="cosmos-horizon" />
     </div>
   );
@@ -401,13 +411,36 @@ export function Row({ label, value, info, strong }: { label: string; value: Reac
   );
 }
 
-export function Empty({ title, text, action }: { title: string; text: string; action?: ReactNode }) {
+export type MascotPose = 'neutral' | 'win' | 'deal' | 'shrug';
+const MASCOT_ALT: Record<MascotPose, string> = {
+  neutral: 'Lucky Lo, the Cold Call dealer, holding a chip',
+  win: 'Lucky Lo grinning with a fist pump',
+  deal: 'Lucky Lo dealing a fan of cards',
+  shrug: 'Lucky Lo shrugging, palms up',
+};
+/** Lucky Lo, the mascot. Decorative by default (empty alt); pass `label` to announce him. */
+export function Mascot({ pose = 'neutral', className = 'size-24', label = false, priority = false }: { pose?: MascotPose; className?: string; label?: boolean; priority?: boolean }) {
   return (
-    <div className="glass relative flex flex-col items-center gap-3 overflow-hidden rounded-card px-6 py-12 text-center">
+    // eslint-disable-next-line @next/next/no-img-element
+    <img
+      src={`/brand/mascot-${pose}.png`}
+      alt={label ? MASCOT_ALT[pose] : ''}
+      aria-hidden={label ? undefined : true}
+      loading={priority ? 'eager' : 'lazy'}
+      decoding="async"
+      draggable={false}
+      className={`pointer-events-none select-none object-contain ${className}`}
+    />
+  );
+}
+
+export function Empty({ title, text, action, pose = 'shrug' }: { title: string; text: string; action?: ReactNode; pose?: MascotPose }) {
+  return (
+    <div className="glass relative flex flex-col items-center gap-3 overflow-hidden rounded-card px-6 pb-12 pt-6 text-center">
       <span className="spill pointer-events-none absolute inset-0" aria-hidden />
-      <span className="relative grid size-20 place-items-center">
-        <span className="absolute inset-0 rounded-full bg-accent/25 blur-xl" aria-hidden />
-        <Logo className="relative size-12" />
+      <span className="relative grid size-32 place-items-center">
+        <span className="absolute inset-4 rounded-full bg-accent/20 blur-2xl" aria-hidden />
+        <Mascot pose={pose} className="relative size-32" />
       </span>
       <p className="t-title relative">{title}</p>
       <p className="relative max-w-sm text-text-2">{text}</p>
@@ -416,28 +449,18 @@ export function Empty({ title, text, action }: { title: string; text: string; ac
   );
 }
 
-/** Cold Call mark (placeholder until the final brand logo lands). */
+/** The CC snow chip, Cold Call's small mark. */
 export function Logo({ className = 'size-8' }: { className?: string }) {
   return (
-    <svg viewBox="0 0 32 32" className={className} aria-hidden>
-      <defs>
-        <linearGradient id="cc-mark" x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="var(--accent)" />
-          <stop offset="1" stopColor="#2a1a7a" />
-        </linearGradient>
-      </defs>
-      <rect x="1" y="1" width="30" height="30" rx="9" fill="url(#cc-mark)" />
-      <rect x="7" y="9.5" width="18" height="5" rx="2.5" fill="#ffffff" />
-      <rect x="7" y="17.5" width="18" height="5" rx="2.5" fill="var(--primary)" />
-    </svg>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src="/img/cc-chip.png" alt="" aria-hidden className={`shrink-0 select-none object-contain ${className}`} draggable={false} />
   );
 }
 
-export function Wordmark({ className = '' }: { className?: string }) {
+/** The COLD CALL wordmark (icy letters, Ink outline, icicles). The image carries the name for screen readers. */
+export function Wordmark({ className = '', height = 30 }: { className?: string; height?: number }) {
   return (
-    <span className={`inline-flex items-center gap-2 ${className}`}>
-      <Logo className="size-8" />
-      <span className="font-display text-[20px] font-extrabold uppercase tracking-tight">cold call</span>
-    </span>
+    // eslint-disable-next-line @next/next/no-img-element
+    <img src="/brand/logo.png" alt="Cold Call" width={Math.round((height * 1200) / 297)} height={height} className={`inline-block select-none object-contain ${className}`} draggable={false} />
   );
 }

@@ -1,6 +1,6 @@
 /**
  * Screenshots for the progression UI against the running API (:4000) and web (:3000).
- * Signs up a fresh guest, plays a free practice Sea Battle game (aiming with knowledge of the bot fleet
+ * Signs up a fresh guest, plays a free practice Ice Floe Battle game (aiming with knowledge of the bot fleet
  * from the database, so the result shows bonuses and achievements), and captures the result screen
  * and /progress at phone and desktop sizes.
  *   cd apps/server && npx tsx --env-file=.env scripts/progress-shots.ts [outDir]

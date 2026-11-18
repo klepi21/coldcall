@@ -1,8 +1,8 @@
 'use client';
 /**
- * Sea Battle art. Every shape here is original SVG drawn by hand for Cold Call (ship silhouettes seen
+ * Ice Floe Battle art. Every shape here is original SVG drawn by hand for Cold Call (ship silhouettes seen
  * from above, sonar ocean, splash and explosion effects). No third party art, fonts or images.
- * Asset record for docs/ASSETS.md: "Sea Battle ships, ocean and effects: original SVG, Cold Call".
+ * Asset record for docs/ASSETS.md: "Ice Floe Battle ships, ocean and effects: original SVG, Cold Call".
  *
  * The ocean stays dark navy in both themes (sonar screen), so the colours below are fixed and do
  * not follow the page tokens. Lime = aim, violet = your fleet, orange red = fire and explosions.
@@ -15,7 +15,7 @@ export const GRID = C * 10;
 export const VB = M + GRID + 4;
 
 export const COLORS = {
-  lime: '#C6FF3D',
+  lime: '#7fe3ff',
   violet: '#8B70FF',
   violetDeep: '#5B3DF5',
   fire: '#FF5A1F',
@@ -49,7 +49,7 @@ function palette(look: ShipLook): Palette {
     case 'reveal':
       return { hull: 'rgba(16, 30, 60, 0.85)', deck: 'rgba(60, 80, 110, 0.9)', detail: '#cfe8a0', stroke: COLORS.lime, strokeW: 2, opacity: 0.9 };
     case 'ok':
-      return { hull: 'rgba(124, 92, 255, 0.45)', deck: 'rgba(160, 140, 255, 0.4)', detail: '#d8ceff', stroke: '#b9a8ff', strokeW: 2, opacity: 1 };
+      return { hull: 'rgba(90, 143, 224, 0.45)', deck: 'rgba(160, 140, 255, 0.4)', detail: '#d8ceff', stroke: '#b9a8ff', strokeW: 2, opacity: 1 };
     case 'bad':
       return { hull: 'rgba(255, 77, 109, 0.45)', deck: 'rgba(255, 120, 140, 0.4)', detail: '#ffd0d8', stroke: COLORS.red, strokeW: 2.5, opacity: 1 };
   }
@@ -177,8 +177,8 @@ export function OceanDefs({ uid }: { uid: string }) {
         <path d="M-20 2 Q-10 -4 0 2 T20 2 T40 2" fill="none" stroke="rgba(140, 210, 255, 0.06)" strokeWidth={1} transform="translate(40 24)" />
       </pattern>
       <linearGradient id={`${uid}-sweep`} x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stopColor="rgba(198, 255, 61, 0)" />
-        <stop offset="100%" stopColor="rgba(198, 255, 61, 0.28)" />
+        <stop offset="0%" stopColor="rgba(127, 227, 255, 0)" />
+        <stop offset="100%" stopColor="rgba(127, 227, 255, 0.28)" />
       </linearGradient>
       <radialGradient id={`${uid}-fire`}>
         <stop offset="0%" stopColor="#fff4c2" />

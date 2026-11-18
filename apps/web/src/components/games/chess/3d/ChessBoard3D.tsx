@@ -368,8 +368,8 @@ function Board3D(props: Props & { onLost: () => void; onReady: () => void }) {
         style={{
           background:
             theme === 'night'
-              ? 'radial-gradient(closest-side at 50% 50%, rgba(124,92,255,0.24), rgba(124,92,255,0))'
-              : 'radial-gradient(closest-side at 50% 50%, rgba(124,92,255,0.16), rgba(124,92,255,0))',
+              ? 'radial-gradient(closest-side at 50% 50%, rgba(90, 143, 224,0.24), rgba(90, 143, 224,0))'
+              : 'radial-gradient(closest-side at 50% 50%, rgba(90, 143, 224,0.16), rgba(90, 143, 224,0))',
         }}
       >
         <Canvas

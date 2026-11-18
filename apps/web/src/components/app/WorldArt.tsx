@@ -3,15 +3,15 @@ import { useId, type CSSProperties, type ReactNode } from 'react';
 import type { GameKind } from '@coldcall/shared';
 
 /**
- * "Four Worlds" lobby art. Original SVG, three depth layers (far sky, the world, the hero object)
+ * Lobby art for the four games, recoloured for the Cold Call snow theme. Original SVG, three depth layers (far sky, the world, the hero object)
  * that shift with the pointer inside a .tilt parent. Ambient motion is CSS only and stops under
  * prefers-reduced-motion. Cheap: no filters except one blur per tile.
  */
 export const WORLD: Record<GameKind, { c: string; c2: string; hook: string; world: string }> = {
-  chess: { c: '#c6ff3d', c2: '#3dffc8', hook: 'Marble, obsidian and nothing left to luck.', world: 'The Marble World' },
-  backgammon: { c: '#ff8a3d', c2: '#ffd23f', hook: 'Lantern light, warm wood, dice in orbit.', world: 'The Lantern World' },
-  tichu: { c: '#ff4d8d', c2: '#2fd6a0', hook: 'Four players, two teams, one Dragon.', world: 'The Dragon World' },
-  seabattle: { c: '#3ddcff', c2: '#7c5cff', hook: 'Hide your fleet. The sonar never sleeps.', world: 'The Ocean World' },
+  chess: { c: '#7fe3ff', c2: '#f2f7fc', hook: 'Pieces of ice on a frozen board. No luck at all.', world: 'The Frozen Board' },
+  backgammon: { c: '#8fa8ff', c2: '#c9e4ff', hook: 'Frosted pine, ice puck checkers, ice cube dice.', world: 'The Pine Lodge' },
+  tichu: { c: '#c9a7ff', c2: '#7fe3ff', hook: 'Four players, two teams, and Lucky Lo deals.', world: 'The Card Lounge' },
+  seabattle: { c: '#4da2ff', c2: '#7fe3ff', hook: 'Hide your icebreakers. Crack the lake open.', world: 'The Frozen Lake' },
 };
 
 function Layer({ depth, children, className = '' }: { depth: number; children: ReactNode; className?: string }) {
@@ -258,13 +258,13 @@ export function WorldArt({ game, className = '' }: { game: GameKind; className?:
             <g className="w-bob" style={{ ['--dur' as string]: '5s' }}>
               <g transform="translate(200 96) translate(-34 -48)">
                 <rect x="-4" y="-4" width="76" height="104" rx="10" fill={c2} opacity="0.35" filter={`url(#${g('soft')})`} className="w-glow" />
-                <rect width="68" height="96" rx="8" fill="#1a0b14" stroke="#ffd23f" strokeWidth="2.5" />
+                <rect width="68" height="96" rx="8" fill="#1a0b14" stroke="#f5c542" strokeWidth="2.5" />
                 <rect x="5" y="5" width="58" height="86" rx="5" fill="none" stroke={c} strokeOpacity="0.6" />
                 {/* stylised dragon: a coiled body and a flame, original drawing */}
-                <path d="M18 70 C10 52 30 46 34 56 C38 66 56 60 50 44 C46 32 30 34 30 26 C30 18 42 16 46 22" fill="none" stroke="#ffd23f" strokeWidth="4" strokeLinecap="round" />
-                <circle cx="46" cy="22" r="4" fill="#ffd23f" />
+                <path d="M18 70 C10 52 30 46 34 56 C38 66 56 60 50 44 C46 32 30 34 30 26 C30 18 42 16 46 22" fill="none" stroke="#f5c542" strokeWidth="4" strokeLinecap="round" />
+                <circle cx="46" cy="22" r="4" fill="#f5c542" />
                 <path d="M50 20 q8 -2 10 -8 q-2 6 2 10 q-6 0 -12 -2z" fill={c} />
-                <text x="34" y="88" fontSize="7" fontWeight="800" fill="#ffd23f" textAnchor="middle" fontFamily="system-ui" letterSpacing="1.5">
+                <text x="34" y="88" fontSize="7" fontWeight="800" fill="#f5c542" textAnchor="middle" fontFamily="system-ui" letterSpacing="1.5">
                   DRAGON
                 </text>
               </g>
@@ -290,7 +290,7 @@ export function WorldArt({ game, className = '' }: { game: GameKind; className?:
             ].map(([x, y, d], i) => (
               <g key={i} className="w-glow" style={{ ['--dur' as string]: d as string, animationDelay: `${-i}s` }}>
                 <circle cx={x as number} cy={y as number} r="9" fill="none" stroke={i === 2 ? '#ff5a36' : c} strokeWidth="1.5" />
-                <circle cx={x as number} cy={y as number} r="3" fill={i === 2 ? '#ffd23f' : c} />
+                <circle cx={x as number} cy={y as number} r="3" fill={i === 2 ? '#f5c542' : c} />
               </g>
             ))}
           </g>

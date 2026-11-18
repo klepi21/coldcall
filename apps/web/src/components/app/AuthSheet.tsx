@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { Sheet, Button, Logo } from '@/components/ui';
+import { Sheet, Button, Mascot } from '@/components/ui';
 import { useSession } from './Providers';
 import { guestWallet } from '@/lib/wallet';
 import { chainConfig, startGoogleLogin } from '@/lib/chain';
@@ -59,14 +59,13 @@ export function AuthSheet({ open, onClose }: { open: boolean; onClose: () => voi
       title="Start playing"
       tint="var(--accent)"
       header={
-        <div className="relative flex h-28 items-center justify-center overflow-hidden" aria-hidden>
-          <span className="absolute size-40 rounded-full bg-accent/30 blur-3xl" />
-          <span className="w-spin absolute size-24 rounded-full opacity-80" style={{ background: 'conic-gradient(from 0deg, #c6ff3d, #3ddcff, #ff4d8d, #ff8a3d, #c6ff3d)', ['--dur' as string]: '9s', WebkitMask: 'radial-gradient(closest-side, transparent 86%, #000 88%)', mask: 'radial-gradient(closest-side, transparent 86%, #000 88%)' }} />
-          <Logo className="relative size-14" />
+        <div className="relative flex h-32 items-end justify-center overflow-hidden" aria-hidden>
+          <span className="absolute bottom-0 size-44 rounded-full bg-accent/25 blur-3xl" />
+          <Mascot pose="neutral" className="relative -mb-3 size-36" priority />
         </div>
       }
     >
-      <p className="mb-5 text-text-2">Create your account in one tap. We make a Sui wallet for you, so you do not need to know anything about crypto. Cold Call pays every network fee.</p>
+      <p className="mb-5 text-text-2">Pull up a chair. Create your account in one tap. We make a Sui wallet for you, so you do not need to know anything about crypto. Cold Call pays every network fee.</p>
 
       <Button size="lg" full loading={busy === 'google'} disabled={!!busy || google === false} onClick={withGoogle}>
         <span className="grid size-7 place-items-center rounded-full bg-white">
@@ -94,6 +93,15 @@ export function AuthSheet({ open, onClose }: { open: boolean; onClose: () => voi
         <a className="font-semibold text-primary" href="/how-it-works">
           How it works
         </a>
+        ,{' '}
+        <a className="font-semibold text-primary" href="/terms">
+          Terms
+        </a>{' '}
+        and{' '}
+        <a className="font-semibold text-primary" href="/privacy">
+          Privacy
+        </a>
+        .
       </p>
     </Sheet>
   );

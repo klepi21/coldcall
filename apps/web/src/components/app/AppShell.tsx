@@ -106,7 +106,7 @@ function PlayOrb({ on }: { on: boolean }) {
     <Link href="/play" onClick={() => haptic()} aria-current={on ? 'page' : undefined} className="press group relative -mt-7 flex w-[84px] shrink-0 flex-col items-center gap-1 text-[11px] font-bold">
       <span className="relative grid size-[62px] place-items-center">
         {/* the four worlds, orbiting */}
-        <span className="w-spin absolute -inset-[3px] rounded-[22px] opacity-90" style={{ background: 'conic-gradient(from 0deg, #c6ff3d, #3ddcff, #ff4d8d, #ff8a3d, #c6ff3d)', ['--dur' as string]: '7s', filter: 'blur(0.5px)' }} aria-hidden />
+        <span className="w-spin absolute -inset-[3px] rounded-[22px] opacity-90" style={{ background: 'conic-gradient(from 0deg, #7fe3ff, #4da2ff, #c9a7ff, #8fa8ff, #7fe3ff)', ['--dur' as string]: '7s', filter: 'blur(0.5px)' }} aria-hidden />
         <span className={`absolute -inset-3 rounded-full bg-primary/30 blur-xl transition-opacity ${on ? 'opacity-100' : 'opacity-50'}`} aria-hidden />
         <span className="btn-primary relative grid size-[58px] place-items-center rounded-[20px]">
           <NavIcon d={ICON.play} className="size-7 translate-x-[1px]" />

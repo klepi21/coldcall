@@ -1,6 +1,6 @@
 'use client';
 /**
- * Sea Battle board. The server (or the dev page) is the authority; this component only sends
+ * Ice Floe Battle board. The server (or the dev page) is the authority; this component only sends
  * intents (place, fire). All art is original SVG (see art.tsx).
  *
  * Placing: drag ships from the dock onto your grid, tap a placed ship to turn it, or tap a dock
@@ -417,7 +417,7 @@ function Placing({
         <div className={ready ? '' : 'max-lg:hidden'}>
           <PanelTitle color={COLORS.violet} title="Your fleet" sub={ready ? (oppReady ? 'Battle stations' : 'Scanning for the enemy fleet') : 'Place your ships in secret'} />
         </div>
-        <div ref={scope} className="relative rounded-[20px] p-1.5" style={{ background: 'linear-gradient(160deg, rgba(124,92,255,0.35), rgba(90,225,255,0.12))', boxShadow: '0 0 0 1px rgba(124,92,255,0.45), 0 0 36px rgba(124,92,255,0.22)' }}>
+        <div ref={scope} className="relative rounded-[20px] p-1.5" style={{ background: 'linear-gradient(160deg, rgba(90, 143, 224,0.35), rgba(90,225,255,0.12))', boxShadow: '0 0 0 1px rgba(90, 143, 224,0.45), 0 0 36px rgba(90, 143, 224,0.22)' }}>
           <div className="rounded-[16px] bg-[#050d22] p-1.5">
             <Grid ref={grid} uid={`${uid}p`} ships={gridShips} badCells={badCells} radar interactive={!ready} onCellDown={onCellDown} label="Your grid. Drag ships here." />
           </div>
@@ -782,7 +782,7 @@ function Battle({
         <div className="flex items-stretch gap-3 lg:w-[400px] lg:shrink-0 lg:flex-col">
           <div className="w-[46%] shrink-0 lg:w-full">
             <PanelTitle color={COLORS.violet} title={spectator ? seatNames[me] ?? 'Seat 1' : 'My fleet'} sub={`${mine.afloat.length} of 5 afloat`} small />
-            <div className="rounded-[14px] bg-[#050d22] p-1" style={{ boxShadow: '0 0 0 1.5px rgba(124,92,255,0.6), 0 0 18px rgba(124,92,255,0.25)' }}>
+            <div className="rounded-[14px] bg-[#050d22] p-1" style={{ boxShadow: '0 0 0 1.5px rgba(90, 143, 224,0.6), 0 0 18px rgba(90, 143, 224,0.25)' }}>
               <Grid uid={`${uid}m`} marks={mine.marks} ships={myShips} lastShot={lastOn(me)} compact label={`My fleet. ${mine.afloat.length} of 5 ships afloat.`}>
                 {effectsFor(me)}
               </Grid>
@@ -807,15 +807,15 @@ function Battle({
             ref={scope}
             className="relative rounded-[20px] p-1.5 transition-shadow"
             style={{
-              background: 'linear-gradient(160deg, rgba(198,255,61,0.30), rgba(90,225,255,0.10))',
-              boxShadow: myTurn ? '0 0 0 2px rgba(198,255,61,0.75), 0 0 40px rgba(198,255,61,0.30)' : '0 0 0 1px rgba(90,225,255,0.25)',
+              background: 'linear-gradient(160deg, rgba(127, 227, 255,0.30), rgba(90,225,255,0.10))',
+              boxShadow: myTurn ? '0 0 0 2px rgba(127, 227, 255,0.75), 0 0 40px rgba(127, 227, 255,0.30)' : '0 0 0 1px rgba(90,225,255,0.25)',
             }}
           >
             <div
               tabIndex={spectator ? -1 : 0}
               onKeyDown={onKey}
               aria-label="Enemy waters. Use the arrow keys to aim and Enter to fire."
-              className="rounded-[16px] bg-[#050d22] p-1.5 outline-none focus-visible:ring-2 focus-visible:ring-[#C6FF3D]"
+              className="rounded-[16px] bg-[#050d22] p-1.5 outline-none focus-visible:ring-2 focus-visible:ring-[#7fe3ff]"
             >
               <Grid
                 uid={`${uid}e`}
@@ -894,13 +894,13 @@ function ResultBanner({ won, spectator, shots, reduce }: { won: boolean; spectat
         className="rounded-[20px] px-5 py-3 text-center backdrop-blur-[2px]"
         style={{
           background: 'rgba(7, 7, 12, 0.78)',
-          boxShadow: won || spectator ? '0 0 0 2px #C6FF3D, 0 0 48px rgba(198,255,61,0.45)' : '0 0 0 2px #FF4D6D, 0 0 40px rgba(255,77,109,0.35)',
+          boxShadow: won || spectator ? '0 0 0 2px #7fe3ff, 0 0 48px rgba(127, 227, 255,0.45)' : '0 0 0 2px #FF4D6D, 0 0 40px rgba(255,77,109,0.35)',
         }}
       >
-        <div className="flex justify-center" style={{ color: won || spectator ? '#C6FF3D' : '#FF4D6D' }}>
+        <div className="flex justify-center" style={{ color: won || spectator ? '#7fe3ff' : '#FF4D6D' }}>
           <Icon name={won || spectator ? 'trophy' : 'anchor'} size={40} />
         </div>
-        <p className="mt-1 font-display text-3xl font-black uppercase tracking-wide" style={{ color: won || spectator ? '#C6FF3D' : '#FF4D6D' }}>
+        <p className="mt-1 font-display text-3xl font-black uppercase tracking-wide" style={{ color: won || spectator ? '#7fe3ff' : '#FF4D6D' }}>
           {spectator ? 'Battle over' : won ? 'Victory' : 'Defeat'}
         </p>
         <p className="mt-1 text-sm text-[#d8d8ea]">{won ? `Fleet sunk in ${shots} shots.` : spectator ? 'Both fleets are now revealed.' : 'Good fight. Their ships are now shown.'}</p>

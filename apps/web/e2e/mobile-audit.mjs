@@ -54,7 +54,7 @@ for (const r of ['play', 'wallet', 'history', 'profile', 'progress', 'how-it-wor
   await page.goto(`${BASE}/${r}`, { waitUntil: 'networkidle' });
   await audit(r.replace('/', '-'));
 }
-for (const game of ['Chess', 'Backgammon', 'Tichu', 'Sea Battle']) {
+for (const game of ['Chess', 'Backgammon', 'Tichu', 'Ice Floe Battle']) {
   await page.goto(`${BASE}/play`, { waitUntil: 'networkidle' });
   await page.getByRole('button', { name: `Play ${game}` }).click();
   await page.waitForTimeout(600);
