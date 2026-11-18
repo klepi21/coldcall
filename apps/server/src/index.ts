@@ -218,7 +218,7 @@ app.post('/api/auth/zk-proof', { preHandler: requireUser, config: { rateLimit: {
   const b = z
     .object({
       jwt: z.string().min(20).max(4096),
-      extendedEphemeralPublicKey: z.string().regex(/^\d{1,90}$/),
+      extendedEphemeralPublicKey: z.string().regex(/^(\d{1,90}|[A-Za-z0-9+/]{20,120}={0,2})$/),
       maxEpoch: z.number().int().positive(),
       jwtRandomness: z.string().regex(/^\d{1,80}$/),
     })
