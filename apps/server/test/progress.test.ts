@@ -23,7 +23,7 @@ function scholarsMate() {
 }
 
 describe('progress rules', () => {
-  it('scoring has no mode, stake or money input, so practice and credits games score the same', () => {
+  it('scoring has no mode, stake or money input, so practice and staked games score the same', () => {
     const { state, result } = scholarsMate();
     expect(result.reason).toBe('checkmate');
     const input: ScoreInput = { game: 'chess', seat: 0, teams: chessEngine.teams, result, state, ownMoves: 5, firstToday: false };

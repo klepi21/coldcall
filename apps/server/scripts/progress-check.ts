@@ -1,5 +1,5 @@
 /**
- * Database check for progression: identical XP for a practice game and a credits game with the same play,
+ * Database check for progression: identical XP for a practice game and a staked game with the same play,
  * one award per table, ledger untouched. Cleans up after itself.
  *   cd apps/server && npx tsx --env-file=.env scripts/progress-check.ts
  */
@@ -41,8 +41,8 @@ try {
   const [pb] = await awardProgress({ tableId: b.tableId, game: 'chess', teams: chessEngine.teams, result: b.result, state: b.state, players: [{ seat: 0, userId: b.userId }] }, (u) => pushed.push(u));
   assert.ok(pa && pb);
   const strip = (m: any) => ({ ...m, tableId: undefined });
-  assert.deepEqual(strip(pb), strip(pa), 'practice and credits games must give identical progress');
-  console.log('practice XP', pa.xpGained, 'credits XP', pb.xpGained, 'lines', pa.breakdown.map((l) => `${l.label} +${l.xp}`).join(', '));
+  assert.deepEqual(strip(pb), strip(pa), 'practice and staked games must give identical progress');
+  console.log('practice XP', pa.xpGained, 'staked XP', pb.xpGained, 'lines', pa.breakdown.map((l) => `${l.label} +${l.xp}`).join(', '));
   console.log('new achievements', pa.newAchievements.map((x) => x.code).join(', '), '| challenges done', pa.challengesDone.map((c) => c.code).join(', ') || 'none', '| level', pa.level);
   // Second award for the same table is a no-op
   const again = await awardProgress({ tableId: a.tableId, game: 'chess', teams: chessEngine.teams, result: a.result, state: a.state, players: [{ seat: 0, userId: a.userId }] }, () => {});

@@ -142,7 +142,9 @@ export async function verifyGoogleIdToken(jwt: string, keys?: Jwk[]): Promise<Go
  */
 export function zkSalt(c: Pick<GoogleClaims, 'iss' | 'aud' | 'sub'>): string {
   if (!env.ZK_SALT_SECRET) throw new AuthError('Google sign in is not set up on this server yet.');
-  const h = createHmac('sha256', env.ZK_SALT_SECRET).update(`${c.iss}|${c.aud}|${c.sub}`).digest();
+  // Google sends the issuer with or without the scheme; one account must always get one salt.
+  const iss = c.iss === 'accounts.google.com' ? 'https://accounts.google.com' : c.iss;
+  const h = createHmac('sha256', env.ZK_SALT_SECRET).update(`${iss}|${c.aud}|${c.sub}`).digest();
   return BigInt(`0x${h.subarray(0, 16).toString('hex')}`).toString();
 }
 

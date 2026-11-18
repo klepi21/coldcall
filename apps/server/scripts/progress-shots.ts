@@ -58,7 +58,7 @@ ws.on('message', (d) => {
   if (m.t === 'progress') progress.push(m);
 });
 
-const table = (await api('/api/tables', { game: 'seabattle', mode: 'practice', stake: 0, visibility: 'public', clientSeed: 'shots1' })).id as string;
+const table = (await api('/api/tables', { game: 'seabattle', mode: 'practice', currency: 'LOFI', stake: 0, visibility: 'public', clientSeed: 'shots1' })).id as string;
 ws.send(JSON.stringify({ t: 'watch', tableId: table }));
 const phone = await ctx(390, 844);
 const page = await phone.newPage();

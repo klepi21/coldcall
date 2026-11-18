@@ -24,6 +24,8 @@ execSync(`psql -d coldcall_devnet -qc "update users set role='admin' where walle
 const browser = await chromium.launch({ executablePath: EXE });
 try {
   for (const [w, h, scheme] of [[1440, 900, 'dark'], [390, 844, 'dark'], [1440, 900, 'light'], [390, 844, 'light']]) {
+    // The app applies the saved account theme on load, so set it on the account, not only in the browser.
+    await fetch(API + '/api/me', { method: 'PATCH', headers: { 'content-type': 'application/json', cookie }, body: JSON.stringify({ settings: { theme: scheme } }) });
     const ctx = await browser.newContext({ viewport: { width: w, height: h }, colorScheme: scheme, deviceScaleFactor: w < 500 ? 2 : 1 });
     await ctx.addCookies([{ name: 'cc_sid', value: cookie.split('=')[1], url: WEB }]);
     const page = await ctx.newPage();

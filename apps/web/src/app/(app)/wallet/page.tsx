@@ -244,7 +244,7 @@ export default function WalletPage() {
       ) : null}
 
       <Card className="mt-4 p-5" tint="#4DA2FF">
-        <p className="t-eyebrow mb-1.5 text-[#7cbcff]">Devnet</p>
+        <p className="t-eyebrow mb-1.5 text-[color-mix(in_srgb,#4DA2FF_70%,var(--text))]">Devnet</p>
         <p className="font-semibold">Free test coins</p>
         <p className="mt-1 text-sm text-text-2">This beta runs on Sui devnet. Get test coins in your wallet, then add them to Cold Call. They have no real value. Cold Call pays the network fee.</p>
         <div className="mt-3 grid gap-2 sm:grid-cols-2">

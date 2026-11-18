@@ -2,6 +2,7 @@
  * Money in and out of the vault, per currency. LOFI and SUI each have their own Vault<T> on chain and
  * their own ledger accounts; nothing here ever converts one into the other.
  */
+import { randomBytes } from 'node:crypto';
 import { CURRENCIES, CURRENCY, baseToMinor, minorToBase, formatAmount, formatBase, type Currency } from '@coldcall/shared';
 import { pool, tx, q, one, maybe } from './db/pool';
 import { post, balances, liabilities } from './ledger';
@@ -242,6 +243,12 @@ export async function dripTestSui(userId: string, wallet: string) {
 
 // ---------- cashing out ----------
 
+/**
+ * Ticket nonces are random 62 bit numbers, never a counter: the vaults remember used nonces forever, and a
+ * new database (a redeploy, a test run) on the same vaults must never hand out a nonce that was used before.
+ */
+const randomNonce = () => (BigInt(`0x${randomBytes(8).toString('hex')}`) >> 2n).toString();
+
 export async function requestWithdrawal(userId: string, wallet: string, currency: Currency, amountMinor: number) {
   const r = CURRENCY[currency];
   if (amountMinor < r.minWithdraw) throw new UserError(`The smallest cash out is ${formatAmount(r.minWithdraw, currency)}.`, 'too_small');
@@ -257,7 +264,7 @@ export async function requestWithdrawal(userId: string, wallet: string, currency
   const review = amountMinor > r.withdrawReviewAbove;
   const amountBase = minorToBase(amountMinor, currency);
   const w = await tx(async (c) => {
-    const nonce = (await one<{ n: string }>(c, `select nextval('withdrawal_nonce_seq')::text as n`)).n;
+    const nonce = randomNonce(); // 62 random bits: a clash is practically impossible, and the unique index would reject it
     const row = await one<any>(
       c,
       `insert into withdrawals(user_id, currency, amount_minor, amount_base, nonce, expiry, status)
@@ -284,6 +291,13 @@ async function issueTicket(userId: string, wallet: string, id: string) {
   const t = await tx(async (c) => {
     const w = await maybe<any>(c, `select * from withdrawals where id=$1 and user_id=$2 for update`, [id, userId]);
     if (!w || w.status !== 'pending') throw new UserError('This cash out cannot be continued.', 'bad_state', 409);
+    // Never signed before: make sure the chain has never seen this nonce, otherwise pick a fresh one.
+    if (!w.ticket_sig) {
+      for (let i = 0; i < 5 && (await isNonceUsed(w.currency, BigInt(w.nonce))); i++) {
+        w.nonce = randomNonce();
+        await q(c, `update withdrawals set nonce=$2 where id=$1`, [w.id, w.nonce]);
+      }
+    }
     const expiryMs = BigInt(Date.now() + 10 * 60_000);
     const sigHex = await signTicket({ currency: w.currency, recipient: wallet, amountBase: BigInt(w.amount_base), nonce: BigInt(w.nonce), expiryMs });
     await q(c, `update withdrawals set ticket_sig=$2, expiry=to_timestamp($3::double precision / 1000), updated_at=now() where id=$1`, [w.id, sigHex, expiryMs.toString()]);
@@ -308,7 +322,7 @@ async function issueTicket(userId: string, wallet: string, id: string) {
 export async function reissueTicket(userId: string, wallet: string, id: string) {
   const w = await maybe<any>(pool, `select * from withdrawals where id=$1 and user_id=$2`, [id, userId]);
   if (!w || !['pending', 'submitted'].includes(w.status)) throw new UserError('This cash out cannot be continued.', 'bad_state', 409);
-  if (await isNonceUsed(w.currency, BigInt(w.nonce))) {
+  if (w.ticket_sig && (await isNonceUsed(w.currency, BigInt(w.nonce)))) {
     void scanVaultEvents();
     throw new UserError('This cash out already went through. Refresh your wallet.', 'already_used', 409);
   }
@@ -337,7 +351,15 @@ export async function sweepWithdrawals() {
   for (const o of open) {
     const used = await isNonceUsed(o.currency, BigInt(o.nonce));
     if (used) {
-      void scanVaultEvents();
+      // The cash out happened: the scanner books it from the Withdrawn event. If no event of ours matches,
+      // something is off, so a person looks at it instead of the money staying locked silently.
+      await scanVaultEvents().catch(() => {});
+      const moved = await q(
+        pool,
+        `update withdrawals set status='review', updated_at=now() where id=$1 and status in ('pending','submitted') and expiry < now() - interval '10 minutes' returning id`,
+        [o.id],
+      );
+      if (moved.length) log.error({ id: o.id, nonce: String(o.nonce) }, 'nonce used on chain without a matching Withdrawn event, sent to review');
       continue;
     }
     const released = await tx(async (c) => {

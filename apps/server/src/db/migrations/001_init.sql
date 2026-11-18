@@ -162,7 +162,7 @@ create table withdrawals (
 create index withdrawals_user on withdrawals(user_id, created_at desc);
 create index withdrawals_open on withdrawals(status) where status in ('review', 'pending', 'submitted');
 
-create sequence withdrawal_nonce_seq start 1000;
+-- Ticket nonces are random 62 bit values (see wallet.ts), never a sequence: vaults remember used nonces forever.
 
 create table chain_cursor (
   name        text primary key,
