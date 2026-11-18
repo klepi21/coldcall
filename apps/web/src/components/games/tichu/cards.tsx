@@ -297,9 +297,9 @@ export const CardFace = memo(function CardFace({ id, className = '' }: { id: Car
 
 const LO_SPECIAL: Record<string, { title: string; img: string; tint: string; mark: string }> = {
   [MAHJONG]: { title: 'MAH JONG', img: '/brand/mascot-deal.png', tint: '#5A8FE0', mark: '1' },
-  [DOG]: { title: 'DOG', img: '/brand/mascot-shrug.png', tint: '#3DDC97', mark: 'D' },
-  [PHOENIX]: { title: 'PHOENIX', img: '/brand/mascot-win.png', tint: '#7FE3FF', mark: 'P' },
-  [DRAGON]: { title: 'DRAGON', img: '/img/mascot-shades.png', tint: '#FF5A6E', mark: 'D' },
+  [DOG]: { title: 'DOG', img: '/brand/mascot-shrug.png', tint: '#3DDC97', mark: 'Dog' },
+  [PHOENIX]: { title: 'PHOENIX', img: '/brand/mascot-win.png', tint: '#7FE3FF', mark: 'Ph' },
+  [DRAGON]: { title: 'DRAGON', img: '/img/mascot-shades.png', tint: '#FF5A6E', mark: 'Dr' },
 };
 
 /** Lucky Lo on the four special cards: dealing (Mah Jong), shrugging (Dog), with ice wings (Phoenix), and in a dragon scarf (Dragon). */
@@ -326,10 +326,10 @@ function LoSpecial({ id, uid }: { id: CardId; uid: string }) {
       {id === DRAGON ? (
         <path d="M30 96 C40 104 60 104 70 96 L74 104 C62 112 38 112 26 104 Z" fill="#FF5A6E" stroke={INK} strokeWidth={1} strokeLinejoin="round" />
       ) : null}
-      <text x={50} y={26} textAnchor="middle" fontSize={11} fill={INK} style={{ fontFamily: 'var(--font-lilita), system-ui, sans-serif', letterSpacing: '0.04em' }}>
+      <text x={56} y={26} textAnchor="middle" fontSize={10} fill={INK} style={{ fontFamily: 'var(--font-lilita), system-ui, sans-serif', letterSpacing: '0.04em' }}>
         {c.title}
       </text>
-      <text x={11} y={130} fontSize={10} fill={c.tint} stroke={INK} strokeWidth={0.4} style={{ fontFamily: 'var(--font-lilita), system-ui, sans-serif' }}>
+      <text x={10} y={20} fontSize={12} fill={c.tint} stroke={INK} strokeWidth={0.5} style={{ fontFamily: 'var(--font-lilita), system-ui, sans-serif' }}>
         {c.mark}
       </text>
       <text x={89} y={130} textAnchor="end" fontSize={10} fill={c.tint} stroke={INK} strokeWidth={0.4} style={{ fontFamily: 'var(--font-lilita), system-ui, sans-serif' }}>

@@ -33,5 +33,5 @@
 | Cold Call wordmark, CC chip, app icons, favicon, og image, hero | `apps/web/public/brand/*`, `apps/web/public/img/cc-chip.png`, icons in `apps/web/public` and `src/app`; drawn in code by the brand work (`brand/src`) | original |
 | Lucky Lo mascot poses (neutral, win, deal, shrug, bust, shades) | `apps/web/public/brand/mascot-*.png`, `apps/web/public/img/mascot-*.png`; vector art from `brand/src/mascot.py` | original |
 | Lilita One font | `apps/web/src/fonts/LilitaOne-Regular.ttf`, self hosted | SIL Open Font License 1.1 (`OFL-LilitaOne.txt`) |
-| Inter font | subset and self hosted by Next at build time (copy in `apps/web/src/fonts`) | SIL Open Font License 1.1 (`OFL-Inter.txt`) |
+| Inter font | `apps/web/src/fonts/Inter.woff2`, Latin subset of the brand file, self hosted | SIL Open Font License 1.1 (`OFL-Inter.txt`) |
 | Snow themes: ice chess pieces and board, frosted pine backgammon, Tichu snowflake back and Lucky Lo specials, Ice Floe Battle frozen lake, cracks and snow puffs, falling snow | SVG, shaders and CSS in `apps/web/src/components/games` and `globals.css`, drawn for Cold Call | original |

@@ -29,7 +29,13 @@ if [ "${1:-}" = "--setup" ]; then
   ssh "$HOST" "ROOT=$ROOT DOMAIN=$DOMAIN API_PORT=$API_PORT WEB_PORT=$WEB_PORT bash -s" <<'SETUP'
 set -euo pipefail
 id coldcall >/dev/null 2>&1 || useradd --system --create-home --shell /bin/bash coldcall
-mkdir -p "$ROOT/config" "$ROOT/app"
+# Node and pnpm must be usable by the coldcall user (installed system wide, not inside another user's nvm).
+if ! sudo -iu coldcall bash -lc 'node -v && pnpm -v' >/dev/null 2>&1; then
+  echo "The coldcall user cannot run node and pnpm. Install Node 20+ system wide and run: corepack enable (or npm i -g pnpm), then run --setup again."
+  exit 1
+fi
+# No empty $ROOT/app here: the first deploy creates it, and a failed first health check never rolls back to an empty folder.
+mkdir -p "$ROOT/config"
 chown -R coldcall:coldcall "$ROOT"
 chmod 750 "$ROOT/config"
 
@@ -181,8 +187,13 @@ sleep 4
 sleep 8
 if ! curl -sf -o /dev/null "http://127.0.0.1:$WEB_PORT/" || ! curl -sf -o /dev/null "http://127.0.0.1:$API_PORT/api/health"; then
   echo "HEALTH CHECK FAILED, rolling back Cold Call"
-  if [ -d prev ]; then rm -rf failed && mv app failed && mv prev app; fi
-  systemctl restart coldcall-web coldcall-api
+  if [ -d prev ] && [ -n "$(ls -A prev 2>/dev/null)" ]; then
+    rm -rf failed && mv app failed && mv prev app
+    systemctl restart coldcall-web coldcall-api
+  else
+    echo "First release: nothing to roll back to. Cold Call stays down; Evens is not affected."
+    systemctl stop coldcall-web coldcall-api || true
+  fi
   exit 1
 fi
 systemctl is-active coldcall-api coldcall-web

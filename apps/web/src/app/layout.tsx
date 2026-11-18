@@ -1,13 +1,12 @@
 import type { Metadata, Viewport } from 'next';
-import { Inter } from 'next/font/google';
 import localFont from 'next/font/local';
 import './globals.css';
 import { Providers } from '@/components/app/Providers';
 import { SITE_URL, shareMeta } from '@/lib/share';
 
-/** Lilita One (display) is self hosted from the brand files. Inter is subset and self hosted by Next at build time. */
+/** Both fonts are self hosted from the brand files (brand/fonts): Lilita One for display, Inter (Latin subset, woff2) for UI. */
 const lilita = localFont({ src: '../fonts/LilitaOne-Regular.ttf', variable: '--font-lilita', weight: '400', display: 'swap' });
-const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
+const inter = localFont({ src: '../fonts/Inter.woff2', variable: '--font-inter', weight: '100 900', display: 'swap' });
 
 const DESCRIPTION = 'Chess, backgammon, Tichu and Ice Floe Battle against real people or a fair bot. Practice free, or play for LOFI or SUI on Sui devnet and the winner takes the pot. Every fee shown up front. 18+.';
 

@@ -114,15 +114,15 @@ void main() {
   float glint = smoothstep(0.6, 0.9, noise(vWorld.xz * 9.0 + uTime * 0.15));
   float spec = pow(max(dot(R, moonDir), 0.0), 500.0) * (0.15 + 0.9 * glint) + pow(max(dot(R, moonDir), 0.0), 40.0) * 0.025;
   // frozen lake ice: pale blue with cloudy patches and fine frost cracks
-  vec3 iceA = vec3(0.30, 0.47, 0.64);
-  vec3 iceB = vec3(0.55, 0.72, 0.86);
+  vec3 iceA = vec3(0.16, 0.30, 0.47);
+  vec3 iceB = vec3(0.34, 0.52, 0.70);
   float cloud = noise(vWorld.xz * 0.6) * 0.6 + noise(vWorld.xz * 2.1) * 0.4;
   vec3 body = mix(iceA, iceB, cloud);
   float crk = abs(noise(vWorld.xz * 3.0) - 0.5);
-  body = mix(body, vec3(0.86, 0.94, 1.0), (1.0 - smoothstep(0.0, 0.035, crk)) * 0.45);
+  body = mix(body, vec3(0.80, 0.90, 1.0), (1.0 - smoothstep(0.0, 0.03, crk)) * 0.35);
   float far = smoothstep(6.0, 13.0, max(abs(vWorld.x), abs(vWorld.z)));
   body = mix(body, vec3(0.12, 0.22, 0.36), far * 0.6);
-  vec3 col = mix(body, sky, fres * 0.45) + vec3(0.8, 0.92, 1.0) * spec;
+  vec3 col = mix(body, sky, fres * 0.18) + vec3(0.8, 0.92, 1.0) * spec;
 
   // ---------- battle grid ----------
   vec2 g = vWorld.xz + 5.0;          // 0..10 over the grid
@@ -134,7 +134,7 @@ void main() {
   float line = 1.0 - smoothstep(0.0, 1.4, min(dl.x, dl.y));
   float glowLine = exp(-min(min(f.x, 1.0 - f.x), min(f.y, 1.0 - f.y)) * 22.0);
   vec2 bd = min(g, 10.0 - g);
-  float border = exp(-abs(min(bd.x, bd.y)) * 9.0) * step(-0.6, min(bd.x, bd.y));
+  float border = exp(-abs(min(bd.x, bd.y)) * 22.0) * step(-0.6, min(bd.x, bd.y));
   vec3 cyan = vec3(0.50, 0.89, 1.0);
   vec3 lofi = vec3(0.18, 0.43, 0.82);
   // ice tiles: bright cut lines, a frosty rim around the field
@@ -188,7 +188,7 @@ void main() {
   vec2 luv = (vWorld.xz + 6.0) / 12.0;
   if (luv.x > 0.0 && luv.x < 1.0 && luv.y > 0.0 && luv.y < 1.0) {
     vec3 lt = texture2D(uLabels, luv).rgb;
-    col = mix(col, vec3(0.93, 0.97, 1.0), max(max(lt.r, lt.g), lt.b) * 0.9 * uGrid);
+    col = mix(col, vec3(0.95, 0.98, 1.0), max(max(lt.r, lt.g), lt.b) * 0.95 * uGrid);
   }
   // fire light on the water
   for (int i = 0; i < ${MAX_FIRES}; i++) {
