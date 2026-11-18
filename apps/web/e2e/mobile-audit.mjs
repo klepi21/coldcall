@@ -3,7 +3,7 @@
 import { chromium } from '@playwright/test';
 const OUT = process.argv[2] ?? '/tmp';
 const W = +(process.argv[3] ?? 390);
-const BASE = process.env.BASE ?? 'https://45-81-6-214.sslip.io';
+const BASE = process.env.BASE ?? 'http://localhost:3000';
 const EXE = process.env.PW_EXE || `${process.env.HOME}/Library/Caches/ms-playwright/chromium_headless_shell-1234/chrome-headless-shell-mac-arm64/chrome-headless-shell`;
 const browser = await chromium.launch({ executablePath: EXE });
 const ctx = await browser.newContext({ viewport: { width: W, height: +(process.env.H ?? (W < 380 ? 667 : 844)) }, deviceScaleFactor: 2, isMobile: W < 700, hasTouch: W < 700, colorScheme: 'dark' });

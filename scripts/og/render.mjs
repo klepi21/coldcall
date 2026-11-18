@@ -34,7 +34,7 @@ const page = (inner) => `<!doctype html><html><head><link rel="preconnect" href=
 .pill{display:inline-flex;align-items:center;gap:10px;border:2px solid rgba(198,255,61,.45);background:rgba(198,255,61,.1);color:#C6FF3D;border-radius:99px;padding:10px 20px;font-weight:700;font-size:22px;letter-spacing:.06em;text-transform:uppercase}
 </style></head><body><div class="neb"></div><div class="stars"></div>${inner}</body></html>`;
 
-const brand = `<div class="brand">${LOGO}<span class="d">Evens</span></div>`;
+const brand = `<div class="brand">${LOGO}<span class="d">Cold Call</span></div>`;
 
 const DEFAULT = page(`${brand}
 <div style="position:absolute;left:64px;top:158px;width:640px">
