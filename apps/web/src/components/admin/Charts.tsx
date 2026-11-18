@@ -58,10 +58,10 @@ export function TimeChart({
   /** bar: stacked when several series; group: side by side; line: line with a soft area. */
   kind?: 'bar' | 'group' | 'line';
   format: (n: number) => string;
-  /** Integer ticks (counts). For money pass false and `scale` 100 to show credits from minor units. */
+  /** Integer ticks (counts). For money pass false and `scale` 100 to show coins from minor units. */
   integer?: boolean;
   height?: number;
-  /** Values are divided by this for the axis (minor units to credits). Tooltips use `format` on raw values. */
+  /** Values are divided by this for the axis (minor units to coins). Tooltips use `format` on raw values. */
   scale?: number;
 }) {
   const [ref, width] = useWidth<HTMLDivElement>();

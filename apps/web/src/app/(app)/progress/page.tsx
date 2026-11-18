@@ -55,7 +55,7 @@ export default function ProgressPage() {
   if (ready && !me)
     return <Empty title="Your progress" text="Sign in to earn XP, level up, take on daily challenges and unlock titles and looks. Free practice games count." action={<Button onClick={() => openAuth()}>Start playing free</Button>} />;
   if (error && !data)
-    return <Empty title="We could not load your progress" text="Your games and credits are not affected. Please try again." action={<Button onClick={() => reload()}>Try again</Button>} />;
+    return <Empty title="We could not load your progress" text="Your games and balances are not affected. Please try again." action={<Button onClick={() => reload()}>Try again</Button>} />;
   if (!data)
     return (
       <div className="mx-auto max-w-[1200px] space-y-4">
@@ -114,7 +114,7 @@ export default function ProgressPage() {
             <span className="font-semibold">What is XP?</span> Points you earn by playing. Every finished game gives XP, and playing well gives more. XP fills your bar and raises your level.
           </p>
           <p className="mt-1.5 text-text-2">
-            You get exactly the same XP whether you play free or for credits. Stakes never change it. Rewards are only titles and looks, they cannot be bought and they never give credits.{' '}
+            You get exactly the same XP whether you play free or with a stake. Stakes never change it. Rewards are only titles and looks, they cannot be bought and they never give coins.{' '}
             <a href="#how-xp" className="font-semibold text-primary">
               How XP works
             </a>
@@ -166,7 +166,7 @@ export default function ProgressPage() {
           </div>
           <div className="space-y-3 text-[15px] leading-relaxed text-text-2">
             <p>
-              <span className="font-semibold text-text">Same XP, free or credits.</span> A practice game and a game for credits with the same play give exactly the same XP. How much you stake, your balance and your wins or losses in credits are never used.
+              <span className="font-semibold text-text">Same XP, free or staked.</span> A practice game and a staked game with the same play give exactly the same XP. How much you stake, your balance and your wins or losses in LOFI or SUI are never used.
             </p>
             <p>
               <span className="font-semibold text-text">Games count after {data.rules.minMoves} moves.</span> A game you leave or resign before making {data.rules.minMoves} moves gives no XP, so quick restarts do not count.

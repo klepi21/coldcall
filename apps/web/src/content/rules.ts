@@ -1,4 +1,4 @@
-/** Rules in three layers: quick start, full rules, tips. Plain English, the exact variants Evens uses. */
+/** Rules in three layers: quick start, full rules, tips. Plain English, the exact variants Cold Call uses. */
 export interface RuleSection {
   id: string;
   title: string;
@@ -87,11 +87,11 @@ export const RULES: Record<GameKind, GameRules> = {
         'When all 15 of your checkers are in your home board, you can start taking them off.',
         'A die can take off a checker from the matching point. A higher die can take off your furthest checker if there are none further back.',
       ] },
-      { id: 'evens', title: 'The Evens version', body: [
+      { id: 'evens', title: 'The Cold Call version', body: [
         'Each game is a single game. A gammon or backgammon is shown in the result but pays the same as a normal win.',
         'There is no doubling cube in this beta.',
         'You can undo your moves during your turn until the last die is used.',
-        'Each turn has 45 seconds. If time runs out we play a simple move for you. After three missed turns in a game with credits, it counts as leaving.',
+        'Each turn has 45 seconds. If time runs out we play a simple move for you. After three missed turns in a game with a stake, it counts as leaving.',
       ] },
       { id: 'fair', title: 'Fair dice', body: [
         'Before the game we publish a lock on the secret seed. Each roll comes from that seed and the players\' own seeds. After the game we reveal the seed so anyone can recompute every roll.',
@@ -133,10 +133,10 @@ export const RULES: Record<GameKind, GameRules> = {
         'Players take turns firing one shot. The first player fires first.',
         'A white splash is a miss. A fire is a hit. When every square of a ship is hit, it sinks and is revealed.',
         'Because ships cannot touch, the squares around a sunk ship are marked as empty for you automatically.',
-        'In Evens a hit does not give an extra shot. Turns always alternate.',
+        'In Cold Call a hit does not give an extra shot. Turns always alternate.',
       ] },
-      { id: 'evens', title: 'The Evens version', body: [
-        'Each turn has 45 seconds. If time runs out we fire a shot for you. After three missed turns in a game with credits, it counts as leaving.',
+      { id: 'evens', title: 'The Cold Call version', body: [
+        'Each turn has 45 seconds. If time runs out we fire a shot for you. After three missed turns in a game with a stake, it counts as leaving.',
         'Against the bot, the house keeps a published 5% edge: you win about 47 of 100 games.',
       ] },
     ],
@@ -194,7 +194,7 @@ export const RULES: Record<GameKind, GameRules> = {
         'Cards are worth: 5s 5 points, 10s and Kings 10 points, Dragon 25, Phoenix minus 25. All other cards 0. There are 100 points per round.',
         'The last player still holding cards gives their hand to the opponents and their tricks to the player who went out first.',
         'If both partners go out first and second, their team scores 200 and no cards are counted.',
-        'In Evens the first team to 500 points wins.',
+        'In Cold Call the first team to 500 points wins.',
       ] },
     ],
     tips: [

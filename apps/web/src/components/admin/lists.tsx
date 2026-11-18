@@ -90,7 +90,7 @@ export function gameCols(focus?: string): Col<GameRow>[] {
     { key: 'stake', label: 'Stake', align: 'right', render: (r) => (r.mode === 'practice' ? <span className="text-text-2">Free</span> : <Credits minor={r.stake} coin={false} />) },
     { key: 'result', label: 'Result', render: (r) => <Outcome g={r} /> },
     focus
-      ? { key: 'mine', label: 'Their result', align: 'right', info: 'This player’s credit change in this game, after fees.', render: (r) => { const s = r.seats.find((x) => x.userId === focus); return s?.payout === null || s?.payout === undefined ? <span className="text-text-2">None</span> : <Net minor={s.payout} />; } }
+      ? { key: 'mine', label: 'Their result', align: 'right', info: 'This player’s change in this game, in its coin, after fees.', render: (r) => { const s = r.seats.find((x) => x.userId === focus); return s?.payout === null || s?.payout === undefined ? <span className="text-text-2">None</span> : <Net minor={s.payout} />; } }
       : { key: 'fee', label: 'Fee', align: 'right', info: 'Fee booked to the fee account for this game.', render: (r) => <Credits minor={r.fee_taken} coin={false} /> },
     { key: 'len', label: 'Length', align: 'right', render: (r) => fmtDuration(r.secs) },
     { key: 'moves', label: 'Moves', align: 'right', render: (r) => r.moves },
@@ -272,7 +272,7 @@ export function WithdrawalsList({ userId, status, q, limit = 15, onChange }: { u
               </div>
             </div>
             <p className="text-sm text-text-2">
-              Approving issues a ticket that is valid for 10 minutes. The player then finishes the cash out from their wallet page. The credits are already locked, so nothing else moves until they do. If they do not finish in time, the lock is released back to their balance.
+              Approving issues a ticket that is valid for 10 minutes. The player then finishes the cash out from their wallet page. The amount is already locked, so nothing else moves until they do. If they do not finish in time, the lock is released back to their balance.
             </p>
             <div className="flex gap-2">
               <Button variant="secondary" full onClick={() => setConfirm(null)}>

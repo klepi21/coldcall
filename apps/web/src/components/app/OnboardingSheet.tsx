@@ -8,8 +8,8 @@ import { api } from '@/lib/api';
 
 const CARDS = [
   { title: 'Pick a game', text: 'Chess, Backgammon or Tichu. Each one has a 60 second tutorial and full rules.', art: 'board' },
-  { title: 'Play free or for credits', text: 'Practice is always free. With credits you see exactly what you can win or lose before you start.', art: 'coin' },
-  { title: 'Cash out anytime', text: 'Your credits are backed one to one by money in a public vault. Cash out to your wallet at any time, up to the daily limit.', art: 'vault' },
+  { title: 'Play free or for a stake', text: 'Practice is always free. Pick LOFI or SUI to play for a stake, and you see exactly what you can win or lose before you start.', art: 'coin' },
+  { title: 'Cash out anytime', text: 'Your LOFI and SUI are each backed one to one in a public vault on Sui. Cash out to your wallet at any time, up to the daily limit.', art: 'vault' },
 ];
 
 function Art({ kind }: { kind: string }) {
@@ -125,7 +125,7 @@ export function OnboardingSheet({ onDone, doneLabel }: { onDone?: () => void; do
             <label className="mt-3 flex items-start gap-3">
               <input type="checkbox" checked={terms} onChange={(e) => setTerms(e.target.checked)} className="mt-1 size-5 accent-[var(--primary)]" />
               <span>
-                I read <a href="/how-it-works" target="_blank" className="font-semibold text-primary">how Evens works</a>, including fees, bot targets and that this beta uses test money only.
+                I read <a href="/how-it-works" target="_blank" className="font-semibold text-primary">how Cold Call works</a>, including fees, bot targets and that this beta uses devnet test coins only.
               </span>
             </label>
             {err ? <p className="mt-3 text-sm font-medium text-loss">{err}</p> : null}

@@ -74,7 +74,7 @@ export function UpdateWatcher() {
   if (!ready || !inGame(path)) return null;
   return (
     <div role="status" className="pointer-events-none fixed inset-x-0 top-2 z-[70] flex justify-center px-4">
-      <span className="glass glass-strong rounded-full px-4 py-2 text-sm text-text-2 shadow-modal">Evens has an update. It loads after this game.</span>
+      <span className="glass glass-strong rounded-full px-4 py-2 text-sm text-text-2 shadow-modal">Cold Call has an update. It loads after this game.</span>
     </div>
   );
 }

@@ -362,7 +362,7 @@ export interface AccountRow {
   last_active: string | null;
 }
 
-export const WALLET_KIND: Record<string, string> = { external: 'Own wallet', embedded: 'Guest wallet', privy: 'Email or Google' };
+export const WALLET_KIND: Record<string, string> = { guest: 'Guest wallet', zklogin: 'Google (zkLogin)' };
 
 export function SaferPlay({ r }: { r: Pick<AccountRow, 'cooloff' | 'excluded' | 'has_limits' | 'cooloff_until' | 'excluded_until'> }) {
   if (!r.cooloff && !r.excluded && !r.has_limits) return <span className="text-text-2">None set</span>;

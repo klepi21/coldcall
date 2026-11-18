@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Evens design tokens. Source of truth: brand/BRAND.md ("Arena": dark by default, light on request).
+/* Cold Call design tokens. Source of truth: brand/BRAND.md ("Arena": dark by default, light on request).
    v3 "Four Worlds" layer (brand/DIRECTION_V3.md): glass, light, depth. */
 :root {
   --bg: #07070c;

@@ -4,7 +4,7 @@ import { IllegalMoveError, type GameEngine, type GameResult, type Seat } from '.
 /**
  * Sea Battle rules engine (the classic hidden fleet naval guessing game).
  *
- * Rules used on Evens:
+ * Rules used on Cold Call:
  * - Each player has a 10 by 10 grid. Columns are A to J, rows are 1 to 10. Internally `row` and
  *   `col` are 0 based: row 0 is "1", col 0 is "A". Cell index = row * 10 + col.
  * - Fleet: Carrier 5, Warship 4, Destroyer 3, Submarine 3, Patrol boat 2 (17 squares).

@@ -56,7 +56,7 @@ export default function AccountDetail() {
             </p>
           </div>
           <a href={explorer(cfg, 'address', u.wallet_address)} target="_blank" rel="noreferrer" className="btn-secondary press inline-flex h-11 items-center rounded-chip px-4 text-[15px] font-semibold">
-            Wallet in Solana Explorer
+            Wallet on Suiscan
           </a>
         </div>
         <dl className="mt-5 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
@@ -83,7 +83,7 @@ export default function AccountDetail() {
               <span className="font-mono text-[12px]">{u.id}</span>
             </Fact>
             <Fact label="Role">{u.role}</Fact>
-            <Fact label="Email or Google linked">{u.privy_linked ? 'Yes' : 'No'}</Fact>
+            <Fact label="Google linked">{u.google_linked ? 'Yes' : 'No'}</Fact>
             <Fact label="18 or older confirmed">{u.age_confirmed_at ? fmtDate(u.age_confirmed_at) : 'Not yet'}</Fact>
             <Fact label="Terms accepted">
               {u.terms_version ? (
@@ -99,7 +99,7 @@ export default function AccountDetail() {
             <Fact label="Last sign in">{fmtAgo(data.sessions.last_sign_in)}</Fact>
             <Fact label="Last test money">{fmtAgo(u.last_faucet_at)}</Fact>
             <Fact label="Games played">
-              {fmtInt(s.games)} <span className="text-text-2">({s.credit_games} for credits)</span>
+              {fmtInt(s.games)} <span className="text-text-2">({s.credit_games} with a {data.currency} stake)</span>
             </Fact>
             <Fact label="Total staked">
               <Credits minor={s.staked} />
@@ -150,7 +150,7 @@ export default function AccountDetail() {
 
       <Panel
         title="Progress"
-        info="Level, XP and achievements. XP is the same for practice and credit games and never depends on stakes."
+        info="Level, XP and achievements. XP is the same for practice and staked games and never depends on stakes."
         action={
           data.progress ? (
             <span className="text-sm text-text-2">

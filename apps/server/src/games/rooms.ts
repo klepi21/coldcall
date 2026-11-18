@@ -643,7 +643,7 @@ async function settle(r: Room, result: GameResult) {
   if (r.botTimer) clearTimeout(r.botTimer);
   const humans = r.seats.filter((s) => !s.isBot);
   const legs: { ref: any; amount: number }[] = [];
-  const payout = new Map<number, number>(); // gross credits returned per seat
+  const payout = new Map<number, number>(); // gross amount returned per seat, in the table currency
   const { total } = entryCost(r.mode, r.stake, r.currency);
   const cur = r.currency;
 

@@ -98,7 +98,7 @@ export default function GameDetail() {
         </p>
       </Card>
 
-      <Panel title="Seats" info="Who sat where. Their result is the credit change after fees; practice games always show zero.">
+      <Panel title="Seats" info="Who sat where. Their result is the change in the table coin after fees; practice games always show zero.">
         <DataTable
           caption="Seats"
           rowKey={(s) => String(s.seat)}

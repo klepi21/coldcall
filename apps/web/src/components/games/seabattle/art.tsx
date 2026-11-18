@@ -1,8 +1,8 @@
 'use client';
 /**
- * Sea Battle art. Every shape here is original SVG drawn by hand for Evens (ship silhouettes seen
+ * Sea Battle art. Every shape here is original SVG drawn by hand for Cold Call (ship silhouettes seen
  * from above, sonar ocean, splash and explosion effects). No third party art, fonts or images.
- * Asset record for docs/ASSETS.md: "Sea Battle ships, ocean and effects: original SVG, Evens".
+ * Asset record for docs/ASSETS.md: "Sea Battle ships, ocean and effects: original SVG, Cold Call".
  *
  * The ocean stays dark navy in both themes (sonar screen), so the colours below are fixed and do
  * not follow the page tokens. Lime = aim, violet = your fleet, orange red = fire and explosions.

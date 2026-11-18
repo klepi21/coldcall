@@ -34,7 +34,7 @@ export default function AccountsPage() {
     { key: 'games', label: 'Games', align: 'right', render: (r) => fmtInt(r.games) },
     { key: 'dep', label: 'Deposits', align: 'right', render: (r) => <Credits minor={r.deposits} coin={false} /> },
     { key: 'wd', label: 'Cash outs', align: 'right', render: (r) => <Credits minor={r.withdrawals} coin={false} /> },
-    { key: 'net', label: 'Game result', align: 'right', info: 'Credits won minus credits lost in finished games, after fees.', render: (r) => <Net minor={r.net} /> },
+    { key: 'net', label: 'Game result', align: 'right', info: 'Won minus lost in finished games of the selected coin, after fees.', render: (r) => <Net minor={r.net} /> },
     { key: 'rg', label: 'Safer play', render: (r) => <SaferPlay r={r} /> },
   ];
 

@@ -1,6 +1,6 @@
 'use client';
 /**
- * The Evens universe: a gold vault coin with four game worlds in orbit, in a violet nebula.
+ * The Cold Call universe: a gold vault coin with four game worlds in orbit, in a violet nebula.
  * Lazy loaded by UniverseStage (never server rendered). Scroll progress drives a camera journey
  * from the wide hero view to each world in turn. Procedural geometry and canvas textures only.
  */

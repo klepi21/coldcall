@@ -3,7 +3,7 @@ import { memo } from 'react';
 import { BAR, BAR_X, BOT, FY, H, LEFT_X, MID, PL, PW, RIGHT_X, TOP, TRAY, TRAY_X, W, colRow, colX } from './geometry';
 
 /**
- * Static board art, drawn by hand for Evens. An original take on a Mediterranean tavli board:
+ * Static board art, drawn by hand for Cold Call. An original take on a Mediterranean tavli board:
  * walnut frame with a thin ivory inlay line, warm olive wood field, ivory and terracotta points,
  * and a lozenge and rosette inlay down the bar. Rendered once; nothing here re-renders during play.
  */

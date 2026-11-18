@@ -1,10 +1,10 @@
 'use client';
 /**
- * Evens Tichu cards. All art here is original, drawn by hand in SVG for Evens. It follows the
+ * Cold Call Tichu cards. All art here is original, drawn by hand in SVG for Cold Call. It follows the
  * conventions of the standard Tichu deck so players recognise it at once: white stock, suit
  * colours and symbols, classic pip layout, double ended court cards, special cards on a lemon
  * panel in a flat folk print style, and an olive back covered in characters. No photo or
- * publisher illustration was traced, embedded or copied. Licence: Evens own work.
+ * publisher illustration was traced, embedded or copied. Licence: Cold Call own work.
  *
  * Suit mapping from engine card ids to the four Tichu suits:
  *   S = Swords  (black, curved sword)

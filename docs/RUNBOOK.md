@@ -1,66 +1,48 @@
-# Evens runbook
+# Cold Call runbook
 
-## Live on Solana devnet (since 16 Nov 2026)
-| What | Address |
-|---|---|
-| Vault program | `CRN6JXESEJUgFBAgYxf6bgGPq5iKya6jWhZphotQhyhN` |
-| Vault config | `DEBAzsKqkL67soSGAi9nAPdY4snuzSpBoriSDS4XxYsc` |
-| Vault token account | `H1ZVCVdLxaYB5dV3HmBZp1LVsBntDL5qpYijHgMBvNzD` |
-| Test USDC mint (6 decimals) | `DkzuzHdoQ6kDRBEztL5sGu6DXVM4yUvqb15NaKfMUDST` |
-| Ticket signer | `GcBy9HbRcnTjcW5tELSMzeDYVaYS7LAKwn9gDinYG5qF` |
-| Admin, deployer and house wallet | `8mNwp5LdLG65JxXybq9S4m3HmSLkLTR8PysQpJoZ9L8K` |
+Cold Call runs on **Sui devnet** with test coins only (LOFI and SUI). It is not deployed yet; the planned host is `https://coldcall.45-81-6-214.sslip.io` (separate folder, ports and database from any other app on that box).
 
-Explorer: https://explorer.solana.com/address/H1ZVCVdLxaYB5dV3HmBZp1LVsBntDL5qpYijHgMBvNzD?cluster=devnet
+## Chain
+- Move package, vaults and faucet: see `move/README.md`. Public ids: `cold_call.config.json` (rewritten by `move/scripts/publish.sh`).
+- Keys: `.secrets/devnet.env` (mode 600, git ignored). The server only needs `CC_GAME_KEY` (cc-game: gas sponsor, ticket signer, test SUI sender). cc-admin keeps the AdminCap and never runs on the server.
+- Devnet is wiped about every two weeks. After a wipe: republish (`move/README.md`), restart the server so it reads the new config, and reset the devnet database (old deposits are gone).
 
-The deployer pays 0.02 SOL to each new user for network fees (faucet button). Keep it topped up via https://faucet.solana.com.
-
-## Local development (no server needed)
-```
+## Local run
+```bash
+brew services start postgresql@17
+createdb coldcall_devnet
 pnpm install
-pnpm dev                      # devnet (apps/server/.env, database evens_devnet), API :4000, web :3000
-CLUSTER=localnet pnpm dev     # fully offline: local validator + apps/server/.env.localnet, database evens
-```
-Open http://localhost:3000. Logs are in `.logs/`.
-
-Tests:
-```
-pnpm test                      # game engines, money rules, calibration, contract (LiteSVM)
-pnpm e2e                       # full API + chain run (needs pnpm dev running)
+cp apps/server/.env.example apps/server/.env   # fill CC_GAME_KEY, GOOGLE_CLIENT_ID, ZK_SALT_SECRET, COLD_CALL_CONFIG
+(cd apps/server && npx tsx --env-file=.env src/index.ts)   # API on :4000, migrates on boot
+(cd apps/web && npx next dev -p 3000)                      # web on :3000, proxies /api to :4000
 ```
 
-## Keys (never commit, `keys/` is gitignored)
-| File | Role |
+## Server environment (`apps/server/.env`, never committed)
+| Variable | Meaning |
 |---|---|
-| `keys/deployer.json` | pays for deploys, vault admin, house wallet |
-| `keys/server-signer.json` | signs withdrawal tickets. Production: move to AWS KMS (implement `TicketSigner` in `apps/server/src/chain/vault.ts`) |
-| `keys/mint-authority.json` | mints test USDC for the faucet (devnet only) |
-| `keys/program-evens_vault.json` | program id `CRN6JXESEJUgFBAgYxf6bgGPq5iKya6jWhZphotQhyhN` |
-| `keys/chain.json` | written by `chain:setup` (mint, config, vault addresses) |
+| `DATABASE_URL` | Postgres, e.g. `postgres://localhost:5432/coldcall_devnet` |
+| `WEB_ORIGIN` | Web origin for CORS, e.g. `http://localhost:3000` |
+| `SUI_NETWORK`, `SUI_RPC` | `devnet`, `https://fullnode.devnet.sui.io:443` (gRPC, `@mysten/sui` 2.39.1) |
+| `COLD_CALL_CONFIG` | absolute path to `cold_call.config.json` |
+| `CC_GAME_KEY` | `suiprivkey1...` of cc-game. Checked against `gameAddress` and `gamePubkeyHex` at first use |
+| `GOOGLE_CLIENT_ID` | Google OAuth web client for zkLogin. Empty means only guest wallets |
+| `ZK_SALT_SECRET` | random secret for the stable zkLogin salt. **Never change it** once Google users exist: their addresses depend on it |
+| `SUI_DRIP_BASE`, `SUI_DRIP_HOURS`, `SUI_DRIP_FLOOR_BASE` | test SUI per claim (default 0.5 SUI), hours between claims (12), game wallet floor (2 SUI) |
+| `ADMIN_WALLETS` | comma separated Sui addresses that become admin at sign in |
 
-## Deploy the vault to devnet
-The public devnet RPC faucet is closed. Get about 4 SOL to the deployer address first:
-`solana-keygen pubkey keys/deployer.json`, then use https://faucet.solana.com (GitHub sign in) or any devnet faucet.
-```
-export PATH="$HOME/.local/share/solana/install/active_release/bin:$HOME/.avm/bin:$PATH"
-anchor build
-solana program deploy target/deploy/evens_vault.so --program-id keys/program-evens_vault.json -k keys/deployer.json --url devnet
-cd apps/server
-SOLANA_RPC=https://api.devnet.solana.com SOLANA_CLUSTER=devnet npx tsx scripts/chain-setup.ts
-SOLANA_RPC=https://api.devnet.solana.com SOLANA_CLUSTER=devnet npx tsx scripts/fund-house.ts 5000
-```
-Then set `SOLANA_RPC` and `SOLANA_CLUSTER=devnet` in `apps/server/.env`. On devnet the faucet sends 0.05 SOL from the deployer to each new user for network fees, so keep the deployer topped up.
+Google OAuth client: authorized JS origins `http://localhost:3000` and the production origin; redirect URIs `<origin>/auth/google`.
 
-## Pause everything
-Call `set_paused(true)` with the admin key (deposits and withdrawals stop on chain). Games keep running on credits.
+## Jobs (inside the API process)
+- Vault event scanner every 15 s (`scanVaultEvents`): credits `Deposited`, books `Funded` to the house bankroll, completes cash outs from `Withdrawn`, books `AdminWithdrawn`. Cursor in `chain_cursor`.
+- Cash out sweep every 30 s: expired tickets are released only when `vault::is_used(nonce)` is false on chain.
+- Reserve check every 5 min, per coin.
 
-## Rotate the ticket signer
-Generate a new key, call `rotate_server_signer(newPubkey)` with the admin key, update `SERVER_SIGNER_KEY`, restart the server. Open tickets signed by the old key stop working and expire back to players automatically.
+## Tests
+- `pnpm test`: shared money rules, game engines, server tests including currency isolation (needs local Postgres; uses a throwaway `coldcall_test` database).
+- `cd apps/server && npx tsx --env-file=.env scripts/e2e-devnet.ts`: live API flow on devnet with a fresh guest wallet.
+- `node apps/web/e2e/flow.mjs <outDir>` (`WIDE=1` for 1440 px): the same flow in a real browser with screenshots.
 
-## Make someone admin
-Add their wallet address to `ADMIN_WALLETS` in `apps/server/.env`, restart, and have them sign in again.
-
-## Restore a backup
-`pg_dump evens > backup.sql` daily (cron to R2 in production). Restore with `psql evens < backup.sql`, start the server, and check the admin page reserve status. Live games resume from `game_states`.
-
-## If the reserve check fails
-1. Pause the vault. 2. Compare `ledger_accounts` (vault_onchain mirror) with the on-chain vault balance and recent `deposits`/`withdrawals`. 3. Fix the cause, unpause.
+## Admin
+- `cd apps/server && npx tsx --env-file=.env scripts/grant-admin.ts <0x address>` (add `--revoke` to remove).
+- House bankroll: fund a vault on chain with `vault::fund` (cc-admin). The scanner books the `Funded` event to the house bankroll of that coin.
+- Pause: `vault::set_paused` with the AdminCap (per coin vault). Deposits and cash outs stop; balances are safe.

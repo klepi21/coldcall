@@ -2,8 +2,8 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Evens',
-    short_name: 'Evens',
+    name: 'Cold Call',
+    short_name: 'Cold Call',
     description: 'Chess, backgammon, Tichu and Sea Battle against people or a fair bot.',
     start_url: '/play',
     display: 'standalone',

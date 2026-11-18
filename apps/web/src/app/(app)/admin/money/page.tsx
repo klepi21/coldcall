@@ -102,7 +102,7 @@ function Reserve() {
   return (
     <>
       <p className="mb-3 text-[13px] text-text-2">
-        Every 5 minutes the server compares the USDC in the vault with everything the ledger holds. {data.summary.total} checks since {fmtDate(data.summary.first)},{' '}
+        Every 5 minutes the server compares the coins in each vault with everything the ledger holds in that coin. {data.summary.total} checks since {fmtDate(data.summary.first)},{' '}
         {data.summary.failed ? <span className="font-semibold text-loss">{data.summary.failed} failed.</span> : 'none failed.'}
       </p>
       <DataTable

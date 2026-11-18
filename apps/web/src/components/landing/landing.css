@@ -1,5 +1,5 @@
 /* Note: rules here are unlayered, so they beat Tailwind utilities. Never set position or display here. */
-/* Evens landing v3 "Four Worlds". Scoped helpers for the landing page only. Tokens live in globals.css. */
+/* Cold Call landing v3 "Four Worlds". Scoped helpers for the landing page only. Tokens live in globals.css. */
 
 /* The universe is always night: keep dark tokens inside these sections even in the light theme. */
 .lp-night {

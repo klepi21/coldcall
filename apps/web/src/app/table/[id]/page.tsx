@@ -552,7 +552,7 @@ function StakeCard({ table }: { table: TableSummary }) {
       </div>
       {cost.fee ? (
         <div className="flex justify-between py-1 text-text-2">
-          <span>Evens fee</span>
+          <span>Cold Call fee</span>
           <Amount minor={cost.fee} currency={table.currency} />
         </div>
       ) : null}

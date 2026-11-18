@@ -18,13 +18,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   const { me, ready, openAuth } = useSession();
   if (!ready) return <Skeleton className="h-[480px]" />;
   if (!me) return <Empty title="Admins only" text="Sign in with an admin account to see this page." action={<Button onClick={() => openAuth()}>Sign in</Button>} />;
-  if (me.role !== 'admin') return <Empty title="Admins only" text="This area is for the Evens team. Your account does not have admin access." />;
+  if (me.role !== 'admin') return <Empty title="Admins only" text="This area is for the Cold Call team. Your account does not have admin access." />;
   return (
     <div className="admin-root space-y-5">
       <style>{TOKENS}</style>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <Eyebrow className="mb-2">Evens team only</Eyebrow>
+          <Eyebrow className="mb-2">Cold Call team only</Eyebrow>
           <h1 className="t-display">Admin</h1>
         </div>
         <AdminTabs />

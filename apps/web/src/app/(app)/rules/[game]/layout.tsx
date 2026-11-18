@@ -8,7 +8,7 @@ export async function generateMetadata({ params }: { params: Promise<{ game: str
   const { game } = await params;
   const name = NAMES[game];
   if (!name) return {};
-  return shareMeta({ title: `How to play ${name}`, description: `The rules of ${name} in plain words, from the basics to the fine print. Practice free on Evens.`, image: `/og/${game}.png`, path: `/rules/${game}` });
+  return shareMeta({ title: `How to play ${name}`, description: `The rules of ${name} in plain words, from the basics to the fine print. Practice free on Cold Call.`, image: `/og/${game}.png`, path: `/rules/${game}` });
 }
 
 export default function L({ children }: { children: ReactNode }) {

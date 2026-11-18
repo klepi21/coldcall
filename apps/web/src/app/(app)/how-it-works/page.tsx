@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { Card, Eyebrow } from '@/components/ui';
+import { CURRENCY, formatAmount } from '@coldcall/shared';
 import { api } from '@/lib/api';
 import { VaultLinks } from '@/components/app/VaultLinks';
 
@@ -29,10 +30,10 @@ function FlowDiagram() {
     </g>
   );
   return (
-    <svg viewBox="0 0 560 112" className="w-full" role="img" aria-label="Your wallet sends money to the vault, you play with credits, and you cash out back to your wallet">
-      {box(0, 'Your wallet', 'test USDC')}
-      {box(205, 'Evens vault', 'public contract')}
-      {box(410, 'Your credits', '1 USDC = 100')}
+    <svg viewBox="0 0 560 112" className="w-full" role="img" aria-label="Your wallet sends LOFI or SUI to the vault of that coin, you play with your balance in that coin, and you cash out back to your wallet">
+      {box(0, 'Your wallet', 'test LOFI or SUI')}
+      {box(205, 'Coin vault', 'one per coin, public')}
+      {box(410, 'Your balance', 'same coin, same amount')}
       <path d="M152 48h48" stroke="var(--primary)" strokeWidth="3" markerEnd="url(#a)" />
       <path d="M357 48h48" stroke="var(--primary)" strokeWidth="3" markerEnd="url(#a)" />
       <path d="M485 94 C485 112 75 112 75 94" fill="none" stroke="var(--gold)" strokeWidth="2.5" strokeDasharray="5 5" markerEnd="url(#b)" />
@@ -52,16 +53,18 @@ function FlowDiagram() {
 }
 
 export default function HowItWorks() {
-  const [reserve, setReserve] = useState<{ vault_minor: number; liabilities_minor: number; ok: boolean; checked_at: string } | null>(null);
+  const [reserve, setReserve] = useState<{ currency: 'LOFI' | 'SUI'; vault_minor: number; liabilities_minor: number; ok: boolean; checked_at: string }[] | null>(null);
   useEffect(() => {
     api('/api/reserve').then(setReserve).catch(() => {});
   }, []);
+  const L = CURRENCY.LOFI;
+  const S = CURRENCY.SUI;
   return (
     <div className="mx-auto max-w-3xl space-y-4">
       <div className="pb-2">
         <Eyebrow className="mb-2">No small print</Eyebrow>
         <h1 className="t-display">
-          How Evens <span className="t-grad-primary">works</span>
+          How Cold Call <span className="t-grad-primary">works</span>
         </h1>
         <p className="mt-3 text-[18px] text-text-2">Everything about money, fees, bots and fairness, in plain words.</p>
       </div>
@@ -84,18 +87,24 @@ export default function HowItWorks() {
 
       <Section id="money" title="Money">
         <FlowDiagram />
-        <p>Money you add goes from your wallet into the Evens vault, a public contract on Solana. You get credits one to one: 1 test USDC is 100 credits.</p>
-        <p>Games use credits, so they are instant and free of network fees. When you cash out, credits turn back into money in your wallet.</p>
-        <p>This beta runs on Solana devnet. All money is test money with no real value. You can get free test USDC in your wallet.</p>
+        <p>Cold Call has two coins: <strong className="text-text">LOFI</strong>, a test coin made for this beta, and <strong className="text-text">SUI</strong>. You hold a separate balance in each. They are never swapped, converted or added together, and there is no exchange rate between them.</p>
+        <p>Coins you add go from your wallet into the vault of that coin, a public contract on Sui. Your balance in that coin goes up by exactly the same amount. Every table is played in one coin, so a LOFI game only ever moves LOFI and a SUI game only ever moves SUI. Pick the coin with the LOFI and SUI switch at the top.</p>
+        <p>Games use your balance, so they are instant. When you cash out, the coins go back to your wallet. Cold Call pays the Sui network fee for adding money, cashing out and getting test LOFI.</p>
+        <p>This beta runs on Sui devnet. LOFI and SUI here are test coins with no real value. You can get free test LOFI and test SUI on the wallet page.</p>
       </Section>
 
       <Section id="stakes" title="Stakes and fees">
-        <p>You choose your stake: any amount from 1 credit up to 10,000 credits (about $100) against people, or up to 5,000 credits (about $50) against the bot. A single bot game never risks more than 1% of the house bankroll, so the biggest bot stake can be lower at times. Practice games are always free.</p>
+        <p>You choose the coin and your stake. Quick picks are {L.stakeLevels.map((l) => formatAmount(l, 'LOFI')).join(', ')} and {S.stakeLevels.map((l) => formatAmount(l, 'SUI')).join(', ')}. Any amount in between works too:</p>
+        <ul className="list-disc space-y-1 pl-5">
+          <li>LOFI: from {formatAmount(L.minStake, 'LOFI')} up to {formatAmount(L.maxStakePvp, 'LOFI')} against people, or {formatAmount(L.maxStakeBot, 'LOFI')} against the bot.</li>
+          <li>SUI: from {formatAmount(S.minStake, 'SUI')} up to {formatAmount(S.maxStakePvp, 'SUI')} against people, or {formatAmount(S.maxStakeBot, 'SUI')} against the bot.</li>
+        </ul>
+        <p>Each coin has its own house bankroll. A single bot game never risks more than 1% of the bankroll of its coin, so the biggest bot stake can be lower at times. Quick match only pairs players of the same game, coin and stake. Practice games are always free.</p>
         <p>
-          <strong className="text-text">Against people:</strong> everyone puts in the same stake. The winner takes the whole pot (in Tichu the winning team splits it). Evens keeps a fee of 5% of the stake, at least 0.05 credits, shown before you join. A chess draw returns your stake, the fee is kept. If you leave before the game starts, you get everything back including the fee.
+          <strong className="text-text">Against people:</strong> everyone puts in the same stake. The winner takes the whole pot (in Tichu the winning team splits it). Cold Call keeps a fee of 5% of the stake, rounded down to 0.01 of the coin, shown before you join. In LOFI the fee is at least 0.05 LOFI. In SUI there is no minimum, so tables of 0.05 and 0.10 SUI have no fee. A chess draw returns your stake, the fee is kept. If you leave before the game starts, you get everything back including the fee.
         </p>
         <p>
-          <strong className="text-text">Against the bot:</strong> there is no fee. A win pays double your stake. A loss loses the stake. A chess draw returns 90%.
+          <strong className="text-text">Against the bot:</strong> there is no fee. A win pays double your stake. A loss loses the stake. A chess draw returns 90%, rounded down to 0.01 (so a 0.05 SUI draw returns 0.04 SUI).
         </p>
         <p>While a game is in play your stake is held for that game, and it is paid out automatically the moment the game ends.</p>
       </Section>
@@ -122,16 +131,28 @@ export default function HowItWorks() {
       </Section>
 
       <Section id="vault" title="The vault">
-        <p>Credits are backed one to one by money in the vault: 100 credits for every 1 USDC. Every 5 minutes we also check that the vault holds at least what we owe all players.</p>
+        <p>There is one vault per coin. Your LOFI is backed one to one by LOFI in the LOFI vault, and your SUI by SUI in the SUI vault. Every 5 minutes we check each vault on its own: it must hold at least everything we hold for players and the house in that coin.</p>
+        {reserve?.length ? (
+          <ul className="space-y-1 text-[15px]">
+            {reserve.map((r) => (
+              <li key={r.currency}>
+                Last {r.currency} check {new Date(r.checked_at).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' })}: vault {formatAmount(r.vault_minor, r.currency)}, held {formatAmount(r.liabilities_minor, r.currency)}.{' '}
+                <span className={r.ok ? 'font-semibold text-win' : 'font-semibold text-loss'}>{r.ok ? 'Fully backed.' : 'Not fully backed, our team is alerted.'}</span>
+              </li>
+            ))}
+          </ul>
+        ) : null}
 
         <p className="font-semibold text-text">Check it yourself</p>
         <VaultLinks />
-        <p>Cash outs are signed by our server and checked by the contract. Up to 20,000 credits a day per player; cash outs above 10,000 credits get a quick check by our team first. Because our server signs them, cash outs pause if our service is down or if we pause the vault for safety.</p>
-        <p>Evens controls this contract: we can pause it and update its code. Before real money, these powers move to a group of keys that must agree, with a time delay.</p>
+        <p>
+          Cash outs are signed by our server and checked by the contract. Per player per day: up to {formatAmount(L.withdrawDaily, 'LOFI')} and up to {formatAmount(S.withdrawDaily, 'SUI')}. Cash outs above {formatAmount(L.withdrawReviewAbove, 'LOFI')} or {formatAmount(S.withdrawReviewAbove, 'SUI')} get a quick check by our team first. Because our server signs them, cash outs pause if our service is down or if we pause the vault for safety.
+        </p>
+        <p>Cold Call controls this contract: we can pause it and update its code. Before real money, these powers move to a group of keys that must agree, with a time delay.</p>
       </Section>
 
       <Section id="limits" title="Safer play">
-        <p>Playing for credits should be fun. In your profile you can set limits for adding money and for losses per day or week, take a break for 24 hours, 7 days or 30 days, or pause your account for 6 months.</p>
+        <p>Playing for a stake should be fun. In your profile you can set limits for adding money and for losses per day or week, separately for LOFI and for SUI, take a break for 24 hours, 7 days or 30 days, or pause your account for 6 months.</p>
         <p>You get a gentle reminder after every hour of play. You can still cash out during a break. You must be 18 or older to play.</p>
         <p>
           Need to talk? <a className="font-semibold text-primary" href="https://www.begambleaware.org" target="_blank" rel="noreferrer">BeGambleAware</a> and{' '}
@@ -145,15 +166,16 @@ export default function HowItWorks() {
       <Section id="glossary" title="Glossary">
         <dl className="grid gap-3 sm:grid-cols-2">
           {[
-            ['Credits', 'What you play with. 100 credits equal 1 test USDC.'],
-            ['Stake', 'The credits you put into one game.'],
-            ['Fee', 'What Evens keeps from games between people: 5% of the stake.'],
+            ['LOFI', 'A test coin made for this Cold Call beta on Sui devnet. No real value.'],
+            ['SUI', 'The coin of the Sui network. Here on devnet it is a test coin with no real value.'],
+            ['Stake', 'The LOFI or SUI you put into one game. A game uses one coin only.'],
+            ['Fee', 'What Cold Call keeps from games between people: 5% of the stake.'],
             ['Pot', 'All stakes in a game between people. The winner takes it.'],
             ['Bot target', 'How often you are expected to win against the bot.'],
             ['Fair shuffle', 'A shuffle you can check after the game with the revealed seed.'],
-            ['Cash out', 'Turning credits back into money in your wallet.'],
-            ['Network fee', 'A tiny amount of SOL the Solana network charges to move money.'],
-            ['Wallet', 'Where your money lives outside Evens. We create one for you if you do not have one.'],
+            ['Cash out', 'Moving coins from your Cold Call balance back to your wallet.'],
+            ['Network fee', 'A tiny amount of SUI the Sui network charges for each transaction. Cold Call pays it for you.'],
+            ['Wallet', 'Where your coins live outside Cold Call. We make one for you from your Google account or in this browser.'],
             ['Limits', 'Caps you set on adding money and losses.'],
           ].map(([t, d]) => (
             <div key={t}>

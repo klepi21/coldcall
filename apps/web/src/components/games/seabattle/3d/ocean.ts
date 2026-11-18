@@ -6,7 +6,7 @@
  *
  * The fragment shader also paints the neon grid, cell marks (from a 10 by 10 data texture), the aim
  * band, the last shot outline, coordinate labels (canvas texture), fire glow and splash ripples, so
- * the whole sea costs one draw call. Original shader code written for Evens.
+ * the whole sea costs one draw call. Original shader code written for Cold Call.
  */
 import * as THREE from 'three';
 

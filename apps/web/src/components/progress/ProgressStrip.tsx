@@ -42,7 +42,7 @@ export function ProgressStrip({ className = '' }: { className?: string }) {
               </span>
             </span>
             <XpBar pct={pct} className="mt-2" />
-            <span className="mt-1.5 block truncate text-xs text-text-2">{data.title ? `${data.title}. ` : ''}Same XP whether you play free or for credits.</span>
+            <span className="mt-1.5 block truncate text-xs text-text-2">{data.title ? `${data.title}. ` : ''}Same XP whether you play free or with a stake.</span>
           </span>
         </Link>
         <div className="min-w-0 flex-1">

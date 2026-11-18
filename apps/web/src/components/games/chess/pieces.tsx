@@ -1,10 +1,10 @@
 'use client';
 /**
- * Evens chess pieces.
+ * Cold Call chess pieces.
  *
- * ORIGINAL ARTWORK: every path in this file was drawn by hand for Evens on a 100 x 100 grid
+ * ORIGINAL ARTWORK: every path in this file was drawn by hand for Cold Call on a 100 x 100 grid
  * (November 2026). It is not traced from, adapted from or based on any existing piece set
- * (not cburnett, Merida, Alpha, Staunton fonts or any other). Licence: owned by Evens.
+ * (not cburnett, Merida, Alpha, Staunton fonts or any other). Licence: owned by Cold Call.
  *
  * Style: clean, slightly classical silhouettes built from a few stacked shapes so the
  * overlaps draw the inner contour lines. Ivory pieces have an ink outline, ink pieces have

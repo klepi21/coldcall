@@ -996,7 +996,7 @@ function StatusIcon({ tone }: { tone: string }) {
 
 type IconName = 'dice' | 'target' | 'radar' | 'burst' | 'trophy' | 'anchor' | 'warn';
 
-/** Small original line icons (SVG, drawn for Evens). */
+/** Small original line icons (SVG, drawn for Cold Call). */
 function Icon({ name, size = 18, className }: { name: IconName; size?: number; className?: string }) {
   const p = { fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const };
   return (

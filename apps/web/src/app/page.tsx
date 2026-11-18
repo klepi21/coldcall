@@ -121,12 +121,12 @@ export default function Landing() {
 
   return (
     <>
-      {/* The landing is the Evens universe: always night, in either theme. Sheets keep the user theme. */}
+      {/* The landing is the Cold Call universe: always night, in either theme. Sheets keep the user theme. */}
       <MotionConfig reducedMotion="user">
         <div className="lp-night min-h-dvh overflow-x-clip bg-[#07070c]">
           <header className="lp-night sticky top-0 z-30 border-b border-white/[0.06] bg-[#07070c]/55 backdrop-blur-md">
             <div className="mx-auto flex h-16 max-w-[1200px] items-center justify-between px-4 sm:px-6">
-              <Link href="/" aria-label="Evens home">
+              <Link href="/" aria-label="Cold Call home">
                 <Wordmark />
               </Link>
               <div className="flex items-center gap-2">

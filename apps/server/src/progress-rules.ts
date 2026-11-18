@@ -2,7 +2,7 @@
  * Progression rules, pure and deterministic. No database, no money.
  *
  * Ethics (binding): XP is earned by playing and playing well. The scoring function below does not
- * receive the mode, the stake, the balance or anything about money, so a practice game and a credits
+ * receive the mode, the stake, the balance or anything about money, so a practice game and a staked
  * game with the same play always earn exactly the same XP. Rewards are cosmetic or status only.
  */
 import type { GameResult } from '@coldcall/games';

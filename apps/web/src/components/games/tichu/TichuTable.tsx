@@ -1,6 +1,6 @@
 'use client';
 /**
- * Evens Tichu table. Renders the server view and sends intents only; the next view is the truth.
+ * Cold Call Tichu table. Renders the server view and sends intents only; the next view is the truth.
  * Seats are drawn relative to the viewer: me at the bottom, (me+1) on the left, partner (me+2)
  * on top, (me+3) on the right. That matches the engine, where "left" for passing is seat+1.
  */

@@ -7,17 +7,17 @@ import { SITE_URL, shareMeta } from '@/lib/share';
 const unbounded = Unbounded({ subsets: ['latin'], variable: '--font-unbounded', weight: ['500', '700', '800'], display: 'swap' });
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'swap' });
 
-const DESCRIPTION = 'Chess, backgammon, Tichu and Sea Battle against real people or a fair bot. Practice free, or play for credits and the winner takes the pot. Every fee shown up front. 18+.';
+const DESCRIPTION = 'Chess, backgammon, Tichu and Sea Battle against real people or a fair bot. Practice free, or play for LOFI or SUI on Sui devnet and the winner takes the pot. Every fee shown up front. 18+.';
 
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
-  title: { default: 'Evens | Four games. One arena.', template: '%s | Evens' },
+  title: { default: 'Cold Call | Four games. One arena.', template: '%s | Cold Call' },
   description: DESCRIPTION,
-  applicationName: 'Evens',
-  ...shareMeta({ title: 'Evens | Four games. One arena.', description: DESCRIPTION }),
+  applicationName: 'Cold Call',
+  ...shareMeta({ title: 'Cold Call | Four games. One arena.', description: DESCRIPTION }),
   // shareMeta sets a plain title; keep the template for inner pages.
 };
-metadata.title = { default: 'Evens | Four games. One arena.', template: '%s | Evens' };
+metadata.title = { default: 'Cold Call | Four games. One arena.', template: '%s | Cold Call' };
 
 export const viewport: Viewport = { width: 'device-width', initialScale: 1, viewportFit: 'cover', themeColor: '#07070c' };
 

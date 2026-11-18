@@ -1,6 +1,6 @@
 'use client';
 /**
- * Hero card that shows the whole idea of Evens in about 15 seconds, on a loop:
+ * Hero card that shows the whole idea of Cold Call in about 15 seconds, on a loop:
  * both players put in the same stake, a short game is played, the winner takes the pot.
  * Numbers come from the real money rules (packages/shared), so the card never overpromises.
  */
