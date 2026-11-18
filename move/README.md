@@ -2,7 +2,7 @@
 
 On-chain vault for COLD CALL. Players deposit coins into a shared `Vault<T>`, play with in-app balances
 held in the Postgres double-entry ledger, and cash out with a withdrawal ticket signed by the game server.
-Replaces the old Solana Anchor vault. **Devnet only, test money only.**
+**Devnet only, test money only.**
 
 Public ids live in `../cold_call.config.json` (rewritten by `scripts/publish.sh`). Keys live in
 `../.secrets/devnet.env` (mode 600, git ignored). The CLI uses its own config in `../.secrets/sui/`.
