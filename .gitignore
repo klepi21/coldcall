@@ -16,3 +16,6 @@ keys/
 .secrets
 move/build
 move/scripts/node_modules
+tools/video/music
+tools/video/out
+tools/video/node_modules
