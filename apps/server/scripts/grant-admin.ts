@@ -5,7 +5,6 @@
  * The account must exist, so sign in with that wallet once first. The role is read on every request,
  * so no new sign in is needed. ADMIN_WALLETS in .env keeps working as before (applied at sign in).
  */
-import { PublicKey } from '@solana/web3.js';
 import { pool, maybe } from '../src/db/pool';
 
 const [address, flag] = process.argv.slice(2).filter((a) => a !== '--');
@@ -13,10 +12,8 @@ if (!address || (flag && flag !== '--revoke')) {
   console.error('Usage: pnpm admin:grant <walletAddress> [--revoke]');
   process.exit(2);
 }
-try {
-  new PublicKey(address);
-} catch {
-  console.error(`"${address}" is not a valid Solana address.`);
+if (!/^0x[0-9a-f]{64}$/.test(address)) {
+  console.error(`"${address}" is not a valid Sui address (0x followed by 64 hex characters).`);
   process.exit(2);
 }
 const role = flag === '--revoke' ? 'user' : 'admin';

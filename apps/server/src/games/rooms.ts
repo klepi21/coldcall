@@ -6,9 +6,9 @@
 import { randomBytes } from 'node:crypto';
 import type { WebSocket } from 'ws';
 import { Rng, commitFor, randomSeedHex, IllegalMoveError, type GameResult } from '@coldcall/games';
-import { entryCost, botDrawRefund, validStake, BOT_MAX_BANKROLL_SHARE, formatCredits, GAMES as META, type Mode, type GameKind, type TableSummary, type ServerMsg } from '@coldcall/shared';
+import { entryCost, botDrawRefund, validStake, BOT_MAX_BANKROLL_SHARE_BPS, formatAmount, GAMES as META, CURRENCIES, type Currency, type Mode, type GameKind, type TableSummary, type ServerMsg } from '@coldcall/shared';
 import { pool, tx, q, one, maybe } from '../db/pool';
-import { post, balances, InsufficientFunds } from '../ledger';
+import { post, balances, houseBankroll, InsufficientFunds } from '../ledger';
 import { GAMES, TIME_CONTROLS, BOT_NAMES, type BotMeta } from './registry';
 import { chessBotFor, levelFor, levelElo, updateRating } from './calibration';
 import { log } from '../lib/log';
@@ -32,6 +32,8 @@ interface Room {
   id: string;
   game: GameKind;
   mode: Mode;
+  /** The one currency this table is played in. Stakes, fees and payouts all use it. */
+  currency: Currency;
   stake: number;
   fee: number;
   capacity: number;
@@ -81,7 +83,7 @@ async function userRow(userId: string) {
   return one(pool, `select * from users where id = $1`, [userId]);
 }
 
-async function checkPlayAllowed(userId: string, mode: Mode, totalCost: number) {
+async function checkPlayAllowed(userId: string, mode: Mode, totalCost: number, currency: Currency) {
   const u = await userRow(userId);
   const now = Date.now();
   if (!u.age_confirmed_at || !u.terms_accepted_at) throw new UserError('Please finish setting up your account first.', 'onboarding', 403);
@@ -90,21 +92,27 @@ async function checkPlayAllowed(userId: string, mode: Mode, totalCost: number) {
   if (u.cooloff_until && new Date(u.cooloff_until).getTime() > now)
     throw new UserError(`You are on a cool off until ${new Date(u.cooloff_until).toLocaleString('en-GB')}. You can still cash out.`, 'cooloff', 403);
   if (mode === 'practice' || totalCost === 0) return;
+  // Loss limits are per currency: LOFI results never count against a SUI limit and back.
+  const lim = await maybe<{ loss_daily: number | null; loss_weekly: number | null }>(
+    pool,
+    `select loss_daily, loss_weekly from user_limits where user_id=$1 and currency=$2`,
+    [userId, currency],
+  );
   for (const [col, days, label] of [
-    ['limit_loss_daily', 1, 'daily'],
-    ['limit_loss_weekly', 7, 'weekly'],
+    ['loss_daily', 1, 'daily'],
+    ['loss_weekly', 7, 'weekly'],
   ] as const) {
-    const limit = u[col] as number | null;
+    const limit = lim?.[col] ?? null;
     if (!limit) continue;
     const r = await one<{ net: number }>(
       pool,
       `select coalesce(sum(s.payout),0)::bigint as net from table_seats s join game_tables t on t.id = s.table_id
-        where s.user_id = $1 and t.ended_at > now() - ($2 || ' days')::interval`,
-      [userId, String(days)],
+        where s.user_id = $1 and t.currency = $3 and t.ended_at > now() - ($2 || ' days')::interval`,
+      [userId, String(days), currency],
     );
     const lostSoFar = Math.max(0, -r.net);
     if (lostSoFar + totalCost > limit)
-      throw new UserError(`This game could take you past your ${label} loss limit. You can change your limits in your profile.`, 'loss_limit', 403);
+      throw new UserError(`This game could take you past your ${label} ${currency} loss limit. You can change your limits in your profile.`, 'loss_limit', 403);
   }
 }
 
@@ -113,6 +121,7 @@ function summary(r: Room): TableSummary {
     id: r.id,
     game: r.game,
     mode: r.mode,
+    currency: r.currency,
     stake: r.stake,
     fee: r.fee,
     capacity: r.capacity,
@@ -184,7 +193,7 @@ export async function pushBalance(userId: string) {
   const set = userSockets.get(userId);
   if (!set?.size) return;
   const b = await balances(pool, userId);
-  for (const ws of set) send(ws, { t: 'balance', available: b.available, locked: b.locked });
+  for (const ws of set) for (const c of CURRENCIES) send(ws, { t: 'balance', currency: c, available: b[c].available, locked: b[c].locked });
 }
 
 function botSeatMeta(game: GameKind, rating: number, partner = false): BotMeta {
@@ -199,6 +208,7 @@ export interface CreateArgs {
   userId: string;
   game: GameKind;
   mode: Mode;
+  currency: Currency;
   stake: number;
   visibility: 'public' | 'private';
   time?: string;
@@ -208,10 +218,10 @@ export interface CreateArgs {
 export async function createTable(a: CreateArgs): Promise<string> {
   const capacity = META[a.game].players;
   const stake = a.mode === 'practice' ? 0 : a.stake;
-  const stakeErr = validStake(a.mode, stake);
+  const stakeErr = validStake(a.mode, stake, a.currency);
   if (stakeErr) throw new UserError(stakeErr);
-  const { fee, total } = entryCost(a.mode, stake);
-  await checkPlayAllowed(a.userId, a.mode, total);
+  const { fee, total } = entryCost(a.mode, stake, a.currency);
+  await checkPlayAllowed(a.userId, a.mode, total, a.currency);
   const timeControl = a.game === 'chess' ? (a.time && TIME_CONTROLS[a.time] ? a.time : '5+3') : null;
 
   const u = await userRow(a.userId);
@@ -234,33 +244,33 @@ export async function createTable(a: CreateArgs): Promise<string> {
 
   const id = await tx(async (c) => {
     if (a.mode === 'bot') {
-      const house = await maybe<{ balance: number }>(c, `select balance from ledger_accounts where kind='house_bankroll' and user_id is null and table_id is null`);
-      const bank = house?.balance ?? 0;
-      const cap = Math.floor(bank * BOT_MAX_BANKROLL_SHARE);
-      if (bank < stake) throw new UserError('Bot tables with credits are paused for a moment. Try practice, or play other people.', 'house_empty', 503);
-      if (stake > cap) throw new UserError(`Right now the biggest stake against the bot is ${formatCredits(cap)} credits. Pick a smaller stake or play people.`, 'bot_cap', 400);
+      // Only the house bankroll of this table's currency backs a bot game.
+      const bank = await houseBankroll(c, a.currency);
+      const cap = Math.floor((bank * BOT_MAX_BANKROLL_SHARE_BPS) / 10_000);
+      if (bank < stake) throw new UserError(`Bot games in ${a.currency} are paused for a moment. Try practice, or play other people.`, 'house_empty', 503);
+      if (stake > cap) throw new UserError(`Right now the biggest ${a.currency} stake against the bot is ${formatAmount(cap, a.currency)}. Pick a smaller stake or play people.`, 'bot_cap', 400);
     }
     const t = await one<{ id: string; created_at: string }>(
       c,
-      `insert into game_tables(game, mode, stake, fee, capacity, status, visibility, invite_code, time_control, bot_level, bot_meta, server_seed, seed_commit, client_seeds, created_by)
-       values ($1,$2,$3,$4,$5,'waiting',$6,$7,$8,$9,$10,$11,$12,$13,$14) returning id, created_at`,
+      `insert into game_tables(game, mode, currency, stake, fee, capacity, status, visibility, invite_code, time_control, bot_level, bot_meta, server_seed, seed_commit, client_seeds, created_by)
+       values ($1,$2,$15,$3,$4,$5,'waiting',$6,$7,$8,$9,$10,$11,$12,$13,$14) returning id, created_at`,
       [
         a.game, a.mode, stake, fee, capacity, a.visibility, inviteCode, timeControl,
         botMeta[1]?.level ?? null, JSON.stringify({ seats: botMeta, disclosed }), serverSeed, commitFor(serverSeed),
-        JSON.stringify([a.clientSeed]), a.userId,
+        JSON.stringify([a.clientSeed]), a.userId, a.currency,
       ],
     );
     await q(c, `insert into table_seats(table_id, seat, user_id) values ($1, 0, $2)`, [t.id, a.userId]);
     if (total > 0) {
-      await post(c, { kind: 'game_start', key: `join:${t.id}:0:${a.userId}`, userId: a.userId, tableId: t.id, memo: `${META[a.game].name} entry` }, [
-        { ref: { kind: 'user_available', userId: a.userId }, amount: -total },
-        { ref: { kind: 'game_escrow', tableId: t.id }, amount: total },
+      await post(c, { kind: 'game_start', key: `join:${t.id}:0:${a.userId}`, currency: a.currency, userId: a.userId, tableId: t.id, memo: `${META[a.game].name} entry` }, [
+        { ref: { kind: 'user_available', currency: a.currency, userId: a.userId }, amount: -total },
+        { ref: { kind: 'game_escrow', currency: a.currency, tableId: t.id }, amount: total },
       ]);
     }
     if (a.mode === 'bot') {
-      await post(c, { kind: 'game_start', key: `house:${t.id}`, tableId: t.id, memo: 'House matches stake' }, [
-        { ref: { kind: 'house_bankroll' }, amount: -stake },
-        { ref: { kind: 'game_escrow', tableId: t.id }, amount: stake },
+      await post(c, { kind: 'game_start', key: `house:${t.id}`, currency: a.currency, tableId: t.id, memo: 'House matches stake' }, [
+        { ref: { kind: 'house_bankroll', currency: a.currency }, amount: -stake },
+        { ref: { kind: 'game_escrow', currency: a.currency, tableId: t.id }, amount: stake },
       ]);
     }
     if (a.mode !== 'pvp') {
@@ -284,15 +294,15 @@ export async function joinTable(userId: string, tableId: string, clientSeed: str
     if (seatOf(room, userId) !== null) return;
     const free = Array.from({ length: room.capacity }, (_, i) => i).find((i) => !room.seats.some((s) => s.seat === i));
     if (free === undefined) throw new UserError('This table is full.', 'full', 409);
-    const { total } = entryCost(room.mode, room.stake);
-    await checkPlayAllowed(userId, room.mode, total);
+    const { total } = entryCost(room.mode, room.stake, room.currency);
+    await checkPlayAllowed(userId, room.mode, total, room.currency);
     const u = await userRow(userId);
     await tx(async (c) => {
       await q(c, `insert into table_seats(table_id, seat, user_id) values ($1,$2,$3)`, [room.id, free, userId]);
       await q(c, `update game_tables set client_seeds = client_seeds || $2::jsonb where id = $1`, [room.id, JSON.stringify([clientSeed])]);
-      await post(c, { kind: 'game_start', key: `join:${room.id}:${free}:${userId}:${Date.now()}`, userId, tableId: room.id, memo: `${META[room.game].name} entry` }, [
-        { ref: { kind: 'user_available', userId }, amount: -total },
-        { ref: { kind: 'game_escrow', tableId: room.id }, amount: total },
+      await post(c, { kind: 'game_start', key: `join:${room.id}:${free}:${userId}:${Date.now()}`, currency: room.currency, userId, tableId: room.id, memo: `${META[room.game].name} entry` }, [
+        { ref: { kind: 'user_available', currency: room.currency, userId }, amount: -total },
+        { ref: { kind: 'game_escrow', currency: room.currency, tableId: room.id }, amount: total },
       ]);
     });
     room.seats.push({ seat: free, userId, isBot: false, name: u.display_name, avatar: u.avatar });
@@ -309,13 +319,13 @@ export async function leaveTable(userId: string, tableId: string): Promise<void>
     if (room.status !== 'waiting') throw new UserError('The game has started. Use resign if you want to stop.', 'started', 409);
     const seat = seatOf(room, userId);
     if (seat === null) return;
-    const { total } = entryCost(room.mode, room.stake);
+    const { total } = entryCost(room.mode, room.stake, room.currency);
     await tx(async (c) => {
       await q(c, `delete from table_seats where table_id=$1 and seat=$2`, [room.id, seat]);
       if (total > 0)
-        await post(c, { kind: 'game_refund', key: `leave:${room.id}:${seat}:${userId}:${Date.now()}`, userId, tableId: room.id, memo: 'Left before start, full refund' }, [
-          { ref: { kind: 'game_escrow', tableId: room.id }, amount: -total },
-          { ref: { kind: 'user_available', userId }, amount: total },
+        await post(c, { kind: 'game_refund', key: `leave:${room.id}:${seat}:${userId}:${Date.now()}`, currency: room.currency, userId, tableId: room.id, memo: 'Left before start, full refund' }, [
+          { ref: { kind: 'game_escrow', currency: room.currency, tableId: room.id }, amount: -total },
+          { ref: { kind: 'user_available', currency: room.currency, userId }, amount: total },
         ]);
       if (room.seats.length === 1) await q(c, `update game_tables set status='cancelled', ended_at=now() where id=$1`, [room.id]);
     });
@@ -327,15 +337,16 @@ export async function leaveTable(userId: string, tableId: string): Promise<void>
 }
 
 /** Stake matched quick play: join an open public table or open a new one. */
-export async function quickMatch(userId: string, game: GameKind, stake: number, time: string | undefined, clientSeed: string) {
+export async function quickMatch(userId: string, game: GameKind, currency: Currency, stake: number, time: string | undefined, clientSeed: string) {
+  // Only ever pairs the same game, currency and stake.
   const open = await q<{ id: string }>(
     pool,
-    `select t.id from game_tables t where t.game=$1 and t.mode='pvp' and t.status='waiting' and t.visibility='public' and t.stake=$2
+    `select t.id from game_tables t where t.game=$1 and t.mode='pvp' and t.status='waiting' and t.visibility='public' and t.currency=$5 and t.stake=$2
        and ($3::text is null or t.time_control=$3)
        and not exists (select 1 from table_seats s where s.table_id=t.id and s.user_id=$4)
        and (select count(*) from table_seats s where s.table_id=t.id) < t.capacity
      order by t.created_at asc limit 5`,
-    [game, stake, game === 'chess' ? (time ?? '5+3') : null, userId],
+    [game, stake, game === 'chess' ? (time ?? '5+3') : null, userId, currency],
   );
   for (const t of open) {
     try {
@@ -346,7 +357,7 @@ export async function quickMatch(userId: string, game: GameKind, stake: number, 
       throw e;
     }
   }
-  return createTable({ userId, game, mode: 'pvp', stake, visibility: 'public', time, clientSeed });
+  return createTable({ userId, game, mode: 'pvp', currency, stake, visibility: 'public', time, clientSeed });
 }
 
 /** Waiting pvp table that nobody joined: replace the empty seats with bots at the same stake. */
@@ -354,7 +365,7 @@ export async function fillWithBots(userId: string, tableId: string) {
   const room = await getRoom(tableId);
   if (room.game === 'tichu' || room.seats.length !== 1) throw new UserError('This table already has other players.');
   await leaveTable(userId, tableId);
-  return createTable({ userId, game: room.game, mode: 'bot', stake: room.stake, visibility: 'public', time: room.timeControl ?? undefined, clientSeed: randomSeedHex(8) });
+  return createTable({ userId, game: room.game, mode: 'bot', currency: room.currency, stake: room.stake, visibility: 'public', time: room.timeControl ?? undefined, clientSeed: randomSeedHex(8) });
 }
 
 // ---------- loading ----------
@@ -372,6 +383,7 @@ async function loadRoom(id: string): Promise<Room> {
     id,
     game: t.game,
     mode: t.mode,
+    currency: t.currency,
     stake: t.stake,
     fee: t.fee,
     capacity: t.capacity,
@@ -632,7 +644,8 @@ async function settle(r: Room, result: GameResult) {
   const humans = r.seats.filter((s) => !s.isBot);
   const legs: { ref: any; amount: number }[] = [];
   const payout = new Map<number, number>(); // gross credits returned per seat
-  const { total } = entryCost(r.mode, r.stake);
+  const { total } = entryCost(r.mode, r.stake, r.currency);
+  const cur = r.currency;
 
   if (r.mode === 'bot') {
     const player = humans[0]!;
@@ -641,12 +654,12 @@ async function settle(r: Room, result: GameResult) {
     const pot = r.stake * 2;
     const toPlayer = result.draw ? (r.game === 'chess' ? botDrawRefund(r.stake) : r.stake) : won ? pot : 0;
     payout.set(player.seat, toPlayer);
-    legs.push({ ref: { kind: 'game_escrow', tableId: r.id }, amount: -pot });
-    if (toPlayer) legs.push({ ref: { kind: 'user_available', userId: player.userId }, amount: toPlayer });
-    if (pot - toPlayer) legs.push({ ref: { kind: 'house_bankroll' }, amount: pot - toPlayer });
+    legs.push({ ref: { kind: 'game_escrow', currency: cur, tableId: r.id }, amount: -pot });
+    if (toPlayer) legs.push({ ref: { kind: 'user_available', currency: cur, userId: player.userId }, amount: toPlayer });
+    if (pot - toPlayer) legs.push({ ref: { kind: 'house_bankroll', currency: cur }, amount: pot - toPlayer });
   } else if (r.mode === 'pvp') {
     const escrow = total * r.capacity;
-    legs.push({ ref: { kind: 'game_escrow', tableId: r.id }, amount: -escrow });
+    legs.push({ ref: { kind: 'game_escrow', currency: cur, tableId: r.id }, amount: -escrow });
     let fees = r.fee * r.capacity;
     if (result.draw) {
       for (const s of humans) payout.set(s.seat, r.stake);
@@ -658,14 +671,14 @@ async function settle(r: Room, result: GameResult) {
     }
     for (const s of humans) {
       const p = payout.get(s.seat) ?? 0;
-      if (p) legs.push({ ref: { kind: 'user_available', userId: s.userId }, amount: p });
+      if (p) legs.push({ ref: { kind: 'user_available', currency: cur, userId: s.userId }, amount: p });
     }
-    legs.push({ ref: { kind: 'fee_revenue' }, amount: fees });
+    legs.push({ ref: { kind: 'fee_revenue', currency: cur }, amount: fees });
   }
 
   r.payouts = humans.map((s) => ({ seat: s.seat, delta: (payout.get(s.seat) ?? 0) - total }));
   await tx(async (c) => {
-    if (legs.length) await post(c, { kind: 'game_settle', key: `settle:${r.id}`, tableId: r.id, memo: `${META[r.game].name} result`, meta: result }, legs);
+    if (legs.length) await post(c, { kind: 'game_settle', key: `settle:${r.id}`, currency: cur, tableId: r.id, memo: `${META[r.game].name} result`, meta: result }, legs);
     for (const p of r.payouts) await q(c, `update table_seats set payout=$3 where table_id=$1 and seat=$2`, [r.id, p.seat, r.mode === 'practice' ? 0 : p.delta]);
     await q(c, `update game_tables set status='settled', ended_at=now(), result=$2 where id=$1`, [
       r.id,
@@ -757,11 +770,12 @@ export async function tableSummary(tableId: string, userId: string | null) {
   return { table: summary(r), you: seatOf(r, userId) };
 }
 
-export async function lobbyTables(game?: GameKind) {
+export async function lobbyTables(game?: GameKind, currency?: Currency) {
   const rows = await q<{ id: string }>(
     pool,
-    `select id from game_tables where status='waiting' and mode='pvp' and visibility='public' and ($1::text is null or game=$1) order by created_at desc limit 30`,
-    [game ?? null],
+    `select id from game_tables where status='waiting' and mode='pvp' and visibility='public'
+        and ($1::text is null or game=$1) and ($2::text is null or currency=$2) order by created_at desc limit 30`,
+    [game ?? null, currency ?? null],
   );
   const out: TableSummary[] = [];
   for (const { id } of rows) out.push(summary(await getRoom(id)));

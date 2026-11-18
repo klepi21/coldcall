@@ -9,10 +9,19 @@ import {
   QuickMatchZ,
   JoinTableZ,
   WithdrawRequestZ,
-  DepositConfirmZ,
+  DepositBuildZ,
+  DigestZ,
+  SignedTxZ,
+  CurrencyZ,
   ClientMsgZ,
   GameKindZ,
   EquipZ,
+  CURRENCIES,
+  CURRENCY,
+  BOT_MAX_BANKROLL_SHARE_BPS,
+  baseToMinor,
+  formatAmount,
+  type Currency,
 } from '@coldcall/shared';
 import { commitFor, chessEngine, backgammonEngine, tichuEngine, Rng } from '@coldcall/games';
 import { env } from './env';
@@ -23,14 +32,16 @@ import {
   COOKIE,
   TERMS_VERSION,
   createNonce,
-  verifySignIn,
+  verifyGuestSignIn,
+  verifyGoogleSignIn,
+  AuthError,
   setSessionCookie,
   sessionUser,
   requireUser,
   requireAdmin,
   publicUser,
 } from './lib/auth';
-import { balances, liabilities, InsufficientFunds } from './ledger';
+import { balances, liabilities, houseBankroll, InsufficientFunds } from './ledger';
 import {
   createTable,
   joinTable,
@@ -50,19 +61,19 @@ import {
   _rooms,
 } from './games/rooms';
 import {
-  buildDeposit,
-  creditDeposit,
+  buildDepositTx,
+  submitSigned,
+  confirmDigest,
+  buildLofiFaucet,
+  dripTestSui,
   requestWithdrawal,
   reissueTicket,
-  confirmWithdrawal,
   sweepWithdrawals,
-  scanDeposits,
+  scanVaultEvents,
   reserveCheck,
   walletOverview,
-  buildSend,
-  portfolio,
 } from './wallet';
-import { faucet, chainConfig, connection, tokenBalanceBase, vaultBalanceBase } from './chain/vault';
+import { chainConfig, vaultBalanceBase } from './chain/vault';
 import { chessBotFor, levelFor } from './games/calibration';
 import { stockfishEval, stopStockfish } from './games/stockfish';
 import { getProgress, getAward, equip, EquipError } from './progress';
@@ -84,9 +95,10 @@ app.setErrorHandler((err, _req, reply) => {
   if (err instanceof InsufficientFunds)
     return reply.code(402).send({
       error: 'insufficient_funds',
-      message: `You need ${(err.needed / 100).toFixed(2)} credits for this. You have ${(err.available / 100).toFixed(2)}. Add money or pick a smaller stake.`,
+      message: `You need ${formatAmount(err.needed, err.currency)} for this. You have ${formatAmount(err.available, err.currency)}. Add ${err.currency} or pick a smaller stake.`,
     });
   if (err instanceof ZodError) return reply.code(400).send({ error: 'invalid', message: 'Some details were not valid. Please check and try again.', issues: err.issues });
+  if (err instanceof AuthError) return reply.code(401).send({ error: 'auth', message: err.message });
   if ((err as any).statusCode === 429) return reply.code(429).send({ error: 'rate_limited', message: 'Slow down a little and try again in a moment.' });
   log.error(err);
   return reply.code(500).send({ error: 'server', message: 'Something went wrong on our side. Your money is safe. Please try again.' });
@@ -96,59 +108,94 @@ app.setErrorHandler((err, _req, reply) => {
 app.get('/api/health', async () => ({ ok: true }));
 app.get('/api/config', async () => {
   const c = chainConfig();
-  return { cluster: c.cluster, rpc: env.PUBLIC_SOLANA_RPC ?? (env.SOLANA_RPC.includes('api-key') ? 'https://api.devnet.solana.com' : env.SOLANA_RPC), programId: c.programId, mint: c.mint, vault: c.vault, termsVersion: TERMS_VERSION };
+  return {
+    network: env.SUI_NETWORK,
+    rpc: env.SUI_RPC,
+    packageId: c.packageId,
+    faucetId: c.faucetId,
+    vaults: { LOFI: c.vaults.LOFI.id, SUI: c.vaults.SUI.id },
+    coinTypes: { LOFI: c.lofiType, SUI: c.suiType },
+    gameAddress: c.gameAddress,
+    googleClientId: env.GOOGLE_CLIENT_ID ?? null,
+    zkProver: 'https://prover-dev.mystenlabs.com/v1',
+    termsVersion: TERMS_VERSION,
+  };
 });
 
 app.get('/api/stats', async () => {
   const online = new Set<string>();
   for (const set of userSockets.keys()) online.add(set);
   const playing = (await one<{ n: number }>(pool, `select count(*)::int as n from game_tables where status='playing'`)).n;
-  const totals = await one<{ games: number; paid: number }>(
+  const games = (await one<{ n: number }>(pool, `select count(*)::int as n from game_tables where status='settled'`)).n;
+  const paidRows = await q<{ currency: Currency; s: number }>(
     pool,
-    `select (select count(*)::int from game_tables where status='settled') as games,
-            (select coalesce(sum(payout),0)::bigint from table_seats where payout > 0) as paid`,
+    `select t.currency, coalesce(sum(s.payout),0)::bigint as s from table_seats s join game_tables t on t.id = s.table_id where s.payout > 0 group by t.currency`,
   );
-  // Real recent wins only, first letter of the display name for privacy.
-  const recent = await q<{ name: string; game: string; amount: number; at: string; mode: string }>(
+  const won = Object.fromEntries(CURRENCIES.map((c) => [c, paidRows.find((r) => r.currency === c)?.s ?? 0]));
+  // Real recent wins only, first letter of the display name for privacy. Each amount keeps its coin.
+  const recent = await q<{ name: string; game: string; amount: number; currency: Currency; at: string; mode: string }>(
     pool,
-    `select left(u.display_name, 1) || '.' as name, t.game, s.payout as amount, t.ended_at as at, t.mode
+    `select left(u.display_name, 1) || '.' as name, t.game, s.payout as amount, t.currency, t.ended_at as at, t.mode
        from table_seats s join game_tables t on t.id = s.table_id join users u on u.id = s.user_id
       where s.payout > 0 and t.status = 'settled' and u.role = 'user'
       order by t.ended_at desc limit 12`,
   );
-  return { online: online.size, playing, gamesPlayed: totals.games, creditsWon: totals.paid, recentWins: recent };
+  return { online: online.size, playing, gamesPlayed: games, won, recentWins: recent };
 });
 
-/** Live on-chain vault balance (cached 10s) next to what the platform owes. */
+/** Live on-chain vault balances (cached 10s) next to what is held for others, one row per currency. */
 let vaultCache: { at: number; data: unknown } | null = null;
 app.get('/api/vault', async () => {
   if (vaultCache && Date.now() - vaultCache.at < 10_000) return vaultCache.data;
-  const base = await vaultBalanceBase();
-  const owed = await liabilities(pool);
-  const data = { usdc: Number(base) / 1_000_000, minor: Number(base / 100n), owedMinor: owed, backed: Number(base / 100n) >= owed, at: new Date().toISOString() };
+  const c = chainConfig();
+  const rows = [];
+  for (const cur of CURRENCIES) {
+    const minor = baseToMinor(await vaultBalanceBase(cur), cur);
+    const owed = await liabilities(pool, cur);
+    rows.push({ currency: cur, vaultId: c.vaults[cur].id, minor, owedMinor: owed, backed: minor >= owed });
+  }
+  const data = { vaults: rows, at: new Date().toISOString() };
   vaultCache = { at: Date.now(), data };
   return data;
 });
 
 app.get('/api/reserve', async () => {
-  const last = await maybe<any>(pool, `select * from reserve_checks order by id desc limit 1`);
-  return last ?? (await reserveCheck());
+  const last = await q<any>(pool, `select distinct on (currency) * from reserve_checks order by currency, id desc`);
+  return last.length === CURRENCIES.length ? last : await reserveCheck();
 });
 
 // ---------- auth ----------
+const SuiAddressZ = z.string().regex(/^0x[0-9a-f]{64}$/);
+
+/** Guest wallet: one time message to sign. */
 app.get('/api/auth/nonce', { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } }, async (req) => {
-  const { address } = z.object({ address: z.string().min(32).max(44) }).parse(req.query);
+  const { address } = z.object({ address: SuiAddressZ }).parse(req.query);
   return createNonce(address);
 });
 
 app.post('/api/auth/verify', { config: { rateLimit: { max: 30, timeWindow: '1 minute' } } }, async (req, reply) => {
   const b = z
-    .object({ address: z.string(), nonce: z.string(), issuedAt: z.string(), signature: z.string(), walletKind: z.string().default('external') })
+    .object({ address: SuiAddressZ, nonce: z.string().regex(/^[0-9a-f]{32}$/), issuedAt: z.string().max(40), signature: z.string().min(10).max(500) })
     .parse(req.body);
-  const r = await verifySignIn(b.address, b.nonce, b.issuedAt, b.signature, b.walletKind);
+  const r = await verifyGuestSignIn(b.address, b.nonce, b.issuedAt, b.signature);
   if (!r) return reply.code(401).send({ error: 'bad_signature', message: 'We could not confirm that signature. Please try signing in again.' });
   setSessionCookie(reply, r.sid);
   return { user: publicUser(r.user) };
+});
+
+/** Google zkLogin: verify the id_token, hand back the stable salt, open a session for the derived address. */
+app.post('/api/auth/google', { config: { rateLimit: { max: 20, timeWindow: '1 minute' } } }, async (req, reply) => {
+  const b = z
+    .object({
+      idToken: z.string().min(20).max(4096),
+      ephemeralPublicKey: z.string().min(20).max(100),
+      maxEpoch: z.number().int().positive(),
+      randomness: z.string().regex(/^\d{1,80}$/),
+    })
+    .parse(req.body);
+  const r = await verifyGoogleSignIn(b.idToken, { ephemeralPublicKey: b.ephemeralPublicKey, maxEpoch: b.maxEpoch, randomness: b.randomness });
+  setSessionCookie(reply, r.sid);
+  return { user: publicUser(r.user), salt: r.salt, address: r.address };
 });
 
 app.post('/api/auth/logout', async (req, reply) => {
@@ -159,9 +206,19 @@ app.post('/api/auth/logout', async (req, reply) => {
 });
 
 // ---------- me ----------
+async function limitsOf(userId: string) {
+  const rows = await q<any>(pool, `select * from user_limits where user_id=$1`, [userId]);
+  return Object.fromEntries(
+    CURRENCIES.map((c) => {
+      const r = rows.find((x) => x.currency === c);
+      return [c, { depositDaily: r?.deposit_daily ?? null, lossDaily: r?.loss_daily ?? null, lossWeekly: r?.loss_weekly ?? null, pending: r?.pending ?? null, pendingAt: r?.pending_at ?? null }];
+    }),
+  );
+}
+
 app.get('/api/me', { preHandler: requireUser }, async (req) => {
   const b = await balances(pool, req.user.id);
-  return { user: publicUser(req.user), balance: b };
+  return { user: publicUser(req.user, await limitsOf(req.user.id)), balances: b };
 });
 
 app.post('/api/me/onboard', { preHandler: requireUser }, async (req) => {
@@ -173,7 +230,7 @@ app.post('/api/me/onboard', { preHandler: requireUser }, async (req) => {
     `update users set display_name=$2, age_confirmed_at=coalesce(age_confirmed_at, now()), terms_accepted_at=now(), terms_version=$3, onboarded_at=coalesce(onboarded_at, now()) where id=$1 returning *`,
     [req.user.id, b.displayName, TERMS_VERSION],
   );
-  return { user: publicUser(u) };
+  return { user: publicUser(u, await limitsOf(req.user.id)) };
 });
 
 app.patch('/api/me', { preHandler: requireUser }, async (req) => {
@@ -181,7 +238,7 @@ app.patch('/api/me', { preHandler: requireUser }, async (req) => {
     .object({
       displayName: z.string().trim().min(2).max(20).regex(/^[\p{L}\p{N} _.]+$/u).optional(),
       avatar: z.enum(['laurel', 'owl', 'olive', 'wave', 'sun', 'column', 'amphora', 'star']).optional(),
-      settings: z.object({ sound: z.boolean().optional(), theme: z.enum(['system', 'dark', 'light']).optional(), confirmMoves: z.boolean().optional(), boardTheme: z.enum(['marble', 'night']).optional(), hints: z.boolean().optional(), render3d: z.boolean().optional() }).optional(),
+      settings: z.object({ currency: CurrencyZ.optional(), sound: z.boolean().optional(), theme: z.enum(['system', 'dark', 'light']).optional(), confirmMoves: z.boolean().optional(), boardTheme: z.enum(['marble', 'night']).optional(), hints: z.boolean().optional(), render3d: z.boolean().optional() }).optional(),
     })
     .parse(req.body);
   const u = await one(
@@ -189,44 +246,49 @@ app.patch('/api/me', { preHandler: requireUser }, async (req) => {
     `update users set display_name=coalesce($2, display_name), avatar=coalesce($3, avatar), settings = settings || $4::jsonb where id=$1 returning *`,
     [req.user.id, b.displayName ?? null, b.avatar ?? null, JSON.stringify(b.settings ?? {})],
   );
-  return { user: publicUser(u) };
+  return { user: publicUser(u, await limitsOf(req.user.id)) };
 });
 
+/** Limits are per currency. Lowering a limit applies now. Raising or removing one waits 24 hours. */
 app.post('/api/me/limits', { preHandler: requireUser }, async (req) => {
-  const n = z.number().int().positive().nullable();
-  const b = z.object({ depositDaily: n, lossDaily: n, lossWeekly: n }).parse(req.body);
-  // Lowering a limit applies now. Raising or removing one waits 24 hours (standard safer play rule).
-  const u = req.user;
-  const lower = (cur: number | null, next: number | null) => next !== null && (cur === null || next <= cur);
-  const apply = (cur: number | null, next: number | null) => (lower(cur, next) ? next : cur);
+  const n = z.number().int().positive().max(1_000_000_000).nullable();
+  const b = z.object({ currency: CurrencyZ, depositDaily: n, lossDaily: n, lossWeekly: n }).parse(req.body);
+  const cur =
+    (await maybe<any>(pool, `select * from user_limits where user_id=$1 and currency=$2`, [req.user.id, b.currency])) ??
+    { deposit_daily: null, loss_daily: null, loss_weekly: null };
+  const lower = (now: number | null, next: number | null) => next !== null && (now === null || next <= now);
+  const apply = (now: number | null, next: number | null) => (lower(now, next) ? next : now);
   const pending: Record<string, number | null> = {};
-  for (const [k, col] of [['depositDaily', 'limit_deposit_daily'], ['lossDaily', 'limit_loss_daily'], ['lossWeekly', 'limit_loss_weekly']] as const)
-    if (!lower(u[col], b[k]) && u[col] !== b[k]) pending[k] = b[k];
-  const updated = await one(
+  for (const [k, col] of [['depositDaily', 'deposit_daily'], ['lossDaily', 'loss_daily'], ['lossWeekly', 'loss_weekly']] as const)
+    if (!lower(cur[col], b[k]) && cur[col] !== b[k]) pending[k] = b[k];
+  const has = Object.keys(pending).length > 0;
+  await q(
     pool,
-    `update users set limit_deposit_daily=$2, limit_loss_daily=$3, limit_loss_weekly=$4,
-       settings = settings || jsonb_build_object('pendingLimits', $5::jsonb, 'pendingLimitsAt', now() + interval '24 hours') where id=$1 returning *`,
-    [u.id, apply(u.limit_deposit_daily, b.depositDaily), apply(u.limit_loss_daily, b.lossDaily), apply(u.limit_loss_weekly, b.lossWeekly), JSON.stringify(Object.keys(pending).length ? pending : null)],
+    `insert into user_limits(user_id, currency, deposit_daily, loss_daily, loss_weekly, pending, pending_at)
+     values ($1,$2,$3,$4,$5,$6, case when $6::jsonb is null then null else now() + interval '24 hours' end)
+     on conflict (user_id, currency) do update set deposit_daily=$3, loss_daily=$4, loss_weekly=$5, pending=$6,
+       pending_at = case when $6::jsonb is null then null else now() + interval '24 hours' end`,
+    [req.user.id, b.currency, apply(cur.deposit_daily, b.depositDaily), apply(cur.loss_daily, b.lossDaily), apply(cur.loss_weekly, b.lossWeekly), has ? JSON.stringify(pending) : null],
   );
-  return { user: publicUser(updated), pending };
+  return { user: publicUser(req.user, await limitsOf(req.user.id)), pending };
 });
 
 app.post('/api/me/cooloff', { preHandler: requireUser }, async (req) => {
   const { hours } = z.object({ hours: z.union([z.literal(24), z.literal(168), z.literal(720)]) }).parse(req.body);
   const u = await one(pool, `update users set cooloff_until = now() + ($2 || ' hours')::interval where id=$1 returning *`, [req.user.id, String(hours)]);
-  return { user: publicUser(u) };
+  return { user: publicUser(u, await limitsOf(req.user.id)) };
 });
 
 app.post('/api/me/exclude', { preHandler: requireUser }, async (req) => {
   const { months } = z.object({ months: z.union([z.literal(6), z.literal(12)]) }).parse(req.body);
   const u = await one(pool, `update users set excluded_until = now() + ($2 || ' months')::interval where id=$1 returning *`, [req.user.id, String(months)]);
-  return { user: publicUser(u) };
+  return { user: publicUser(u, await limitsOf(req.user.id)) };
 });
 
 app.get('/api/me/history', { preHandler: requireUser }, async (req) => {
   return q(
     pool,
-    `select t.id, t.game, t.mode, t.stake, t.fee, t.status, t.result, t.created_at, t.ended_at, s.seat, s.payout
+    `select t.id, t.game, t.mode, t.currency, t.stake, t.fee, t.status, t.result, t.created_at, t.ended_at, s.seat, s.payout
        from table_seats s join game_tables t on t.id = s.table_id
       where s.user_id=$1 order by t.created_at desc limit 50`,
     [req.user.id],
@@ -253,83 +315,59 @@ app.post('/api/progress/equip', { preHandler: requireUser }, async (req) => {
   }
 });
 
-// ---------- wallet ----------
+// ---------- wallet (every call names its currency) ----------
 app.get('/api/wallet', { preHandler: requireUser }, async (req) => {
-  const o = await walletOverview(req.user.id, req.user.wallet_address);
-  const [tokens, sol] = await Promise.all([tokenBalanceBase(req.user.wallet_address), connection.getBalance(new (await import('@solana/web3.js')).PublicKey(req.user.wallet_address))]);
-  return { ...o, walletTokens: Number(tokens / 100n), walletSol: sol / 1e9 };
+  const { currency } = z.object({ currency: CurrencyZ.default('LOFI') }).parse(req.query);
+  return walletOverview(req.user.id, req.user.wallet_address, currency);
 });
 
-app.post('/api/wallet/faucet', { preHandler: requireUser, config: { rateLimit: { max: 3, timeWindow: '1 minute' } } }, async (req) => {
-  const last = req.user.settings?.lastFaucetAt ? new Date(req.user.settings.lastFaucetAt).getTime() : 0;
-  if (Date.now() - last < 20 * 3600_000 && env.SOLANA_CLUSTER !== 'localnet')
-    throw new UserError('You can get free test money once a day. Come back tomorrow.', 'faucet_limit', 429);
-  const r = await faucet(req.user.wallet_address, env.FAUCET_TOKENS);
-  await q(pool, `update users set settings = settings || jsonb_build_object('lastFaucetAt', now()) where id=$1`, [req.user.id]);
-  return { ok: true, tokens: env.FAUCET_TOKENS, signature: r.signature };
+/** Sponsored LOFI faucet claim: returns bytes for the browser to sign. */
+app.post('/api/wallet/faucet/lofi', { preHandler: requireUser, config: { rateLimit: { max: 5, timeWindow: '1 minute' } } }, async (req) =>
+  buildLofiFaucet(req.user.id, req.user.wallet_address),
+);
+
+/** "Get test SUI": the game wallet sends a little SUI. Rate limited per player and per IP. */
+app.post('/api/wallet/faucet/sui', { preHandler: requireUser, config: { rateLimit: { max: 3, timeWindow: '10 minutes' } } }, async (req) =>
+  dripTestSui(req.user.id, req.user.wallet_address),
+);
+
+app.post('/api/wallet/deposit/build', { preHandler: requireUser, config: { rateLimit: { max: 30, timeWindow: '1 minute' } } }, async (req) => {
+  const { currency, amount } = DepositBuildZ.parse(req.body);
+  return buildDepositTx(req.user.id, req.user.wallet_address, currency, amount);
 });
 
-app.post('/api/wallet/deposit/build', { preHandler: requireUser }, async (req) => {
-  const { amount } = z.object({ amount: z.number().int().min(100).max(10_000_000) }).parse(req.body);
-  return buildDeposit(req.user.id, req.user.wallet_address, amount);
+/** The browser signed bytes the server built. The server sponsors and executes them. */
+app.post('/api/wallet/submit', { preHandler: requireUser, config: { rateLimit: { max: 30, timeWindow: '1 minute' } } }, async (req) => {
+  const { bytes, signature } = SignedTxZ.parse(req.body);
+  return submitSigned(req.user.id, bytes, signature);
 });
 
-app.post('/api/wallet/send/build', { preHandler: requireUser, config: { rateLimit: { max: 20, timeWindow: '1 minute' } } }, async (req) => {
-  // amount in USDC base units (6 decimals), as a string to stay exact
-  const { to, amount, asset } = z
-    .object({ to: z.string().min(32).max(44), amount: z.string().regex(/^\d{1,20}$/), asset: z.union([z.literal('SOL'), z.literal('USDC'), z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/)]).default('USDC') })
-    .parse(req.body);
-  const base = BigInt(amount);
-  if (base <= 0n) throw new UserError('Enter an amount above zero.', 'too_small');
-  return buildSend(req.user.wallet_address, to, base, asset);
-});
-
-app.get('/api/wallet/portfolio', { preHandler: requireUser }, async (req) => {
-  return { items: await portfolio(req.user.wallet_address) };
-});
-
+/** Backup: credit a deposit by digest, read from the chain. */
 app.post('/api/wallet/deposit/confirm', { preHandler: requireUser }, async (req) => {
-  const { signature } = DepositConfirmZ.parse(req.body);
-  for (let i = 0; i < 10; i++) {
-    const r = await creditDeposit(signature);
-    if (r.credited || (await maybe(pool, `select 1 from deposits where signature=$1`, [signature]))) return { ok: true, amount: r.amount };
-    await new Promise((res) => setTimeout(res, 1000));
-  }
-  throw new UserError('We are still waiting for the network to confirm your deposit. It will show up automatically.', 'pending', 202);
+  const { digest } = z.object({ digest: DigestZ }).parse(req.body);
+  return confirmDigest(req.user.id, digest);
 });
 
 app.post('/api/wallet/withdraw', { preHandler: requireUser }, async (req) => {
-  const { amount } = WithdrawRequestZ.parse(req.body);
-  return requestWithdrawal(req.user.id, req.user.wallet_address, amount);
+  const { currency, amount } = WithdrawRequestZ.parse(req.body);
+  return requestWithdrawal(req.user.id, req.user.wallet_address, currency, amount);
 });
 app.post('/api/wallet/withdraw/:id/ticket', { preHandler: requireUser }, async (req) => {
   const { id } = z.object({ id: z.string().uuid() }).parse(req.params);
   return reissueTicket(req.user.id, req.user.wallet_address, id);
 });
-app.post('/api/wallet/withdraw/:id/confirm', { preHandler: requireUser }, async (req) => {
-  const { id } = z.object({ id: z.string().uuid() }).parse(req.params);
-  const { signature } = DepositConfirmZ.parse(req.body);
-  for (let i = 0; i < 10; i++) {
-    try {
-      return await confirmWithdrawal(req.user.id, req.user.wallet_address, id, signature);
-    } catch (e) {
-      if (!(e instanceof UserError) || e.code !== 'not_found_onchain' || i === 9) throw e;
-      await new Promise((res) => setTimeout(res, 1000));
-    }
-  }
-});
 
 // ---------- tables ----------
 app.get('/api/tables', async (req) => {
-  const { game } = z.object({ game: GameKindZ.optional() }).parse(req.query);
-  return lobbyTables(game);
+  const { game, currency } = z.object({ game: GameKindZ.optional(), currency: CurrencyZ.optional() }).parse(req.query);
+  return lobbyTables(game, currency);
 });
 
 app.get('/api/bot-info', { preHandler: requireUser }, async (req) => {
-  const { game } = z.object({ game: GameKindZ }).parse(req.query);
+  const { game, currency } = z.object({ game: GameKindZ, currency: CurrencyZ.default('LOFI') }).parse(req.query);
   const rating = req.user.ratings?.[game]?.r ?? 1500;
-  const bank = (await maybe<{ balance: number }>(pool, `select balance from ledger_accounts where kind='house_bankroll' and user_id is null and table_id is null`))?.balance ?? 0;
-  const botCap = Math.min(500_000, Math.floor(bank * 0.01));
+  const bank = await houseBankroll(pool, currency);
+  const botCap = Math.min(CURRENCY[currency].maxStakeBot, Math.floor((bank * BOT_MAX_BANKROLL_SHARE_BPS) / 10_000));
   if (game === 'chess') {
     const s = chessBotFor(rating);
     return { rating, engineElo: s.elo, expected: s.expected, botCap };
@@ -345,7 +383,7 @@ app.post('/api/tables', { preHandler: requireUser }, async (req) => {
 });
 app.post('/api/tables/quick', { preHandler: requireUser }, async (req) => {
   const b = QuickMatchZ.parse(req.body);
-  return { id: await quickMatch(req.user.id, b.game, b.stake, b.time, b.clientSeed) };
+  return { id: await quickMatch(req.user.id, b.game, b.currency, b.stake, b.time, b.clientSeed) };
 });
 app.get('/api/tables/:id', async (req) => {
   const { id } = z.object({ id: z.string().uuid() }).parse(req.params);
@@ -493,12 +531,12 @@ const every = (ms: number, name: string, fn: () => Promise<unknown>) => {
   setTimeout(run, 2000);
   return setInterval(run, ms);
 };
-every(15_000, 'deposits', scanDeposits);
+every(15_000, 'vault events', scanVaultEvents);
 every(30_000, 'withdrawals', sweepWithdrawals);
 every(300_000, 'reserve', reserveCheck);
 
 await app.listen({ port: env.PORT, host: '0.0.0.0' });
-log.info(`Evens server on :${env.PORT} (${env.SOLANA_CLUSTER})`);
+log.info(`Cold Call server on :${env.PORT} (Sui ${env.SUI_NETWORK})`);
 
 const shutdown = async () => {
   stopStockfish();

@@ -1,260 +1,341 @@
+/**
+ * Sui chain layer for the Cold Call vault (Move package in /move, ids in cold_call.config.json).
+ *
+ * The server builds every user transaction itself, with the user as sender and the cc-game wallet as gas
+ * owner. The browser only signs the bytes. When they come back, the server checks they are exactly the
+ * bytes it built (see `pending` below), adds the sponsor signature and executes. Because the server
+ * builds every sponsored transaction, it only ever sponsors three calls into this package: the LOFI
+ * faucet claim, a vault deposit and a vault withdraw. It never sponsors anything that touches `tx.gas`.
+ */
 import { createHash } from 'node:crypto';
 import { readFileSync, existsSync } from 'node:fs';
-import {
-  Connection,
-  Keypair,
-  PublicKey,
-  SystemProgram,
-  Transaction,
-  TransactionInstruction,
-  SYSVAR_INSTRUCTIONS_PUBKEY,
-  Ed25519Program,
-  LAMPORTS_PER_SOL,
-  sendAndConfirmTransaction,
-} from '@solana/web3.js';
-import {
-  TOKEN_PROGRAM_ID,
-  ASSOCIATED_TOKEN_PROGRAM_ID,
-  getAssociatedTokenAddressSync,
-  getOrCreateAssociatedTokenAccount,
-  mintTo,
-  getAccount,
-} from '@solana/spl-token';
-import nacl from 'tweetnacl';
-import bs58 from 'bs58';
+import { z } from 'zod';
+import { bcs } from '@mysten/sui/bcs';
+import { SuiGrpcClient } from '@mysten/sui/grpc';
+import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
+import { Transaction, coinWithBalance } from '@mysten/sui/transactions';
+import { fromBase64, toBase64, normalizeSuiAddress } from '@mysten/sui/utils';
+import type { Currency } from '@coldcall/shared';
 import { env } from '../env';
 
-export const PROGRAM_ID = new PublicKey(env.PROGRAM_ID);
-/**
- * Public RPC endpoints drop connections now and then ("fetch failed"). Retry network errors and
- * 429/5xx with backoff. Safe for sendTransaction too: a resent signed transaction has the same
- * signature and lands at most once.
- */
-const retryingFetch: typeof fetch = async (input, init) => {
-  let last: unknown;
-  for (let attempt = 0; attempt < 5; attempt++) {
-    try {
-      const r = await fetch(input, { ...init, signal: AbortSignal.timeout(10_000) });
-      if (r.status !== 429 && r.status < 500) return r;
-      last = new Error(`RPC HTTP ${r.status}`);
-    } catch (e) {
-      last = e;
-    }
-    await new Promise((res) => setTimeout(res, 250 * 2 ** attempt));
-  }
-  throw last;
-};
-export const connection = new Connection(env.SOLANA_RPC, { commitment: 'confirmed', fetch: retryingFetch, disableRetryOnRateLimit: true });
+export const CLOCK = '0x6';
 
-export function loadKeypair(path: string): Keypair {
-  return Keypair.fromSecretKey(Uint8Array.from(JSON.parse(readFileSync(path, 'utf8'))));
-}
+const AddrZ = z.string().regex(/^0x[0-9a-f]{64}$/);
+const ConfigZ = z.object({
+  network: z.string(),
+  rpc: z.string().url(),
+  packageId: AddrZ,
+  faucetId: AddrZ,
+  lofiType: z.string(),
+  suiType: z.string(),
+  vaults: z.object({ SUI: z.object({ id: AddrZ }), LOFI: z.object({ id: AddrZ }) }),
+  gameAddress: AddrZ,
+  adminAddress: AddrZ,
+  gamePubkeyHex: z.string().regex(/^[0-9a-f]{64}$/),
+});
+export type ChainConfig = z.infer<typeof ConfigZ>;
 
-export const disc = (name: string) => createHash('sha256').update(`global:${name}`).digest().subarray(0, 8);
-export const eventDisc = (name: string) => createHash('sha256').update(`event:${name}`).digest().subarray(0, 8);
-
-export const configPda = () => PublicKey.findProgramAddressSync([Buffer.from('config')], PROGRAM_ID)[0];
-export const vaultPda = () => PublicKey.findProgramAddressSync([Buffer.from('vault')], PROGRAM_ID)[0];
-export const noncePda = (user: PublicKey, nonce: bigint) => {
-  const n = Buffer.alloc(8);
-  n.writeBigUInt64LE(nonce);
-  return PublicKey.findProgramAddressSync([Buffer.from('nonce'), user.toBuffer(), n], PROGRAM_ID)[0];
-};
-
-export interface ChainConfig {
-  cluster: string;
-  programId: string;
-  mint: string;
-  config: string;
-  vault: string;
-  serverSigner: string;
-  admin: string;
-}
-
+let cfg: ChainConfig | null = null;
 export function chainConfig(): ChainConfig {
-  if (!existsSync(env.CHAIN_CONFIG)) throw new Error(`Missing ${env.CHAIN_CONFIG}. Run pnpm chain:setup first.`);
-  return JSON.parse(readFileSync(env.CHAIN_CONFIG, 'utf8'));
-}
-
-const u64 = (n: bigint) => {
-  const b = Buffer.alloc(8);
-  b.writeBigUInt64LE(n);
-  return b;
-};
-const i64 = (n: bigint) => {
-  const b = Buffer.alloc(8);
-  b.writeBigInt64LE(n);
-  return b;
-};
-
-/** Must match `ticket_message` in programs/evens_vault/src/lib.rs exactly. */
-export function ticketMessage(user: PublicKey, mint: PublicKey, amount: bigint, nonce: bigint, expiry: bigint): Buffer {
-  return Buffer.concat([
-    Buffer.from('EVENS_WITHDRAW_V1'),
-    PROGRAM_ID.toBuffer(),
-    configPda().toBuffer(),
-    user.toBuffer(),
-    mint.toBuffer(),
-    u64(amount),
-    u64(nonce),
-    i64(expiry),
-  ]);
-}
-
-/** Signer abstraction so a KMS can replace the local key file in production. */
-export interface TicketSigner {
-  publicKey: PublicKey;
-  sign(message: Uint8Array): Promise<Uint8Array>;
-}
-let signer: TicketSigner | null = null;
-export function ticketSigner(): TicketSigner {
-  if (!signer) {
-    const kp = loadKeypair(env.SERVER_SIGNER_KEY);
-    signer = { publicKey: kp.publicKey, sign: async (m) => nacl.sign.detached(m, kp.secretKey) };
+  if (!cfg) {
+    if (!existsSync(env.COLD_CALL_CONFIG)) throw new Error(`Missing ${env.COLD_CALL_CONFIG}. Publish the Move package first (move/scripts/publish.sh).`);
+    cfg = ConfigZ.parse(JSON.parse(readFileSync(env.COLD_CALL_CONFIG, 'utf8')));
   }
-  return signer;
+  return cfg;
 }
 
-export async function signTicket(user: PublicKey, amountBase: bigint, nonce: bigint, expiry: bigint) {
-  const cfg = chainConfig();
-  const msg = ticketMessage(user, new PublicKey(cfg.mint), amountBase, nonce, expiry);
-  const sig = await ticketSigner().sign(msg);
-  return { message: msg, signature: bs58.encode(sig) };
-}
+export const client = new SuiGrpcClient({ network: env.SUI_NETWORK as 'devnet', baseUrl: env.SUI_RPC });
 
-/** Builds the two instructions a client needs to cash out (Ed25519 verify + withdraw). */
-export function withdrawInstructions(user: PublicKey, amountBase: bigint, nonce: bigint, expiry: bigint, signatureB58: string) {
-  const cfg = chainConfig();
-  const mint = new PublicKey(cfg.mint);
-  const msg = ticketMessage(user, mint, amountBase, nonce, expiry);
-  const edIx = Ed25519Program.createInstructionWithPublicKey({
-    publicKey: ticketSigner().publicKey.toBytes(),
-    message: msg,
-    signature: bs58.decode(signatureB58),
-  });
-  const data = Buffer.concat([disc('withdraw'), u64(amountBase), u64(nonce), i64(expiry)]);
-  const ix = new TransactionInstruction({
-    programId: PROGRAM_ID,
-    keys: [
-      { pubkey: user, isSigner: true, isWritable: true },
-      { pubkey: configPda(), isSigner: false, isWritable: true },
-      { pubkey: mint, isSigner: false, isWritable: false },
-      { pubkey: getAssociatedTokenAddressSync(mint, user), isSigner: false, isWritable: true },
-      { pubkey: vaultPda(), isSigner: false, isWritable: true },
-      { pubkey: noncePda(user, nonce), isSigner: false, isWritable: true },
-      { pubkey: SYSVAR_INSTRUCTIONS_PUBKEY, isSigner: false, isWritable: false },
-      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
-      { pubkey: ASSOCIATED_TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
-      { pubkey: SystemProgram.programId, isSigner: false, isWritable: false },
-    ],
-    data,
-  });
-  return [edIx, ix];
-}
-
-export function depositInstruction(user: PublicKey, amountBase: bigint) {
-  const cfg = chainConfig();
-  const mint = new PublicKey(cfg.mint);
-  return new TransactionInstruction({
-    programId: PROGRAM_ID,
-    keys: [
-      { pubkey: user, isSigner: true, isWritable: true },
-      { pubkey: configPda(), isSigner: false, isWritable: true },
-      { pubkey: mint, isSigner: false, isWritable: false },
-      { pubkey: getAssociatedTokenAddressSync(mint, user), isSigner: false, isWritable: true },
-      { pubkey: vaultPda(), isSigner: false, isWritable: true },
-      { pubkey: TOKEN_PROGRAM_ID, isSigner: false, isWritable: false },
-    ],
-    data: Buffer.concat([disc('deposit'), u64(amountBase)]),
-  });
-}
-
-/**
- * Verifies a deposit transaction on chain. Reads the chain, never trusts the client:
- * the tx must have succeeded, call our program's `deposit` with the claimed user as signer,
- * and the vault token balance must have grown by exactly the instruction amount.
- */
-export async function verifyDeposit(signature: string): Promise<{ user: string; amountBase: bigint; slot: number } | null> {
-  const tx = await connection.getTransaction(signature, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 });
-  if (!tx || tx.meta?.err) return null;
-  const msg = tx.transaction.message;
-  const keys = msg.getAccountKeys({ accountKeysFromLookups: tx.meta?.loadedAddresses });
-  const vault = vaultPda().toBase58();
-  const depositDisc = disc('deposit');
-  for (const ix of msg.compiledInstructions) {
-    if (!keys.get(ix.programIdIndex)?.equals(PROGRAM_ID)) continue;
-    const data = Buffer.from(ix.data);
-    if (data.length !== 16 || !data.subarray(0, 8).equals(depositDisc)) continue;
-    const amount = data.readBigUInt64LE(8);
-    const user = keys.get(ix.accountKeyIndexes[0]!)!;
-    if (!msg.isAccountSigner(ix.accountKeyIndexes[0]!)) continue;
-    const vaultIndex = ix.accountKeyIndexes[4]!;
-    if (keys.get(vaultIndex)?.toBase58() !== vault) continue;
-    const pre = tx.meta?.preTokenBalances?.find((b) => b.accountIndex === vaultIndex)?.uiTokenAmount.amount ?? '0';
-    const post = tx.meta?.postTokenBalances?.find((b) => b.accountIndex === vaultIndex)?.uiTokenAmount.amount ?? '0';
-    if (BigInt(post) - BigInt(pre) < amount) continue;
-    return { user: user.toBase58(), amountBase: amount, slot: tx.slot };
+let game: Ed25519Keypair | null = null;
+/** cc-game: gas sponsor, ticket signer and sender of "Get test SUI". */
+export function gameKeypair(): Ed25519Keypair {
+  if (!game) {
+    if (!env.CC_GAME_KEY) throw new Error('CC_GAME_KEY is not set');
+    game = Ed25519Keypair.fromSecretKey(env.CC_GAME_KEY);
+    const c = chainConfig();
+    if (game.toSuiAddress() !== c.gameAddress) throw new Error('CC_GAME_KEY does not match gameAddress in the config');
+    if (Buffer.from(game.getPublicKey().toRawBytes()).toString('hex') !== c.gamePubkeyHex) throw new Error('CC_GAME_KEY does not match the vault ticket key');
   }
+  return game;
+}
+
+export const coinType = (c: Currency) => (c === 'SUI' ? chainConfig().suiType : chainConfig().lofiType);
+export const vaultId = (c: Currency) => chainConfig().vaults[c].id;
+export const isSuiAddress = (a: string) => /^0x[0-9a-f]{64}$/.test(a);
+export const normAddr = (a: string) => normalizeSuiAddress(a);
+
+/** Which currency a vault object id belongs to, or null if it is not ours. */
+export function currencyOfVault(id: string): Currency | null {
+  const c = chainConfig();
+  const n = normAddr(id);
+  if (n === c.vaults.LOFI.id) return 'LOFI';
+  if (n === c.vaults.SUI.id) return 'SUI';
   return null;
 }
 
-/** Withdraw confirmation: tx succeeded and called withdraw with this nonce for this user. */
-export async function verifyWithdraw(signature: string, user: string, nonce: bigint): Promise<boolean> {
-  const tx = await connection.getTransaction(signature, { commitment: 'confirmed', maxSupportedTransactionVersion: 0 });
-  if (!tx || tx.meta?.err) return false;
-  const msg = tx.transaction.message;
-  const keys = msg.getAccountKeys({ accountKeysFromLookups: tx.meta?.loadedAddresses });
-  for (const ix of msg.compiledInstructions) {
-    if (!keys.get(ix.programIdIndex)?.equals(PROGRAM_ID)) continue;
-    const data = Buffer.from(ix.data);
-    if (!data.subarray(0, 8).equals(disc('withdraw'))) continue;
-    if (data.readBigUInt64LE(16) !== nonce) continue;
-    if (keys.get(ix.accountKeyIndexes[0]!)?.toBase58() === user) return true;
+// ---------- withdrawal tickets ----------
+
+const Ticket = bcs.struct('Ticket', {
+  vault: bcs.Address,
+  recipient: bcs.Address,
+  amount: bcs.u64(),
+  nonce: bcs.u64(),
+  expiry_ms: bcs.u64(),
+});
+
+/** The exact 88 bytes `vault::ticket_message` builds on chain. */
+export function ticketMessage(t: { currency: Currency; recipient: string; amountBase: bigint; nonce: bigint; expiryMs: bigint }): Uint8Array {
+  const bytes = Ticket.serialize({ vault: vaultId(t.currency), recipient: t.recipient, amount: t.amountBase, nonce: t.nonce, expiry_ms: t.expiryMs }).toBytes();
+  if (bytes.length !== 88) throw new Error('ticket must be 88 bytes');
+  return bytes;
+}
+
+/** Raw 64 byte Ed25519 signature (no intent, no hash), hex encoded. */
+export async function signTicket(t: Parameters<typeof ticketMessage>[0]): Promise<string> {
+  const sig = await gameKeypair().sign(ticketMessage(t));
+  return Buffer.from(sig).toString('hex');
+}
+
+// ---------- sponsored transactions ----------
+
+export type SponsoredKind = 'deposit' | 'withdraw' | 'faucet';
+interface Pending {
+  userId: string;
+  sender: string;
+  kind: SponsoredKind;
+  meta: Record<string, unknown>;
+  expires: number;
+}
+/** sha256(bytes) -> what the server built. Only these bytes are ever sponsor signed. */
+const pending = new Map<string, Pending>();
+const hashBytes = (b: Uint8Array) => createHash('sha256').update(b).digest('hex');
+
+function remember(bytes: Uint8Array, p: Omit<Pending, 'expires'>) {
+  const now = Date.now();
+  for (const [k, v] of pending) if (v.expires < now) pending.delete(k);
+  pending.set(hashBytes(bytes), { ...p, expires: now + 10 * 60_000 });
+}
+
+async function sponsor(tx: Transaction, sender: string): Promise<Uint8Array> {
+  tx.setSender(sender);
+  tx.setGasOwner(chainConfig().gameAddress);
+  tx.setGasBudgetIfNotSet(50_000_000n);
+  return tx.build({ client });
+}
+
+export class ChainUserError extends Error {
+  constructor(message: string, public code: string) {
+    super(message);
   }
-  return false;
 }
 
-export async function vaultBalanceBase(): Promise<bigint> {
-  const acc = await getAccount(connection, vaultPda());
-  return acc.amount;
-}
-
-export async function recentVaultSignatures(limit = 50): Promise<string[]> {
-  const sigs = await connection.getSignaturesForAddress(vaultPda(), { limit });
-  return sigs.filter((s) => !s.err).map((s) => s.signature);
-}
-
-/** Devnet faucet: mint test USDC to the user's ATA, and top up a little SOL for fees. */
-export async function faucet(userAddress: string, tokens: number) {
-  const cfg = chainConfig();
-  const mintAuth = loadKeypair(env.MINT_AUTHORITY_KEY);
-  const payer = loadKeypair(env.DEPLOYER_KEY);
-  const user = new PublicKey(userAddress);
-  const mint = new PublicKey(cfg.mint);
-  const sol = await connection.getBalance(user);
-  if (sol < 0.01 * LAMPORTS_PER_SOL) {
-    if (env.SOLANA_CLUSTER === 'localnet') {
-      const sig = await connection.requestAirdrop(user, LAMPORTS_PER_SOL);
-      await connection.confirmTransaction(sig, 'confirmed');
-    } else {
-      await sendAndConfirmTransaction(
-        connection,
-        new Transaction().add(SystemProgram.transfer({ fromPubkey: payer.publicKey, toPubkey: user, lamports: 0.02 * LAMPORTS_PER_SOL })),
-        [payer],
-      );
-    }
+/** Turn a Move abort from build (dry run) into a plain message. */
+export function explainAbort(e: unknown): ChainUserError | null {
+  const msg = String((e as Error)?.message ?? e);
+  const m = msg.match(/abort code: (\d+), in '(0x[0-9a-f]+)::(\w+)::(\w+)'/);
+  if (!m) {
+    if (/insufficient|not enough|InsufficientCoinBalance|balance/i.test(msg) && /coin|balance/i.test(msg))
+      return new ChainUserError('Your wallet does not hold enough of this coin for that amount.', 'wallet_insufficient');
+    return null;
   }
-  const ata = await getOrCreateAssociatedTokenAccount(connection, payer, mint, user);
-  const sig = await mintTo(connection, payer, mint, ata.address, mintAuth, BigInt(tokens) * 1_000_000n);
-  return { signature: sig, ata: ata.address.toBase58() };
+  const [, code, , mod] = m;
+  const k = `${mod}:${code}`;
+  const known: Record<string, [string, string]> = {
+    'lofi:100': ['You already got test LOFI recently. You can claim again a few hours after your last claim.', 'faucet_cooldown'],
+    'vault:1': ['Adding money and cashing out are paused for a moment. Your balance is safe. Please try again later.', 'vault_paused'],
+    'vault:3': ['This cash out ticket ran out of time. Ask for a new one, it only takes a tap.', 'ticket_expired'],
+    'vault:4': ['This cash out already went through. Refresh your wallet.', 'ticket_used'],
+    'vault:6': ['The vault cannot pay this right now. Your balance is safe. We have been told.', 'vault_low'],
+  };
+  const hit = known[k];
+  return hit ? new ChainUserError(hit[0], hit[1]) : new ChainUserError('The network refused this transaction. Nothing moved. Please try again.', 'move_abort');
 }
 
-export async function tokenBalanceBase(owner: string): Promise<bigint> {
-  const cfg = chainConfig();
+async function buildOrExplain(tx: Transaction, sender: string) {
   try {
-    const acc = await getAccount(connection, getAssociatedTokenAddressSync(new PublicKey(cfg.mint), new PublicKey(owner)));
-    return acc.amount;
-  } catch {
-    return 0n;
+    return await sponsor(tx, sender);
+  } catch (e) {
+    throw explainAbort(e) ?? e;
   }
 }
+
+/** Sponsored deposit: takes the amount from the user's own coins (never from the sponsor's gas). */
+export async function buildDeposit(userId: string, sender: string, currency: Currency, amountBase: bigint) {
+  const c = chainConfig();
+  const tx = new Transaction();
+  const coin = tx.add(coinWithBalance({ type: coinType(currency), balance: amountBase, useGasCoin: false }));
+  tx.moveCall({ target: `${c.packageId}::vault::deposit`, typeArguments: [coinType(currency)], arguments: [tx.object(vaultId(currency)), coin] });
+  const bytes = await buildOrExplain(tx, sender);
+  remember(bytes, { userId, sender, kind: 'deposit', meta: { currency, amountBase: amountBase.toString() } });
+  return toBase64(bytes);
+}
+
+/** Sponsored LOFI faucet claim (1,000 LOFI, once per cooldown, enforced by the contract). */
+export async function buildFaucetClaim(userId: string, sender: string) {
+  const c = chainConfig();
+  const tx = new Transaction();
+  tx.moveCall({ target: `${c.packageId}::lofi::claim`, arguments: [tx.object(c.faucetId), tx.object(CLOCK)] });
+  const bytes = await buildOrExplain(tx, sender);
+  remember(bytes, { userId, sender, kind: 'faucet', meta: { currency: 'LOFI' } });
+  return toBase64(bytes);
+}
+
+/** Sponsored withdraw with a server signed ticket. The coins go to the sender, who must be the recipient. */
+export async function buildWithdraw(
+  userId: string,
+  sender: string,
+  t: { currency: Currency; amountBase: bigint; nonce: bigint; expiryMs: bigint; sigHex: string; withdrawalId: string },
+) {
+  const c = chainConfig();
+  const tx = new Transaction();
+  tx.moveCall({
+    target: `${c.packageId}::vault::withdraw`,
+    typeArguments: [coinType(t.currency)],
+    arguments: [
+      tx.object(vaultId(t.currency)),
+      tx.pure.u64(t.amountBase),
+      tx.pure.u64(t.nonce),
+      tx.pure.u64(t.expiryMs),
+      tx.pure.vector('u8', Array.from(Buffer.from(t.sigHex, 'hex'))),
+      tx.object(CLOCK),
+    ],
+  });
+  const bytes = await buildOrExplain(tx, sender);
+  remember(bytes, { userId, sender, kind: 'withdraw', meta: { currency: t.currency, withdrawalId: t.withdrawalId, nonce: t.nonce.toString() } });
+  return toBase64(bytes);
+}
+
+export interface VaultEvent {
+  type: 'Deposited' | 'Withdrawn' | 'Funded' | 'AdminWithdrawn' | 'Other';
+  digest: string;
+  eventSeq: number;
+  currency: Currency | null;
+  user: string | null; // Deposited.user, Withdrawn.user, Funded.from, AdminWithdrawn.to
+  amountBase: bigint;
+  nonce: bigint | null;
+  checkpoint: number | null;
+}
+
+function parseEvent(e: any, digest: string, idx: number, checkpoint: number | null): VaultEvent | null {
+  const c = chainConfig();
+  const type: string = e.eventType ?? e.type ?? '';
+  if (!type.startsWith(`${c.packageId}::vault::`)) return null;
+  const name = type.slice(`${c.packageId}::vault::`.length);
+  const j = e.json ?? {};
+  const kind = (['Deposited', 'Withdrawn', 'Funded', 'AdminWithdrawn'].includes(name) ? name : 'Other') as VaultEvent['type'];
+  const who = j.user ?? j.from ?? j.to ?? null;
+  return {
+    type: kind,
+    digest,
+    eventSeq: idx,
+    currency: j.vault ? currencyOfVault(j.vault) : null,
+    user: who ? normAddr(who) : null,
+    amountBase: j.amount !== undefined ? BigInt(j.amount) : 0n,
+    nonce: j.nonce !== undefined ? BigInt(j.nonce) : null,
+    checkpoint,
+  };
+}
+
+/** Executes bytes the server built, after the user signed them. Returns the vault events read from the result. */
+export async function executeSponsored(userId: string, bytesB64: string, userSignature: string) {
+  const bytes = fromBase64(bytesB64);
+  const key = hashBytes(bytes);
+  const p = pending.get(key);
+  if (!p || p.userId !== userId || p.expires < Date.now())
+    throw new ChainUserError('This request is too old or was not made here. Please start again.', 'unknown_tx');
+  const { signature: sponsorSig } = await gameKeypair().signTransaction(bytes);
+  const r: any = await client.executeTransaction({ transaction: bytes, signatures: [userSignature, sponsorSig], include: { effects: true, events: true } });
+  pending.delete(key);
+  if (r.$kind !== 'Transaction') {
+    const err = JSON.stringify(r.FailedTransaction?.status?.error ?? r.FailedTransaction?.status ?? 'failed');
+    throw explainAbort(new Error(err)) ?? new ChainUserError('The network did not accept this transaction. Nothing moved.', 'tx_failed');
+  }
+  const t = r.Transaction;
+  await client.waitForTransaction({ digest: t.digest }).catch(() => {});
+  const events = (t.events ?? []).map((e: any, i: number) => parseEvent(e, t.digest, i, null)).filter(Boolean) as VaultEvent[];
+  return { digest: t.digest as string, kind: p.kind, meta: p.meta, sender: p.sender, events };
+}
+
+/** Vault events of one transaction, read from the chain (never from the client). */
+export async function transactionVaultEvents(digest: string): Promise<VaultEvent[] | null> {
+  try {
+    const r: any = await client.getTransaction({ digest, include: { events: true, effects: true } });
+    const t = r.Transaction ?? r.transaction ?? r;
+    if (r.$kind && r.$kind !== 'Transaction') return [];
+    return (t.events ?? []).map((e: any, i: number) => parseEvent(e, digest, i, null)).filter(Boolean) as VaultEvent[];
+  } catch {
+    return null;
+  }
+}
+
+/** Backup scanner: every vault event after `cursor`, oldest first. */
+export async function listVaultEvents(cursor: string | null, limit = 50) {
+  const c = chainConfig();
+  const r: any = await client.listEvents({ filter: { emitModule: `${c.packageId}::vault` }, limit, after: cursor ?? undefined } as any);
+  const events = (r.events as any[])
+    .map((e) => parseEvent(e, e.transactionDigest, Number(e.eventIndex), e.checkpoint ? Number(e.checkpoint) : null))
+    .filter(Boolean) as VaultEvent[];
+  return { events, cursor: (r.endCursor as string | null) ?? cursor, more: !!r.hasNextPage };
+}
+
+export async function vaultBalanceBase(currency: Currency): Promise<bigint> {
+  const r: any = await client.getObjects({ objectIds: [vaultId(currency)], include: { json: true } } as any);
+  const o = r.objects?.[0];
+  if (!o || o instanceof Error || !o.json) throw new Error(`vault ${currency} not readable`);
+  return BigInt(o.json.balance);
+}
+
+/** Has this ticket nonce been used on chain? Reads `vault::is_used` through a dry run. */
+export async function isNonceUsed(currency: Currency, nonce: bigint): Promise<boolean> {
+  const c = chainConfig();
+  const tx = new Transaction();
+  tx.setSender(c.gameAddress);
+  tx.moveCall({ target: `${c.packageId}::vault::is_used`, typeArguments: [coinType(currency)], arguments: [tx.object(vaultId(currency)), tx.pure.u64(nonce)] });
+  const r: any = await client.simulateTransaction({ transaction: tx, include: { commandResults: true }, checksEnabled: false } as any);
+  const out = r.commandResults?.[0]?.returnValues?.[0]?.bcs as Uint8Array | undefined;
+  if (!out) throw new Error('is_used: no return value');
+  return out[0] === 1;
+}
+
+/** Coins of this type in a wallet (base units), coin objects plus address balance. */
+export async function walletBalanceBase(owner: string, currency: Currency): Promise<bigint> {
+  const r: any = await client.getBalance({ owner, coinType: coinType(currency) });
+  return BigInt(r.balance?.balance ?? 0);
+}
+
+/** Next time the faucet lets this address claim (ms, 0 = now). */
+export async function nextFaucetClaimMs(owner: string): Promise<number> {
+  const c = chainConfig();
+  const tx = new Transaction();
+  tx.setSender(c.gameAddress);
+  tx.moveCall({ target: `${c.packageId}::lofi::next_claim_ms`, arguments: [tx.object(c.faucetId), tx.pure.address(owner)] });
+  const r: any = await client.simulateTransaction({ transaction: tx, include: { commandResults: true }, checksEnabled: false } as any);
+  const out = r.commandResults?.[0]?.returnValues?.[0]?.bcs as Uint8Array | undefined;
+  return out ? Number(bcs.u64().parse(out)) : 0;
+}
+
+let gameLock: Promise<unknown> = Promise.resolve();
+/** Transactions the game wallet sends on its own run one at a time. */
+function serial<T>(fn: () => Promise<T>): Promise<T> {
+  const p = gameLock.then(fn, fn);
+  gameLock = p.catch(() => {});
+  return p;
+}
+
+/** "Get test SUI": the game wallet sends a small SUI coin, so the player can then add SUI. */
+export function sendTestSui(to: string, amountBase: bigint) {
+  return serial(async () => {
+    const g = gameKeypair();
+    const have = await walletBalanceBase(g.toSuiAddress(), 'SUI');
+    if (have < amountBase + env.SUI_DRIP_FLOOR_BASE) throw new ChainUserError('Test SUI has run out for now. Please try again later.', 'drip_empty');
+    const tx = new Transaction();
+    tx.setSender(g.toSuiAddress());
+    tx.transferObjects([coinWithBalance({ balance: amountBase })], to);
+    const r: any = await client.signAndExecuteTransaction({ transaction: tx, signer: g, include: { effects: true } });
+    if (r.$kind !== 'Transaction') throw new ChainUserError('Sending test SUI did not work. Please try again.', 'drip_failed');
+    await client.waitForTransaction({ digest: r.Transaction.digest }).catch(() => {});
+    return r.Transaction.digest as string;
+  });
+}
+
+export const suiscan = (kind: 'tx' | 'account' | 'object', id: string) => `https://suiscan.xyz/${env.SUI_NETWORK}/${kind}/${id}`;

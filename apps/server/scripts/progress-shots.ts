@@ -5,8 +5,7 @@
  * and /progress at phone and desktop sizes.
  *   cd apps/server && npx tsx --env-file=.env scripts/progress-shots.ts [outDir]
  */
-import nacl from 'tweetnacl';
-import bs58 from 'bs58';
+import { Ed25519Keypair } from '@mysten/sui/keypairs/ed25519';
 import WebSocket from 'ws';
 import { chromium } from '@playwright/test';
 import { shipCells } from '@coldcall/games';
@@ -28,11 +27,11 @@ async function api(path: string, body?: unknown) {
   return j;
 }
 
-const kp = nacl.sign.keyPair();
-const addr = bs58.encode(kp.publicKey);
+const kp = new Ed25519Keypair();
+const addr = kp.toSuiAddress();
 const n = await api(`/api/auth/nonce?address=${addr}`);
-const sig = nacl.sign.detached(new TextEncoder().encode(n.message), kp.secretKey);
-await api('/api/auth/verify', { address: addr, nonce: n.nonce, issuedAt: n.issuedAt, signature: bs58.encode(sig), walletKind: 'embedded' });
+const { signature } = await kp.signPersonalMessage(new TextEncoder().encode(n.message));
+await api('/api/auth/verify', { address: addr, nonce: n.nonce, issuedAt: n.issuedAt, signature });
 await api('/api/me/onboard', { displayName: 'Nikos', ageConfirmed: true, termsAccepted: true });
 const sid = cookie.split('=')[1]!;
 const LOSS = process.env.LOSS === '1';

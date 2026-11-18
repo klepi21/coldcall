@@ -1,15 +1,18 @@
 import { z } from 'zod';
-import { MIN_STAKE, MAX_STAKE_PVP } from './money';
+import { CURRENCIES } from './money';
 
 export const GameKindZ = z.enum(['chess', 'backgammon', 'tichu', 'seabattle']);
 export const ModeZ = z.enum(['practice', 'bot', 'pvp']);
-export const StakeZ = z.number().int().min(MIN_STAKE).max(MAX_STAKE_PVP);
+export const CurrencyZ = z.enum(CURRENCIES);
+/** Range checked per currency by validStake. */
+export const StakeZ = z.number().int().min(1).max(100_000_000);
 export const ChessTimeZ = z.enum(['3+2', '5+3', '10+5']);
 
 export const CreateTableZ = z.object({
   game: GameKindZ,
   mode: ModeZ,
-  stake: z.number().int().min(0),
+  currency: CurrencyZ,
+  stake: z.number().int().min(0).max(100_000_000),
   visibility: z.enum(['public', 'private']).default('public'),
   time: ChessTimeZ.optional(),
   clientSeed: z.string().min(1).max(64),
@@ -18,6 +21,7 @@ export type CreateTable = z.infer<typeof CreateTableZ>;
 
 export const QuickMatchZ = z.object({
   game: GameKindZ,
+  currency: CurrencyZ,
   stake: StakeZ,
   time: ChessTimeZ.optional(),
   clientSeed: z.string().min(1).max(64),
@@ -25,8 +29,12 @@ export const QuickMatchZ = z.object({
 
 export const JoinTableZ = z.object({ clientSeed: z.string().min(1).max(64) });
 
-export const WithdrawRequestZ = z.object({ amount: z.number().int().positive() });
-export const DepositConfirmZ = z.object({ signature: z.string().min(40).max(100) });
+export const WithdrawRequestZ = z.object({ currency: CurrencyZ, amount: z.number().int().positive().max(100_000_000) });
+export const DepositBuildZ = z.object({ currency: CurrencyZ, amount: z.number().int().positive().max(100_000_000) });
+/** A Sui transaction digest (base58, 32 bytes). */
+export const DigestZ = z.string().regex(/^[1-9A-HJ-NP-Za-km-z]{32,44}$/);
+/** Browser hands back the transaction bytes the server built plus the user's signature. */
+export const SignedTxZ = z.object({ bytes: z.string().min(10).max(200_000), signature: z.string().min(10).max(20_000) });
 
 /** Client to server over WebSocket. */
 export const ClientMsgZ = z.discriminatedUnion('t', [
@@ -52,6 +60,7 @@ export interface TableSummary {
   id: string;
   game: 'chess' | 'backgammon' | 'tichu' | 'seabattle';
   mode: 'practice' | 'bot' | 'pvp';
+  currency: 'LOFI' | 'SUI';
   stake: number;
   fee: number;
   capacity: number;
@@ -87,5 +96,5 @@ export type ServerMsg =
       serverSeed: string;
     }
   | { t: 'react'; tableId: string; seat: number; emoji: string }
-  | { t: 'balance'; available: number; locked: number }
+  | { t: 'balance'; currency: 'LOFI' | 'SUI'; available: number; locked: number }
   | { t: 'pong' };
