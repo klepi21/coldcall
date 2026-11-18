@@ -17,7 +17,7 @@ A skill games arena on Sui. Chess, Backgammon, Tichu and Ice Floe Battle, played
 [![Postgres](https://img.shields.io/badge/Postgres-ledger-336791?style=for-the-badge&logo=postgresql&logoColor=white)](docs/DATABASE.md)
 [![CLAY hackathon](https://img.shields.io/badge/CLAY-Lofi_the_Yeti_hackathon-F5C542?style=for-the-badge&labelColor=0B1A2E)](#credits)
 
-### [Play now](https://coldcall.45-81-6-214.sslip.io) &nbsp;&nbsp;|&nbsp;&nbsp; [Move package on Suiscan](https://suiscan.xyz/devnet/object/0x1c3c732c1bc3c6dafb9695e277473e7c0f4241147dd8510e4ae418995af0ed43) &nbsp;&nbsp;|&nbsp;&nbsp; Demo video: coming soon
+### [Play now](https://coldcall.45-81-6-214.sslip.io) &nbsp;&nbsp;|&nbsp;&nbsp; [Move package on Suiscan](https://suiscan.xyz/devnet/object/0x1c3c732c1bc3c6dafb9695e277473e7c0f4241147dd8510e4ae418995af0ed43) &nbsp;&nbsp;|&nbsp;&nbsp; Demo video: [watch on YouTube (3:23)](https://youtu.be/SwkUPz8EQVY)
 
 </div>
 
