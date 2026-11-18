@@ -32,8 +32,8 @@ export const GAMES: Record<GameKind, GameMeta> = {
   },
   seabattle: {
     id: 'seabattle',
-    name: 'Sea Battle',
-    tagline: 'Hide your fleet. Hunt theirs.',
+    name: 'Ice Floe Battle',
+    tagline: 'Hide your icebreakers. Crack theirs.',
     players: 2,
     teams: false,
     botTarget: 'You win about 47 of 100 games.',

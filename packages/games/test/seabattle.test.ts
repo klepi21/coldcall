@@ -327,7 +327,7 @@ describe('bots', () => {
     };
     const a10 = avg(10);
     const a0 = avg(0);
-    console.log(`Sea Battle average shots to sink a fleet: level 10 = ${a10.toFixed(1)}, level 0 = ${a0.toFixed(1)}`);
+    console.log(`Ice Floe Battle average shots to sink a fleet: level 10 = ${a10.toFixed(1)}, level 0 = ${a0.toFixed(1)}`);
     expect(a10).toBeGreaterThan(17);
   }, 120_000);
 });

@@ -2,7 +2,7 @@ import type { Rng } from './rng';
 import { IllegalMoveError, type GameEngine, type GameResult, type Seat } from './types';
 
 /**
- * Sea Battle rules engine (the classic hidden fleet naval guessing game).
+ * Ice Floe Battle rules engine (the classic hidden fleet naval guessing game).
  *
  * Rules used on Cold Call:
  * - Each player has a 10 by 10 grid. Columns are A to J, rows are 1 to 10. Internally `row` and

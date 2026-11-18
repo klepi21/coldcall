@@ -2,7 +2,7 @@ import type { BotContext } from './types';
 import { SB_SIZE, sbShipSize, seaBattleEngine, type SbMark, type SbMove, type SbState } from './seabattle';
 
 /**
- * Sea Battle bot. It only reads `publicView(state, seat)`, so it knows exactly what a human in
+ * Ice Floe Battle bot. It only reads `publicView(state, seat)`, so it knows exactly what a human in
  * that seat knows: its own shots (miss, hit, sunk, auto marked) and which enemy ship types are
  * still afloat. It never looks at the hidden enemy fleet.
  *
