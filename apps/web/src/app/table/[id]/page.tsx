@@ -535,20 +535,6 @@ function TurnTimer({ ms }: { ms: number }) {
   );
 }
 
-function Laurel() {
-  return (
-    <svg viewBox="0 0 48 48" className="size-12" aria-hidden>
-      {[0, 1, 2, 3, 4].map((i) => (
-        <g key={i}>
-          <ellipse cx={14 - i * 0.5} cy={34 - i * 6} rx="3.4" ry="6" transform={`rotate(${-40 + i * 8} ${14 - i * 0.5} ${34 - i * 6})`} fill="var(--gold)" />
-          <ellipse cx={34 + i * 0.5} cy={34 - i * 6} rx="3.4" ry="6" transform={`rotate(${40 - i * 8} ${34 + i * 0.5} ${34 - i * 6})`} fill="var(--gold)" />
-        </g>
-      ))}
-      <path d="M24 42c-6-2-10-8-11-16M24 42c6-2 10-8 11-16" stroke="var(--gold)" strokeWidth="1.6" fill="none" />
-    </svg>
-  );
-}
-
 function StakeCard({ table }: { table: TableSummary }) {
   if (table.mode === 'practice') return <Card className="p-4 text-sm text-text-2">Free practice game. No coins involved.</Card>;
   const cost = entryCost(table.mode, table.stake, table.currency);
