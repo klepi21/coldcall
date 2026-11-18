@@ -1,0 +1,12 @@
+{
+  "name": "cold-call-move-scripts",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "e2e": "node e2e.mjs",
+    "vector": "node gen-vector.mjs"
+  },
+  "dependencies": {
+    "@mysten/sui": "2.39.1"
+  }
+}

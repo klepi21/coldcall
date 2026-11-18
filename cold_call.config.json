@@ -1,0 +1,41 @@
+{
+  "network": "devnet",
+  "rpc": "https://fullnode.devnet.sui.io:443",
+  "rpcProtocol": "gRPC-web via @mysten/sui 2.39.1 SuiGrpcClient (public fullnodes no longer serve JSON-RPC)",
+  "chainId": "3KRzFSVPYSpQ7dyNAhk3RqXf2KAXo9hZth1KawpKPozq",
+  "packageId": "0x1c3c732c1bc3c6dafb9695e277473e7c0f4241147dd8510e4ae418995af0ed43",
+  "adminCapId": "0xec8f943e2ffd48caf2aae1f561b81bb07c84675c0f926d235f65eb88ab993381",
+  "faucetId": "0xe2723c6d654a7de53c4462de1c75e75d6c2314b12abd3d12948291e84e42502c",
+  "upgradeCapId": "0x19b91fbe5bcad7865c5c5f2aebe4a8f331236309ba7516578c3d44c593d067c2",
+  "lofiCurrencyId": "0x4f939f42d2ece0b62c0cc0cfeaa0ec7d0f06e541b73cb70c81523a684c1d1b86",
+  "lofiMetadataCapId": "0xdb0b0b3f5932f3fcc78065e87ef442e71a7065985c78a4e3910796eb1bc7c0fd",
+  "coinRegistryId": "0xc",
+  "clockId": "0x6",
+  "lofiType": "0x1c3c732c1bc3c6dafb9695e277473e7c0f4241147dd8510e4ae418995af0ed43::lofi::LOFI",
+  "suiType": "0x2::sui::SUI",
+  "vaults": {
+    "SUI": {
+      "id": "0xf876736621841037e5737b6926cead1fbd08b72255c9fc0d87b003fd88a3b382"
+    },
+    "LOFI": {
+      "id": "0xacbc8803cfbba49c71ecd72b908767e09f07e8ceae4235a5a1be4e0e1bfa6e58"
+    }
+  },
+  "decimals": {
+    "SUI": 9,
+    "LOFI": 9
+  },
+  "bankroll": {
+    "SUI": "5000000000",
+    "LOFI": "1000000000000000"
+  },
+  "adminAddress": "0xf6329afcff87d1fd2328b0bd29bd6d1ea8821a5a197cf4bd8bdd0205a91643bc",
+  "gameAddress": "0x697e2286204f802065e2f515df291f894fc59d1f88cd0d5a32b02fb43c1b7fd4",
+  "gamePubkeyHex": "38a5df805ce425103a254af87d4e4ab63ca5e25996f1ffa2d704b6210f3e94da",
+  "publishedAt": "2026-11-18T16:47:35.483Z",
+  "digests": {
+    "publish": "DYJBSRCq5pGaipuKsUVkupKKwihfx2WxBZ5gCzkTtR4F",
+    "setup": "GBB3RujKanxvXoRAz1X29XPFByocccubhFxtjFtbLxR7",
+    "fund": "7scwCshBCTBBCeezcYq7DS6HEXBwvAZP77fkxRuKVZVR"
+  }
+}
