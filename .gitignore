@@ -16,3 +16,5 @@ keys/
 .secrets
 move/build
 move/scripts/node_modules
+CLAUDE.md
+.claude/
