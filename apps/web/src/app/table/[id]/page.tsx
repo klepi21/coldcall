@@ -586,7 +586,8 @@ function WaitingRoom({ table, mySeat, onLeave, onBots, onJoin }: { table: TableS
   const cost = entryCost(table.mode, table.stake, table.currency);
   return (
     <div className="mx-auto max-w-md pt-6">
-      <Card className="p-6 text-center">
+      <Card className="p-6 pt-2 text-center">
+        <Mascot pose="deal" className="mx-auto size-28" />
         <div className="mx-auto mb-4 flex justify-center gap-3">
           {table.seats.map((s) => (
             <motion.div key={s.seat} animate={s.userId ? { scale: 1 } : { scale: [1, 1.06, 1] }} transition={s.userId ? {} : { repeat: Infinity, duration: 1.6 }} className={`flex size-14 items-center justify-center rounded-full text-lg font-semibold ${s.userId ? 'bg-primary/20 text-primary' : 'border-2 border-dashed border-line text-text-2'}`}>
@@ -594,7 +595,7 @@ function WaitingRoom({ table, mySeat, onLeave, onBots, onJoin }: { table: TableS
             </motion.div>
           ))}
         </div>
-        <h2 className="font-display text-xl font-bold uppercase">{mySeat === null ? 'A seat is open' : 'Waiting for players'}</h2>
+        <h2 className="font-display text-2xl">{mySeat === null ? 'A seat is open' : 'Lucky Lo is dealing you in'}</h2>
         <p className="mt-2 text-text-2">
           {table.seats.filter((s) => s.userId).length} of {table.capacity} seated. The game starts as soon as the table is full.
         </p>

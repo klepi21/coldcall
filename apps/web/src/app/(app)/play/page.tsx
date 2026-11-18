@@ -6,7 +6,7 @@ import { motion } from 'motion/react';
 import { GAMES, formatAmount, type GameKind, type Mode, type TableSummary } from '@coldcall/shared';
 import { useSession } from '@/components/app/Providers';
 import { GameSetupSheet } from '@/components/app/GameSetupSheet';
-import { Button, Skeleton, Amount, InfoTip, Glass, Eyebrow, useTilt } from '@/components/ui';
+import { Button, Skeleton, Amount, InfoTip, Glass, Eyebrow, useTilt, Mascot } from '@/components/ui';
 import { api, randomClientSeed } from '@/lib/api';
 import { haptic } from '@/lib/haptics';
 import { WORLD, WorldArt } from '@/components/app/WorldArt';
@@ -129,11 +129,14 @@ function Lobby() {
       <ProgressStrip className="mb-6" />
 
       <div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-3">
-        <div>
-          <Eyebrow className="mb-2">Four worlds, one vault</Eyebrow>
-          <h1 className="t-display">
-            Pick your <span className="t-grad-primary">world</span>
-          </h1>
+        <div className="flex items-end gap-3">
+          <Mascot pose="neutral" className="-mb-1 size-20 shrink-0 sm:size-24" />
+          <div>
+            <Eyebrow className="mb-2">Four tables, two coins</Eyebrow>
+            <h1 className="t-display">
+              Pick your <span className="t-grad-primary">table</span>
+            </h1>
+          </div>
         </div>
         {live.length ? (
           <p className="glass inline-flex items-center gap-2 rounded-full px-3.5 py-2 text-sm text-text-2">
