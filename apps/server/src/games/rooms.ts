@@ -5,8 +5,8 @@
  */
 import { randomBytes } from 'node:crypto';
 import type { WebSocket } from 'ws';
-import { Rng, commitFor, randomSeedHex, IllegalMoveError, type GameResult } from '@evens/games';
-import { entryCost, botDrawRefund, validStake, BOT_MAX_BANKROLL_SHARE, formatCredits, GAMES as META, type Mode, type GameKind, type TableSummary, type ServerMsg } from '@evens/shared';
+import { Rng, commitFor, randomSeedHex, IllegalMoveError, type GameResult } from '@coldcall/games';
+import { entryCost, botDrawRefund, validStake, BOT_MAX_BANKROLL_SHARE, formatCredits, GAMES as META, type Mode, type GameKind, type TableSummary, type ServerMsg } from '@coldcall/shared';
 import { pool, tx, q, one, maybe } from '../db/pool';
 import { post, balances, InsufficientFunds } from '../ledger';
 import { GAMES, TIME_CONTROLS, BOT_NAMES, type BotMeta } from './registry';

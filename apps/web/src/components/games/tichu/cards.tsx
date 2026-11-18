@@ -14,7 +14,7 @@
  * Every suit has its own shape and colour, so cards stay readable for colour blind players.
  */
 import { memo, useId } from 'react';
-import { cardRank, cardSuit, DOG, DRAGON, MAHJONG, PHOENIX, type CardId } from '@evens/games/tichu-combos';
+import { cardRank, cardSuit, DOG, DRAGON, MAHJONG, PHOENIX, type CardId } from '@coldcall/games/tichu-combos';
 
 export type SuitShape = 'jade' | 'sword' | 'pagoda' | 'star';
 export interface SuitInfo {

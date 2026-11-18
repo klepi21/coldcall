@@ -1,5 +1,5 @@
 'use client';
-import type { GameKind } from '@evens/shared';
+import type { GameKind } from '@coldcall/shared';
 import { GAME_COLOR } from '@/components/app/GameArt';
 
 /** Surface paint per world: marble and obsidian, wood and brass, pink and jade, deep ocean. */

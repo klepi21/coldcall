@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { backgammonBot, backgammonEngine, IllegalMoveError, Rng, type BgConfig, type BgMove, type BgState } from '@evens/games';
+import { backgammonBot, backgammonEngine, IllegalMoveError, Rng, type BgConfig, type BgMove, type BgState } from '@coldcall/games';
 import dynamic from 'next/dynamic';
 import type { BoardSettings } from '@/components/games/types';
 import { Frame3D } from '@/components/games/backgammon/3d/Frame3D';

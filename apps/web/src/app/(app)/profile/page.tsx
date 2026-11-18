@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import Link from 'next/link';
-import { formatCredits, parseCredits } from '@evens/shared';
+import { formatCredits, parseCredits } from '@coldcall/shared';
 import { useSession } from '@/components/app/Providers';
 import { Button, Card, Empty, Sheet, Row, InfoTip, Chip, PageHeader, Glass } from '@/components/ui';
 import { api } from '@/lib/api';

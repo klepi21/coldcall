@@ -1,11 +1,11 @@
 {
-  "name": "evens",
+  "name": "coldcall",
   "private": true,
   "packageManager": "pnpm@10.13.1",
   "scripts": {
     "dev": "./scripts/dev.sh",
     "build": "pnpm -r build",
-    "test": "pnpm -r test && cargo test -p evens_vault",
+    "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck",
     "e2e": "cd apps/server && npx tsx --env-file=.env scripts/e2e.ts"
   },

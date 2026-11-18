@@ -16,7 +16,7 @@
 import { Component, useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
 import { Canvas, useThree } from '@react-three/fiber';
 import { useAnimate, useReducedMotion } from 'motion/react';
-import { shipCells, type SbMark, type SbMove, type SbShip, type SbView } from '@evens/games/seabattle';
+import { shipCells, type SbMark, type SbMove, type SbShip, type SbView } from '@coldcall/games/seabattle';
 import type { BoardProps } from '../../types';
 import { haptic, play, type SoundName } from '@/lib/sound';
 import { SeaBattleBoard } from '../SeaBattleBoard';

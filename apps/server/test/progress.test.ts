@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { chessEngine, Rng } from '@evens/games';
+import { chessEngine, Rng } from '@coldcall/games';
 import {
   scoreGame,
   levelFromXp,

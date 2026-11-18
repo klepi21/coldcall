@@ -1,5 +1,5 @@
 import { PublicKey, Transaction, SystemProgram } from '@solana/web3.js';
-import { tokenBaseToMinor, minorToTokenBase } from '@evens/shared';
+import { tokenBaseToMinor, minorToTokenBase } from '@coldcall/shared';
 import { pool, tx, q, one, maybe } from './db/pool';
 import { post, balances } from './ledger';
 import {

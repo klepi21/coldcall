@@ -3,7 +3,7 @@ import { Suspense, useEffect, useState, type CSSProperties } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { motion } from 'motion/react';
-import { GAMES, formatCredits, type GameKind, type Mode, type TableSummary } from '@evens/shared';
+import { GAMES, formatCredits, type GameKind, type Mode, type TableSummary } from '@coldcall/shared';
 import { useSession } from '@/components/app/Providers';
 import { GameSetupSheet } from '@/components/app/GameSetupSheet';
 import { Button, Skeleton, Credits, InfoTip, Glass, Eyebrow, useTilt } from '@/components/ui';

@@ -10,7 +10,7 @@ import { Component, useCallback, useEffect, useId, useMemo, useRef, useState, ty
 import { Canvas } from '@react-three/fiber';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
 import { Chess } from 'chess.js';
-import type { ChessMove, ChessView } from '@evens/games';
+import type { ChessMove, ChessView } from '@coldcall/games';
 import type { BoardProps } from '../../types';
 import { haptic, play } from '@/lib/sound';
 import { ChessBoard, type ChessDevPreview } from '../ChessBoard';

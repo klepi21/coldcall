@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
-import type { ProgressGame, ProgressResponse } from '@evens/shared';
+import type { ProgressGame, ProgressResponse } from '@coldcall/shared';
 import { Skeleton } from '@/components/ui';
 import { useProgress } from './store';
 import { GAME_COLOR, GAME_NAME, Icon, XpBar, ink, tint } from './parts';

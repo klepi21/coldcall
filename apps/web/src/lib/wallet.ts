@@ -19,7 +19,7 @@ export interface EvensWallet {
   disconnect(): Promise<void>;
 }
 
-const GUEST_KEY = 'evens:guest-wallet:v1';
+const GUEST_KEY = 'coldcall:guest-wallet:v1';
 
 export function hasGuestWallet() {
   try {

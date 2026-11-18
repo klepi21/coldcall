@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useRef, type ReactNode } from 'react';
 import { motion } from 'motion/react';
-import { GAMES, formatCredits, type GameKind } from '@evens/shared';
+import { GAMES, formatCredits, type GameKind } from '@coldcall/shared';
 import { GameArt, GAME_COLOR } from '@/components/app/GameArt';
 import { TileLoop, CountUp } from '@/components/app/LandingFx';
 import { Coin } from '@/components/ui';

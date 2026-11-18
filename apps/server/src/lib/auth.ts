@@ -6,7 +6,7 @@ import { PublicKey } from '@solana/web3.js';
 import { pool, q, one, maybe } from '../db/pool';
 import { env, isProd } from '../env';
 
-export const COOKIE = 'evens_sid';
+export const COOKIE = 'cc_sid';
 export const TERMS_VERSION = '2026-11-16b';
 
 export function signInMessage(address: string, nonce: string, issuedAt: string) {

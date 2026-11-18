@@ -1,6 +1,6 @@
 'use client';
 import { useCallback } from 'react';
-import { parseCredits } from '@evens/shared';
+import { parseCredits } from '@coldcall/shared';
 import { Button, Card } from '@/components/ui';
 import { DataTable, ErrorBox, Field, Pager, RowsSkeleton, SearchInput, Select, TextInput } from '@/components/admin/parts';
 import { gameCols, type GameRow } from '@/components/admin/lists';

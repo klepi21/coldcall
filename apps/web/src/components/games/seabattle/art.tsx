@@ -7,7 +7,7 @@
  * The ocean stays dark navy in both themes (sonar screen), so the colours below are fixed and do
  * not follow the page tokens. Lime = aim, violet = your fleet, orange red = fire and explosions.
  */
-import type { SbShipId } from '@evens/games/seabattle';
+import type { SbShipId } from '@coldcall/games/seabattle';
 
 export const C = 40; // cell size in SVG units
 export const M = 24; // label margin (letters on top, numbers on the left)

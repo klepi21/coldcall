@@ -5,7 +5,7 @@
  */
 import { randomBytes } from 'node:crypto';
 import assert from 'node:assert/strict';
-import { chessEngine, Rng, commitFor } from '@evens/games';
+import { chessEngine, Rng, commitFor } from '@coldcall/games';
 import { pool, q, one } from '../src/db/pool';
 import { awardProgress } from '../src/progress';
 

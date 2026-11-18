@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import type { ProgressMsg } from '@evens/shared';
+import type { ProgressMsg } from '@coldcall/shared';
 import { play, haptic } from '@/lib/sound';
 import { onProgressMsg, useProgressFeed } from './store';
 import { Burst, Icon, LevelBadge } from './parts';

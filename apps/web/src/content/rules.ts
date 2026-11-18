@@ -11,7 +11,7 @@ export interface GameRules {
   tutorial: { title: string; text: string }[];
 }
 
-import type { GameKind } from '@evens/shared';
+import type { GameKind } from '@coldcall/shared';
 
 export const RULES: Record<GameKind, GameRules> = {
   chess: {

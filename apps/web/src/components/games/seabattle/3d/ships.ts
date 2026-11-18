@@ -6,7 +6,7 @@
  */
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import type { SbShipId } from '@evens/games/seabattle';
+import type { SbShipId } from '@coldcall/games/seabattle';
 
 export type Slot = 'hull' | 'deck' | 'detail' | 'glow';
 export type ShipGeo = Record<Slot, THREE.BufferGeometry>;

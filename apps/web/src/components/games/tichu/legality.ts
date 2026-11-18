@@ -3,8 +3,8 @@
  * what the Play button says. `legal` from the server is a representative sample (one card
  * choice per rank pattern), so a selection is matched by its rank signature, not card ids.
  */
-import type { TichuMove, TichuView } from '@evens/games';
-import { analyze, beats, cardRank, cardSuit, comboLabel, comboNoun, interpret, isBomb, isNormal, rankWord, DOG, DRAGON, MAHJONG, PHOENIX, type CardId } from '@evens/games/tichu-combos';
+import type { TichuMove, TichuView } from '@coldcall/games';
+import { analyze, beats, cardRank, cardSuit, comboLabel, comboNoun, interpret, isBomb, isNormal, rankWord, DOG, DRAGON, MAHJONG, PHOENIX, type CardId } from '@coldcall/games/tichu-combos';
 
 export type PlayMove = Extract<TichuMove, { type: 'play' }>;
 

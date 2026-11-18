@@ -1,9 +1,9 @@
 'use client';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { seaBattleEngine as E, type SbMove, type SbState } from '@evens/games/seabattle';
-import { seaBattleBot } from '@evens/games/seabattle-bot';
-import { Rng } from '@evens/games/rng';
-import { IllegalMoveError } from '@evens/games/types';
+import { seaBattleEngine as E, type SbMove, type SbState } from '@coldcall/games/seabattle';
+import { seaBattleBot } from '@coldcall/games/seabattle-bot';
+import { Rng } from '@coldcall/games/rng';
+import { IllegalMoveError } from '@coldcall/games/types';
 import dynamic from 'next/dynamic';
 import type { BoardSettings } from '@/components/games/types';
 

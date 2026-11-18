@@ -5,7 +5,7 @@
  * screen that mounts after the push still gets it.
  */
 import { useEffect, useSyncExternalStore } from 'react';
-import type { ProgressMsg, ProgressResponse } from '@evens/shared';
+import type { ProgressMsg, ProgressResponse } from '@coldcall/shared';
 import { api } from '@/lib/api';
 import { useSession, type SocketHub } from '@/components/app/Providers';
 

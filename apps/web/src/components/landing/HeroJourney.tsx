@@ -3,7 +3,7 @@ import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { useMotionValueEvent, useScroll, useTransform, motion } from 'motion/react';
-import { GAMES, type GameKind } from '@evens/shared';
+import { GAMES, type GameKind } from '@coldcall/shared';
 import { canUse3d } from '@/lib/webgl';
 import { play, haptic } from '@/lib/sound';
 import { GAME_COLOR } from '@/components/app/GameArt';

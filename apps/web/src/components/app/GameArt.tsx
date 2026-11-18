@@ -1,5 +1,5 @@
 import { useId } from 'react';
-import type { GameKind } from '@evens/shared';
+import type { GameKind } from '@coldcall/shared';
 
 /** Per game neon accent, used for tiles, glows and badges. */
 export const GAME_COLOR: Record<GameKind, string> = {

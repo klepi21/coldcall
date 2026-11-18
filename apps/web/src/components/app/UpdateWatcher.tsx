@@ -56,8 +56,8 @@ export function UpdateWatcher() {
     const recover = (msg: string) => {
       if (!bad(msg) || inGame(location.pathname)) return;
       try {
-        if (sessionStorage.getItem('evens:chunk-reload') === MINE) return;
-        sessionStorage.setItem('evens:chunk-reload', MINE);
+        if (sessionStorage.getItem('coldcall:chunk-reload') === MINE) return;
+        sessionStorage.setItem('coldcall:chunk-reload', MINE);
       } catch {}
       window.location.reload();
     };

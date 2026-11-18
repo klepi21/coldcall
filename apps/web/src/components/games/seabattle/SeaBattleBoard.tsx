@@ -23,8 +23,8 @@ import {
   type SbShip,
   type SbShipId,
   type SbView,
-} from '@evens/games/seabattle';
-import { Rng, randomSeedHex } from '@evens/games/rng';
+} from '@coldcall/games/seabattle';
+import { Rng, randomSeedHex } from '@coldcall/games/rng';
 import type { BoardProps } from '../types';
 import { haptic, play, type SoundName } from '@/lib/sound';
 import { COLORS, SB_CSS, ShipIcon } from './art';

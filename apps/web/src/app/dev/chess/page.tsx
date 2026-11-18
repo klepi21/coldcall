@@ -11,7 +11,7 @@
  *   ?fen=...            custom start position   ?bot=0         turn the bot off
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { chessEngine, Rng, type ChessMove, type ChessState } from '@evens/games';
+import { chessEngine, Rng, type ChessMove, type ChessState } from '@coldcall/games';
 import { ChessBoard, CapturedTray, MoveList, type ChessDevPreview } from '@/components/games/chess/ChessBoard';
 import type { BoardSettings } from '@/components/games/types';
 

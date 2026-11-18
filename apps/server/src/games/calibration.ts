@@ -10,7 +10,7 @@
  *
  * Backgammon and Tichu have no draws: target win chance 47.5%, logistic model.
  */
-import { BOT_HOUSE_EDGE } from '@evens/shared';
+import { BOT_HOUSE_EDGE } from '@coldcall/shared';
 
 export const DRAW_FACTOR = 2 / 3;
 export const ENGINE_MIN = 1320;

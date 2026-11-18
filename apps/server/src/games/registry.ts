@@ -13,7 +13,7 @@ import {
   type ChessState,
   type BgState,
   type TichuState,
-} from '@evens/games';
+} from '@coldcall/games';
 import { Chess } from 'chess.js';
 import { stockfishMove } from './stockfish';
 import type { ChessBotSetting } from './calibration';

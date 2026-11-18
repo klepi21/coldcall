@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { GAMES } from '@evens/shared';
+import { GAMES } from '@coldcall/shared';
 import { useSession } from '@/components/app/Providers';
 import { Card, Credits, Empty, Skeleton, Button, Chip, PageHeader } from '@/components/ui';
 import { WORLD } from '@/components/app/WorldArt';

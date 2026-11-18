@@ -7,7 +7,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence, useReducedMotion } from 'motion/react';
 import { Chess, type Square } from 'chess.js';
-import { outcomeSummary, formatCredits } from '@evens/shared';
+import { outcomeSummary, formatCredits } from '@coldcall/shared';
 import { PieceArt, type PieceColor, type PieceType } from '@/components/games/chess/pieces';
 import { Coin } from '@/components/ui';
 

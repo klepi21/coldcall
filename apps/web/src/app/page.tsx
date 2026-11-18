@@ -2,7 +2,7 @@
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { type GameKind } from '@evens/shared';
+import { type GameKind } from '@coldcall/shared';
 import { MotionConfig } from 'motion/react';
 import { useSession } from '@/components/app/Providers';
 import { AuthSheet } from '@/components/app/AuthSheet';

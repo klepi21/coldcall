@@ -1,5 +1,5 @@
 'use client';
-import type { GameStats, ProgressGame } from '@evens/shared';
+import type { GameStats, ProgressGame } from '@coldcall/shared';
 import { Skeleton } from '@/components/ui';
 import { useProgress } from './store';
 import { GAME_COLOR, GAME_NAME, Icon, XpBar, glass, ink, tint } from './parts';

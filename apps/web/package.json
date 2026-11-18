@@ -1,5 +1,5 @@
 {
-  "name": "@evens/web",
+  "name": "@coldcall/web",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -10,8 +10,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@evens/games": "workspace:*",
-    "@evens/shared": "workspace:*",
+    "@coldcall/games": "workspace:*",
+    "@coldcall/shared": "workspace:*",
     "@noble/hashes": "1.8.0",
     "@privy-io/react-auth": "^3.51.4",
     "@react-three/drei": "10.0.8",

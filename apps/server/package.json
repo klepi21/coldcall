@@ -1,5 +1,5 @@
 {
-  "name": "@evens/server",
+  "name": "@coldcall/server",
   "version": "0.1.0",
   "private": true,
   "type": "module",
@@ -23,8 +23,8 @@
     "vitest": "3.2.4"
   },
   "dependencies": {
-    "@evens/games": "workspace:*",
-    "@evens/shared": "workspace:*",
+    "@coldcall/games": "workspace:*",
+    "@coldcall/shared": "workspace:*",
     "@fastify/cookie": "11.0.2",
     "@fastify/cors": "11.0.1",
     "@fastify/rate-limit": "10.3.0",

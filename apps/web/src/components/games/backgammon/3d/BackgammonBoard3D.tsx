@@ -3,7 +3,7 @@ import { Component, useCallback, useEffect, useMemo, useRef, useState, type Reac
 import { Canvas, invalidate } from '@react-three/fiber';
 import { NeutralToneMapping } from 'three';
 import { motion, useAnimate, useReducedMotion } from 'motion/react';
-import { backgammonEngine, Rng, type BgMove, type BgStep, type BgView } from '@evens/games';
+import { backgammonEngine, Rng, type BgMove, type BgStep, type BgView } from '@coldcall/games';
 import type { BoardProps } from '../../types';
 import { Button, InfoTip } from '@/components/ui';
 import { haptic, play } from '@/lib/sound';

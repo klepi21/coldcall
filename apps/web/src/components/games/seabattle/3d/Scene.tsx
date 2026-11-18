@@ -7,7 +7,7 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, type MutableRefObject } from 'react';
 import { useFrame, useThree, type ThreeEvent } from '@react-three/fiber';
 import * as THREE from 'three';
-import { shipCells, sbShipSize, type SbMark, type SbShip, type SbShipId } from '@evens/games/seabattle';
+import { shipCells, sbShipSize, type SbMark, type SbShip, type SbShipId } from '@coldcall/games/seabattle';
 import { HORIZON, MAX_FIRES, MAX_RIPPLES, makeLabelsTexture, makeMarksTexture, makeOceanMaterial, makeSkyMaterial, waveHeight } from './ocean';
 import { ParticlePool, burning, fireBurst, splashBurst, trail, type Particle } from './particles';
 import { shipGeometry, shipMaterials, type ShipLook3D, type Slot } from './ships';

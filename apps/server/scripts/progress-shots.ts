@@ -9,7 +9,7 @@ import nacl from 'tweetnacl';
 import bs58 from 'bs58';
 import WebSocket from 'ws';
 import { chromium } from '@playwright/test';
-import { shipCells } from '@evens/games';
+import { shipCells } from '@coldcall/games';
 import { pool, one } from '../src/db/pool';
 
 const API = 'http://localhost:4000';
@@ -43,7 +43,7 @@ await fetch(API + '/api/me', { method: 'PATCH', headers: { 'content-type': 'appl
 const browser = await chromium.launch({ executablePath: EXE });
 async function ctx(width: number, height: number) {
   const c = await browser.newContext({ viewport: { width, height }, deviceScaleFactor: 2, isMobile: width < 700, hasTouch: width < 700, colorScheme: 'dark' });
-  await c.addCookies([{ name: 'evens_sid', value: sid, domain: 'localhost', path: '/', httpOnly: true, sameSite: 'Lax' }]);
+  await c.addCookies([{ name: 'cc_sid', value: sid, domain: 'localhost', path: '/', httpOnly: true, sameSite: 'Lax' }]);
   return c;
 }
 
@@ -135,7 +135,7 @@ await sleep(600);
 await p3.screenshot({ path: `${OUT}/progress-desktop.png`, fullPage: true });
 
 const light = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, colorScheme: 'light' });
-await light.addCookies([{ name: 'evens_sid', value: sid, domain: 'localhost', path: '/', httpOnly: true, sameSite: 'Lax' }]);
+await light.addCookies([{ name: 'cc_sid', value: sid, domain: 'localhost', path: '/', httpOnly: true, sameSite: 'Lax' }]);
 const p4 = await light.newPage();
 await p4.goto(`${WEB}/progress`, { waitUntil: 'networkidle' });
 await sleep(1500);

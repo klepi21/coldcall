@@ -2,7 +2,7 @@
 import { use } from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
-import { GAMES, type GameKind } from '@evens/shared';
+import { GAMES, type GameKind } from '@coldcall/shared';
 import { RulesBody } from '@/components/app/RulesSheet';
 import { Card, Eyebrow } from '@/components/ui';
 import { WORLD, WorldArt } from '@/components/app/WorldArt';

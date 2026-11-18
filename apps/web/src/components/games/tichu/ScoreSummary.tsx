@@ -1,6 +1,6 @@
 'use client';
 import { motion } from 'motion/react';
-import type { TichuView } from '@evens/games';
+import type { TichuView } from '@coldcall/games';
 import { Button } from '@/components/ui';
 
 type Round = TichuView['rounds'][number];

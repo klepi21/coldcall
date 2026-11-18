@@ -1,6 +1,6 @@
 'use client';
 import { useId, type CSSProperties, type ReactNode } from 'react';
-import type { GameKind } from '@evens/shared';
+import type { GameKind } from '@coldcall/shared';
 
 /**
  * "Four Worlds" lobby art. Original SVG, three depth layers (far sky, the world, the hero object)

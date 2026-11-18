@@ -1,6 +1,6 @@
 'use client';
 import { motion, useReducedMotion } from 'motion/react';
-import type { ChallengeInfo } from '@evens/shared';
+import type { ChallengeInfo } from '@coldcall/shared';
 import { GAME_COLOR, Icon, XpBar, ink, tint } from './parts';
 
 /** Today's three free daily challenges with progress. */

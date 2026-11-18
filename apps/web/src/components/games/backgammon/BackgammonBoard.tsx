@@ -1,7 +1,7 @@
 'use client';
 import { useCallback, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { motion, useAnimate, useReducedMotion } from 'motion/react';
-import { backgammonEngine, Rng, type BgMove, type BgStep, type BgView } from '@evens/games';
+import { backgammonEngine, Rng, type BgMove, type BgStep, type BgView } from '@coldcall/games';
 import type { BoardProps } from '../types';
 import { Button, InfoTip } from '@/components/ui';
 import { haptic, play } from '@/lib/sound';

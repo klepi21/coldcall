@@ -6,7 +6,7 @@
  * this file's duplicates.
  */
 import { motion } from 'motion/react';
-import { SB_FLEET, type SbView } from '@evens/games/seabattle';
+import { SB_FLEET, type SbView } from '@coldcall/games/seabattle';
 import { ShipIcon } from '../art';
 import { cellName } from '../Grid';
 

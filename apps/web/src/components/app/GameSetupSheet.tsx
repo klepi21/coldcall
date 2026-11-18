@@ -2,7 +2,7 @@
 import { useEffect, useState, type CSSProperties } from 'react';
 import { motion } from 'motion/react';
 import { useRouter } from 'next/navigation';
-import { GAMES, STAKE_LEVELS, outcomeSummary, entryCost, formatCredits, parseCredits, validStake, maxStake, usd, type Mode, type GameKind } from '@evens/shared';
+import { GAMES, STAKE_LEVELS, outcomeSummary, entryCost, formatCredits, parseCredits, validStake, maxStake, usd, type Mode, type GameKind } from '@coldcall/shared';
 import { Sheet, Button, Chip, Row, Credits, InfoTip, Coin, CountUp } from '@/components/ui';
 import { WORLD, WorldArt } from './WorldArt';
 import { feedback } from '@/lib/haptics';

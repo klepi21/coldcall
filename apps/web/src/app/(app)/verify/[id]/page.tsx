@@ -2,8 +2,8 @@
 import { use, useEffect, useState } from 'react';
 import { sha256 } from '@noble/hashes/sha256';
 import { bytesToHex, hexToBytes } from '@noble/hashes/utils';
-import { Rng, backgammonEngine, tichuEngine, chessEngine, seaBattleEngine } from '@evens/games';
-import { GAMES } from '@evens/shared';
+import { Rng, backgammonEngine, tichuEngine, chessEngine, seaBattleEngine } from '@coldcall/games';
+import { GAMES } from '@coldcall/shared';
 import { Card, Skeleton, Button } from '@/components/ui';
 import { api } from '@/lib/api';
 

@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import type { TableSummary } from '@evens/shared';
+import type { TableSummary } from '@coldcall/shared';
 
 /** Absolute site URL used for share previews. Set NEXT_PUBLIC_SITE_URL when the domain changes. */
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://45-81-6-214.sslip.io';

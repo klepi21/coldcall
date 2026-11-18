@@ -2,7 +2,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import type { ProgressMsg } from '@evens/shared';
+import type { ProgressMsg } from '@coldcall/shared';
 import { api } from '@/lib/api';
 import { play } from '@/lib/sound';
 import { cachedAward, onProgressMsg, rememberAward, useProgressFeed } from './store';

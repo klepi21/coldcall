@@ -1,7 +1,7 @@
 'use client';
 import { forwardRef, useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type CSSProperties, type ReactNode } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react';
-import { formatCredits } from '@evens/shared';
+import { formatCredits } from '@coldcall/shared';
 import { feedback } from '@/lib/haptics';
 import { play } from '@/lib/sound';
 

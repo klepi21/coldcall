@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { animate, motion, useReducedMotion } from 'motion/react';
-import type { ProgressGame } from '@evens/shared';
+import type { ProgressGame } from '@coldcall/shared';
 
 export const GAME_COLOR: Record<ProgressGame, string> = { chess: '#c6ff3d', backgammon: '#ff8a3d', tichu: '#ff4d8d', seabattle: '#3ddcff' };
 export const GAME_NAME: Record<ProgressGame, string> = { chess: 'Chess', backgammon: 'Backgammon', tichu: 'Tichu', seabattle: 'Sea Battle' };

@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { formatCredits } from '@evens/shared';
+import { formatCredits } from '@coldcall/shared';
 import { Button, Card, Credits, Skeleton } from '@/components/ui';
 import { TimeChart, Meter } from '@/components/admin/Charts';
 import { DataTable, ErrorBox, Kpi, Panel, Pill, Net, type Col } from '@/components/admin/parts';

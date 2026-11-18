@@ -6,8 +6,8 @@
  */
 import { AnimatePresence, MotionConfig, motion, useAnimate, useReducedMotion } from 'motion/react';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent } from 'react';
-import type { TichuMove, TichuView, TrickPlay } from '@evens/games';
-import { isBomb, type CardId } from '@evens/games/tichu-combos';
+import type { TichuMove, TichuView, TrickPlay } from '@coldcall/games';
+import { isBomb, type CardId } from '@coldcall/games/tichu-combos';
 import type { BoardProps } from '../types';
 import { InfoTip } from '@/components/ui';
 import { haptic, play as playSound } from '@/lib/sound';

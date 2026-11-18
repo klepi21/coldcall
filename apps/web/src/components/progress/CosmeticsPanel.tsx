@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import type { CosmeticSlot, ProgressResponse } from '@evens/shared';
+import type { CosmeticSlot, ProgressResponse } from '@coldcall/shared';
 import { Skeleton, Spinner } from '@/components/ui';
 import { useSession } from '@/components/app/Providers';
 import { api } from '@/lib/api';

@@ -130,7 +130,7 @@ function applyTheme(t?: string) {
   if (t === 'light' || t === 'dark') root.dataset.theme = t;
   else delete root.dataset.theme;
   try {
-    localStorage.setItem('evens:theme', t ?? 'system');
+    localStorage.setItem('coldcall:theme', t ?? 'system');
   } catch {}
 }
 

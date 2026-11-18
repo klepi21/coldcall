@@ -1,6 +1,6 @@
 'use client';
 import { forwardRef, useImperativeHandle, useRef, type PointerEvent as RPointerEvent, type ReactNode } from 'react';
-import type { SbMark, SbShip } from '@evens/games/seabattle';
+import type { SbMark, SbShip } from '@coldcall/games/seabattle';
 import { C, COLORS, GRID, M, OceanDefs, ShipShape, VB, shipTransform, type ShipLook } from './art';
 
 export const COLS = 'ABCDEFGHIJ';

@@ -6,7 +6,7 @@
  *
  * No three.js imports in this file.
  */
-import type { BgStep, BgView } from '@evens/games';
+import type { BgStep, BgView } from '@coldcall/games';
 import { clonePos, persp, type Pos, type Where } from '../geometry';
 
 export const isStep = (m: unknown): m is BgStep => !!m && typeof m === 'object' && !('type' in m);

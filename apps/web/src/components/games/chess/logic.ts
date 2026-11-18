@@ -1,4 +1,4 @@
-import type { ChessView } from '@evens/games';
+import type { ChessView } from '@coldcall/games';
 import { PIECE_NAMES, type PieceColor, type PieceType } from './pieces';
 
 export const FILES = 'abcdefgh';

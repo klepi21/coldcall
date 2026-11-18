@@ -5,8 +5,8 @@
  * receive the mode, the stake, the balance or anything about money, so a practice game and a credits
  * game with the same play always earn exactly the same XP. Rewards are cosmetic or status only.
  */
-import type { GameResult } from '@evens/games';
-import type { AchievementInfo, CosmeticSlot, ProgressGame, XpLine } from '@evens/shared';
+import type { GameResult } from '@coldcall/games';
+import type { AchievementInfo, CosmeticSlot, ProgressGame, XpLine } from '@coldcall/shared';
 
 export const XP = {
   finish: 20,

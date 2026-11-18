@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { GAMES, type GameKind } from '@evens/shared';
+import { GAMES, type GameKind } from '@coldcall/shared';
 import { Sheet, Button } from '@/components/ui';
 import { RULES } from '@/content/rules';
 

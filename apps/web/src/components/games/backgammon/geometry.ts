@@ -4,7 +4,7 @@
  * moves counter clockwise from c = 23 (top right) to c = 0. Absolute engine index i maps to c with
  * c = i for seat 0 and c = 23 - i for seat 1.
  */
-import type { BgPoint } from '@evens/games';
+import type { BgPoint } from '@coldcall/games';
 
 export const W = 1000;
 export const H = 800;

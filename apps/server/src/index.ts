@@ -13,8 +13,8 @@ import {
   ClientMsgZ,
   GameKindZ,
   EquipZ,
-} from '@evens/shared';
-import { commitFor, chessEngine, backgammonEngine, tichuEngine, Rng } from '@evens/games';
+} from '@coldcall/shared';
+import { commitFor, chessEngine, backgammonEngine, tichuEngine, Rng } from '@coldcall/games';
 import { env } from './env';
 import { log } from './lib/log';
 import { pool, q, one, maybe } from './db/pool';

@@ -15,7 +15,7 @@ const BUILD_ID =
   })();
 
 const nextConfig: NextConfig = {
-  transpilePackages: ['@evens/games', '@evens/shared'],
+  transpilePackages: ['@coldcall/games', '@coldcall/shared'],
   devIndicators: false,
   // Lint runs separately; style rules must not block a production build. Type errors still fail the build.
   eslint: { ignoreDuringBuilds: true },

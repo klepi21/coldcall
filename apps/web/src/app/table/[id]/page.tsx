@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { AnimatePresence, motion } from 'motion/react';
-import { GAMES, entryCost, formatCredits, type TableSummary } from '@evens/shared';
+import { GAMES, entryCost, formatCredits, type TableSummary } from '@coldcall/shared';
 import { useSession } from '@/components/app/Providers';
 import { AuthSheet } from '@/components/app/AuthSheet';
 import { OnboardingSheet } from '@/components/app/OnboardingSheet';

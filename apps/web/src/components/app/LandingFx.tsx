@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { animate, motion, useInView, useReducedMotion } from 'motion/react';
-import { GAMES, STAKE_LEVELS, formatCredits, pvpFee, usd, type GameKind } from '@evens/shared';
+import { GAMES, STAKE_LEVELS, formatCredits, pvpFee, usd, type GameKind } from '@coldcall/shared';
 import { GAME_COLOR } from './GameArt';
 import { Coin, Chip } from '@/components/ui';
 

@@ -12,7 +12,7 @@
  */
 import type { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { BOT_HOUSE_EDGE, tokenBaseToMinor } from '@evens/shared';
+import { BOT_HOUSE_EDGE, tokenBaseToMinor } from '@coldcall/shared';
 import { pool, q, one, maybe } from './db/pool';
 import { env } from './env';
 import { requireUser, requireAdmin, TERMS_VERSION } from './lib/auth';

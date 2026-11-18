@@ -1,6 +1,6 @@
 'use client';
 import { useCallback, useEffect, useState } from 'react';
-import { formatCredits, parseCredits } from '@evens/shared';
+import { formatCredits, parseCredits } from '@coldcall/shared';
 import { useSession } from '@/components/app/Providers';
 import { Button, Card, Credits, Sheet, Skeleton, InfoTip, Chip, Empty, Row, Glass, PageHeader } from '@/components/ui';
 import { api } from '@/lib/api';

@@ -9,7 +9,7 @@
  *   ?gallery=1 | big                  show every card face (big: specials and courts, large)
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { IllegalMoveError, Rng, tichuBot, tichuBotInterrupt, tichuDeck, tichuEngine, type TichuMove, type TichuState } from '@evens/games';
+import { IllegalMoveError, Rng, tichuBot, tichuBotInterrupt, tichuDeck, tichuEngine, type TichuMove, type TichuState } from '@coldcall/games';
 import { TichuTable } from '@/components/games/tichu/TichuTable';
 import { CardBack, CardFace } from '@/components/games/tichu/cards';
 
@@ -104,7 +104,7 @@ export default function TichuDevPage() {
     const next = theme === 'dark' ? 'light' : 'dark';
     document.documentElement.dataset.theme = next;
     try {
-      localStorage.setItem('evens:theme', next);
+      localStorage.setItem('coldcall:theme', next);
     } catch {}
     setTheme(next);
   };

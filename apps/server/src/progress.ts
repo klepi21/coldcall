@@ -3,8 +3,8 @@
  * no ledger, no balances, no stakes. Scoring lives in progress-rules.ts and never sees mode or stake.
  */
 import type pg from 'pg';
-import type { GameResult } from '@evens/games';
-import type { AchievementInfo, CosmeticSlot, ProgressGame, ProgressMsg, ProgressResponse, XpLine } from '@evens/shared';
+import type { GameResult } from '@coldcall/games';
+import type { AchievementInfo, CosmeticSlot, ProgressGame, ProgressMsg, ProgressResponse, XpLine } from '@coldcall/shared';
 import { pool, tx, q, maybe } from './db/pool';
 import { log } from './lib/log';
 import {
