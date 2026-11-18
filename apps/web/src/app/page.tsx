@@ -31,11 +31,11 @@ const ORDER: GameKind[] = ['chess', 'backgammon', 'tichu', 'seabattle'];
 function Section({ id, eyebrow, title, sub, children }: { id?: string; eyebrow: string; title: ReactNode; sub?: ReactNode; children: ReactNode }) {
   return (
     <section id={id} className="mx-auto max-w-[1200px] scroll-mt-20 px-4 py-14 sm:px-6 sm:py-20">
-      <motion.div initial={{ opacity: 0, y: 16 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: '-60px' }} transition={{ duration: 0.4 }}>
+      <div>
         <p className="t-eyebrow text-accent">{eyebrow}</p>
         <h2 className="t-display mt-2">{title}</h2>
         {sub ? <p className="mt-3 max-w-2xl text-[17px] leading-relaxed text-text-2">{sub}</p> : null}
-      </motion.div>
+      </div>
       <div className="mt-8">{children}</div>
     </section>
   );
@@ -164,15 +164,11 @@ export default function Landing() {
         {/* Games */}
         <Section id="games" eyebrow="Four tables" title="Pick your game" sub="Every game has a free practice mode, a bot that matches your level, and real people at your stake.">
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {ORDER.map((g, i) => (
+            {ORDER.map((g) => (
               <motion.button
                 key={g}
                 type="button"
                 onClick={start}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.35, delay: i * 0.06 }}
                 className="glass press group overflow-hidden rounded-card text-left"
                 style={{ '--tint': WORLD[g].c } as CSSProperties}
                 aria-label={`Play ${GAMES[g].name}`}
