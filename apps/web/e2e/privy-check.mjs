@@ -1,0 +1,16 @@
+import { chromium } from '@playwright/test';
+const BASE = process.env.BASE || 'http://localhost:3000';
+const OUT = '/private/tmp/claude-501/-Users-konstantinoslepidas/f20ec7f5-ba28-4ba1-a433-882b71ac4224/scratchpad';
+const browser = await chromium.launch({ executablePath: `${process.env.HOME}/Library/Caches/ms-playwright/chromium_headless_shell-1234/chrome-headless-shell-mac-arm64/chrome-headless-shell` });
+const page = await (await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true, colorScheme: 'dark' })).newPage();
+const errs = []; page.on('pageerror', (e) => errs.push(String(e))); page.on('console', (m) => m.type() === 'error' && errs.push(m.text()));
+await page.goto(BASE + '/play', { waitUntil: 'load' });
+await page.getByRole('button', { name: /start playing/i }).first().click();
+const b = page.getByRole('button', { name: /continue with email or google/i });
+await page.waitForTimeout(3000); await page.screenshot({ path: OUT + '/privy-pre.png' }); console.log('ERRPRE', JSON.stringify(errs.slice(0,5))); await b.waitFor({timeout:8000}); await page.waitForTimeout(2500);
+console.log('enabled', await b.isEnabled());
+await b.click();
+await page.waitForTimeout(4000);
+await page.screenshot({ path: `${OUT}/privy-modal.png` });
+console.log('ERR', JSON.stringify(errs.slice(0, 6)));
+await browser.close();

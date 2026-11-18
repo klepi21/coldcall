@@ -1,0 +1,1 @@
+export { SeaBattleBoard } from './SeaBattleBoard';

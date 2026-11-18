@@ -1,0 +1,510 @@
+@import "tailwindcss";
+
+/* Evens design tokens. Source of truth: brand/BRAND.md ("Arena": dark by default, light on request).
+   v3 "Four Worlds" layer (brand/DIRECTION_V3.md): glass, light, depth. */
+:root {
+  --bg: #07070c;
+  --surface: #111119;
+  --surface-2: #1b1b27;
+  --line: #2a2a3b;
+  --text: #f4f4fb;
+  --text-2: #9a9ab3;
+  --primary: #c6ff3d;
+  --primary-ink: #0a0a0f;
+  --accent: #7c5cff;
+  --gold: #ffd23f;
+  --win: #c6ff3d;
+  --loss: #ff4d6d;
+  --warn: #ffb020;
+  --shadow-card: 0 2px 16px rgba(0, 0, 0, 0.45);
+  --shadow-modal: 0 24px 64px rgba(0, 0, 0, 0.6);
+  --glow: 0 0 0 1px rgba(198, 255, 61, 0.35), 0 0 24px rgba(198, 255, 61, 0.25);
+  --glow-accent: 0 0 0 1px rgba(124, 92, 255, 0.45), 0 0 28px rgba(124, 92, 255, 0.3);
+  --felt: radial-gradient(120% 80% at 50% -10%, #1c1640 0%, #0d0b1c 55%, #07070c 100%);
+
+  /* v3 glass */
+  --glass-fill: linear-gradient(180deg, rgba(30, 26, 52, 0.72), rgba(14, 12, 26, 0.78));
+  --glass-fill-strong: linear-gradient(180deg, rgba(28, 24, 50, 0.9), rgba(12, 11, 22, 0.94));
+  --glass-edge: rgba(255, 255, 255, 0.09);
+  --glass-rim: rgba(255, 255, 255, 0.16);
+  --glass-rim-2: rgba(124, 92, 255, 0.28);
+  --glass-shadow: 0 1px 0 rgba(255, 255, 255, 0.07) inset, 0 18px 48px -18px rgba(0, 0, 0, 0.7);
+  --well: rgba(255, 255, 255, 0.045);
+  --well-hover: rgba(255, 255, 255, 0.08);
+  --well-line: rgba(255, 255, 255, 0.08);
+  --primary-grad: linear-gradient(180deg, #dcff7a 0%, #c6ff3d 45%, #a6e81d 100%);
+  --primary-glow: 0 0 0 1px rgba(198, 255, 61, 0.5), 0 8px 28px -6px rgba(198, 255, 61, 0.55), 0 1px 0 rgba(255, 255, 255, 0.55) inset;
+  --gold-glow: 0 0 32px rgba(255, 210, 63, 0.35);
+  --nebula-1: rgba(124, 92, 255, 0.34);
+  --nebula-2: rgba(196, 56, 255, 0.16);
+  --nebula-3: rgba(61, 140, 255, 0.14);
+  --nebula-4: rgba(198, 255, 61, 0.05);
+  --star: rgba(255, 255, 255, 0.85);
+  --star-dim: rgba(190, 180, 255, 0.5);
+  --backdrop-base: radial-gradient(140% 90% at 50% 0%, #120e26 0%, #07070c 60%);
+  color-scheme: dark;
+}
+
+:root[data-theme="light"] {
+  --bg: #f4f4f8;
+  --surface: #ffffff;
+  --surface-2: #ebebf2;
+  --line: #d9d9e6;
+  --text: #0c0c14;
+  --text-2: #55556e;
+  --primary: #5b3df5;
+  --primary-ink: #ffffff;
+  --accent: #5b3df5;
+  --gold: #b07d00;
+  --win: #1f8f3a;
+  --loss: #d61f45;
+  --warn: #a15c00;
+  --shadow-card: 0 2px 12px rgba(12, 12, 20, 0.08);
+  --shadow-modal: 0 24px 64px rgba(12, 12, 20, 0.18);
+  --glow: 0 0 0 1px rgba(91, 61, 245, 0.35), 0 0 20px rgba(91, 61, 245, 0.18);
+  --glow-accent: 0 0 0 1px rgba(91, 61, 245, 0.35), 0 0 20px rgba(91, 61, 245, 0.18);
+  --felt: radial-gradient(120% 80% at 50% -10%, #ffffff 0%, #eeeef6 70%, #e6e6f0 100%);
+
+  --glass-fill: linear-gradient(180deg, rgba(255, 255, 255, 0.86), rgba(255, 255, 255, 0.72));
+  --glass-fill-strong: linear-gradient(180deg, rgba(255, 255, 255, 0.97), rgba(250, 250, 255, 0.94));
+  --glass-edge: rgba(91, 61, 245, 0.1);
+  --glass-rim: rgba(255, 255, 255, 1);
+  --glass-rim-2: rgba(91, 61, 245, 0.22);
+  --glass-shadow: 0 1px 0 rgba(255, 255, 255, 1) inset, 0 14px 40px -18px rgba(40, 30, 110, 0.28);
+  --well: rgba(91, 61, 245, 0.05);
+  --well-hover: rgba(91, 61, 245, 0.1);
+  --well-line: rgba(91, 61, 245, 0.12);
+  --primary-grad: linear-gradient(180deg, #7a62ff 0%, #5b3df5 50%, #4a2de0 100%);
+  --primary-glow: 0 0 0 1px rgba(91, 61, 245, 0.5), 0 8px 24px -8px rgba(91, 61, 245, 0.55), 0 1px 0 rgba(255, 255, 255, 0.35) inset;
+  --gold-glow: 0 0 28px rgba(176, 125, 0, 0.18);
+  --nebula-1: rgba(124, 92, 255, 0.2);
+  --nebula-2: rgba(255, 120, 200, 0.14);
+  --nebula-3: rgba(61, 200, 255, 0.14);
+  --nebula-4: rgba(255, 200, 80, 0.1);
+  --star: rgba(91, 61, 245, 0.28);
+  --star-dim: rgba(91, 61, 245, 0.16);
+  --backdrop-base: radial-gradient(140% 90% at 50% 0%, #fbfaff 0%, #eeedf7 70%);
+  color-scheme: light;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-text: var(--text);
+  --color-text-2: var(--text-2);
+  --color-primary: var(--primary);
+  --color-primary-ink: var(--primary-ink);
+  --color-accent: var(--accent);
+  --color-gold: var(--gold);
+  --color-win: var(--win);
+  --color-loss: var(--loss);
+  --color-warn: var(--warn);
+  --color-well: var(--well);
+  --color-well-hover: var(--well-hover);
+  --color-well-line: var(--well-line);
+  --font-display: var(--font-unbounded), system-ui, sans-serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --radius-chip: 10px;
+  --radius-card: 16px;
+  --radius-sheet: 24px;
+  --shadow-card: var(--shadow-card);
+  --shadow-modal: var(--shadow-modal);
+  --shadow-glow: var(--glow);
+  --shadow-glow-accent: var(--glow-accent);
+}
+
+html,
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  min-height: 100dvh;
+}
+
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.felt {
+  background: var(--felt);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+/* Arena effects (kept for the game tables and the landing page) */
+.arena-grid {
+  background-image: linear-gradient(rgba(124, 92, 255, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(124, 92, 255, 0.08) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+.text-glow {
+  text-shadow: 0 0 24px color-mix(in srgb, var(--primary) 55%, transparent);
+}
+.neon-border {
+  box-shadow: var(--glow);
+}
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: var(--glow); }
+  50% { box-shadow: 0 0 0 1px rgba(198, 255, 61, 0.6), 0 0 36px rgba(198, 255, 61, 0.45); }
+}
+.pulse-glow {
+  animation: pulse-glow 2.4s ease-in-out infinite;
+}
+@keyframes live-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+.live-dot {
+  animation: live-dot 1.4s ease-in-out infinite;
+}
+
+/* =====================================================================
+   v3 "Four Worlds" system
+   ===================================================================== */
+
+@layer components {
+  /* ---------- Type scale (Unbounded display, Inter UI) ---------- */
+  .t-hero {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
+    line-height: 0.98;
+    font-size: clamp(34px, 8.4vw, 64px);
+  }
+  .t-display {
+    font-family: var(--font-display);
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: -0.015em;
+    line-height: 1.02;
+    font-size: clamp(28px, 6.6vw, 44px);
+  }
+  .t-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: -0.01em;
+    line-height: 1.1;
+    font-size: clamp(18px, 4.4vw, 22px);
+  }
+  .t-eyebrow {
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    font-size: 11px;
+    line-height: 1.2;
+    color: var(--text-2);
+  }
+  .t-num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+  .t-grad {
+    background: linear-gradient(100deg, var(--text) 0%, var(--text) 40%, color-mix(in srgb, var(--accent) 70%, var(--text)) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .t-grad-primary {
+    background: linear-gradient(100deg, var(--primary) 0%, color-mix(in srgb, var(--primary) 55%, #ffffff) 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  :root[data-theme="light"] .t-grad-primary {
+    background: linear-gradient(100deg, #5b3df5 0%, #b03df5 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
+
+  /* ---------- Glass surfaces ----------
+     .glass        dark glass panel with a gradient border and a top inner highlight. No blur, cheap.
+     .glass-blur   adds backdrop blur. Use only on bars and sheets (fixed layers), never on lists.
+     .glass-strong more opaque, for sheets and menus.
+     Tint the border per game with style={{ '--tint': GAME_COLOR.chess }}. */
+  .glass {
+    --tint: var(--glass-rim-2);
+    position: relative;
+    background:
+      var(--glass-fill) padding-box,
+      linear-gradient(165deg, var(--glass-rim) 0%, var(--glass-edge) 28%, var(--glass-edge) 62%, color-mix(in srgb, var(--tint) 70%, transparent) 100%) border-box;
+    border: 1px solid transparent;
+    box-shadow: var(--glass-shadow);
+  }
+  .glass-strong {
+    background:
+      var(--glass-fill-strong) padding-box,
+      linear-gradient(165deg, var(--glass-rim) 0%, var(--glass-edge) 30%, var(--glass-edge) 62%, color-mix(in srgb, var(--tint, var(--glass-rim-2)) 70%, transparent) 100%) border-box;
+  }
+  .glass-blur {
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
+    backdrop-filter: blur(18px) saturate(140%);
+  }
+  /* Light spill: a soft pool of the game colour from the top of a panel. */
+  .spill {
+    background-image: radial-gradient(120% 70% at 50% -10%, color-mix(in srgb, var(--tint, var(--accent)) 28%, transparent), transparent 70%);
+  }
+  :root[data-theme="light"] .spill {
+    background-image: radial-gradient(120% 70% at 50% -10%, color-mix(in srgb, var(--tint, var(--accent)) 18%, transparent), transparent 70%);
+  }
+  /* A recessed well inside glass, for summaries, inputs and rows. */
+  .well {
+    background: var(--well);
+    box-shadow: inset 0 0 0 1px var(--well-line);
+  }
+  .divide-well > * + * {
+    border-top: 1px solid var(--well-line);
+  }
+
+  /* Game coloured text that stays readable in both themes. */
+  .game-ink {
+    color: var(--tint, var(--primary));
+  }
+  :root[data-theme="light"] .game-ink {
+    color: color-mix(in srgb, var(--tint, var(--primary)) 48%, #000);
+  }
+
+  /* ---------- Buttons ---------- */
+  .btn-primary {
+    background: var(--primary-grad);
+    color: var(--primary-ink);
+    box-shadow: var(--primary-glow);
+  }
+  .btn-primary:hover:not(:disabled) {
+    filter: brightness(1.06) saturate(1.05);
+  }
+  .btn-secondary {
+    background: var(--well);
+    color: var(--text);
+    box-shadow: inset 0 0 0 1px var(--well-line), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background: var(--well-hover);
+  }
+  /* Press squash: quick scale down, springy release. */
+  .press {
+    transition:
+      transform 0.32s cubic-bezier(0.34, 1.56, 0.64, 1),
+      filter 0.15s ease,
+      background-color 0.15s ease,
+      box-shadow 0.2s ease,
+      opacity 0.15s ease;
+    will-change: transform;
+  }
+  .press:active:not(:disabled) {
+    transform: scale(0.965);
+    transition-duration: 0.09s;
+    transition-timing-function: ease-out;
+  }
+
+  /* ---------- Hover tilt with glare (pointer devices only) ----------
+     Use with useTilt() from components/ui, which writes --rx, --ry, --gx, --gy, --px, --py. */
+  .tilt {
+    transform-style: preserve-3d;
+  }
+  .tilt-glare {
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    background: radial-gradient(420px circle at var(--gx, 50%) var(--gy, 0%), rgba(255, 255, 255, 0.16), transparent 45%);
+    mix-blend-mode: soft-light;
+    z-index: 3;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .tilt {
+      transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateY(var(--lift, 0px));
+      transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.4s ease;
+    }
+    .tilt[data-hover="1"] {
+      --lift: -4px;
+      transition: transform 0.12s ease-out, box-shadow 0.4s ease;
+    }
+    .tilt[data-hover="1"] .tilt-glare {
+      opacity: 1;
+    }
+    .tilt .parallax {
+      transform: translate3d(calc(var(--px, 0) * var(--depth, 10px)), calc(var(--py, 0) * var(--depth, 10px)), 0);
+      transition: transform 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+    }
+    .tilt[data-hover="1"] .parallax {
+      transition: transform 0.12s ease-out;
+    }
+  }
+
+  /* ---------- Skeleton shimmer ---------- */
+  .shimmer {
+    position: relative;
+    overflow: hidden;
+    background: var(--well);
+  }
+  .shimmer::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--text) 9%, transparent), transparent);
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
+/* ---------- Persistent app backdrop: violet nebula, stars, slow light ---------- */
+.cosmos {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--backdrop-base);
+  contain: strict;
+}
+.cosmos-nebula {
+  position: absolute;
+  inset: -20%;
+  background:
+    radial-gradient(38% 30% at 22% 18%, var(--nebula-1), transparent 70%),
+    radial-gradient(34% 28% at 82% 12%, var(--nebula-2), transparent 70%),
+    radial-gradient(44% 36% at 70% 78%, var(--nebula-3), transparent 70%),
+    radial-gradient(30% 24% at 18% 82%, var(--nebula-4), transparent 70%);
+  animation: nebula-drift 48s ease-in-out infinite alternate;
+  will-change: transform;
+}
+.cosmos-stars,
+.cosmos-stars-2 {
+  position: absolute;
+  inset: 0;
+  background-repeat: repeat;
+}
+.cosmos-stars {
+  background-image:
+    radial-gradient(1.2px 1.2px at 23px 41px, var(--star), transparent 60%),
+    radial-gradient(1px 1px at 91px 163px, var(--star-dim), transparent 60%),
+    radial-gradient(1.4px 1.4px at 187px 77px, var(--star), transparent 60%),
+    radial-gradient(1px 1px at 241px 211px, var(--star-dim), transparent 60%),
+    radial-gradient(1px 1px at 131px 263px, var(--star), transparent 60%),
+    radial-gradient(1.1px 1.1px at 297px 19px, var(--star-dim), transparent 60%);
+  background-size: 320px 300px;
+  opacity: 0.7;
+}
+.cosmos-stars-2 {
+  background-image:
+    radial-gradient(1.6px 1.6px at 61px 97px, var(--star), transparent 60%),
+    radial-gradient(1.2px 1.2px at 401px 233px, var(--star-dim), transparent 60%),
+    radial-gradient(1.8px 1.8px at 289px 371px, var(--star), transparent 60%),
+    radial-gradient(1.2px 1.2px at 467px 43px, var(--star-dim), transparent 60%);
+  background-size: 520px 460px;
+  animation: twinkle 7s ease-in-out infinite alternate;
+}
+.cosmos-light {
+  position: absolute;
+  width: 70vmax;
+  height: 70vmax;
+  left: -20vmax;
+  top: -30vmax;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 22%, transparent), transparent);
+  animation: light-drift 36s ease-in-out infinite alternate;
+  will-change: transform;
+}
+.cosmos-horizon {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 40vh;
+  background: linear-gradient(to top, color-mix(in srgb, var(--bg) 70%, transparent), transparent);
+}
+@keyframes nebula-drift {
+  0% { transform: translate3d(0, 0, 0) rotate(0deg) scale(1); }
+  100% { transform: translate3d(3%, 2%, 0) rotate(6deg) scale(1.06); }
+}
+@keyframes light-drift {
+  0% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(55vw, 20vh, 0); }
+  100% { transform: translate3d(90vw, 50vh, 0); }
+}
+@keyframes twinkle {
+  0% { opacity: 0.35; }
+  100% { opacity: 0.95; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cosmos-nebula,
+  .cosmos-light,
+  .cosmos-stars-2 {
+    animation: none !important;
+  }
+}
+
+/* ---------- World art motion (lobby tiles, setup sheet header) ---------- */
+@keyframes world-spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes world-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+@keyframes world-aurora {
+  0%, 100% { opacity: 0.55; transform: translateX(-4%) scaleY(1); }
+  50% { opacity: 0.95; transform: translateX(4%) scaleY(1.15); }
+}
+@keyframes world-orbit {
+  from { transform: rotate(0deg) translateX(var(--orbit, 70px)) rotate(0deg); }
+  to { transform: rotate(360deg) translateX(var(--orbit, 70px)) rotate(-360deg); }
+}
+@keyframes world-sail {
+  from { transform: translateX(-30px); }
+  to { transform: translateX(30px); }
+}
+@keyframes world-glow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+.w-spin { animation: world-spin var(--dur, 6s) linear infinite; transform-origin: center; transform-box: fill-box; }
+.w-bob { animation: world-bob var(--dur, 5s) ease-in-out infinite; }
+.w-aurora { animation: world-aurora var(--dur, 9s) ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+.w-orbit { animation: world-orbit var(--dur, 14s) linear infinite; transform-box: fill-box; }
+.w-sail { animation: world-sail var(--dur, 10s) ease-in-out infinite alternate; }
+.w-glow { animation: world-glow var(--dur, 3s) ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .w-spin, .w-bob, .w-aurora, .w-orbit, .w-sail, .w-glow { animation: none !important; }
+}
+
+/* The shell root is isolated so the backdrop (z -1) sits above the body background and below content.
+   Do not give page content its own z-index: sheets inside pages must stack above the nav bars. */
+.page-root {
+  position: relative;
+}
