@@ -100,10 +100,10 @@ export const Grid = forwardRef<GridHandle, GridProps>(function Grid(
         </clipPath>
         <g clipPath={`url(#${uid}-clip)`}>
           <rect width={GRID} height={GRID} fill={`url(#${uid}-sea)`} />
-          <g className="sb-drift">
+          <g>
             <rect x={0} y={0} width={GRID + 160} height={GRID} fill={`url(#${uid}-waves)`} />
           </g>
-          <g className="sb-drift2" opacity={0.7}>
+          <g opacity={0.6} transform="translate(-37 0)">
             <rect x={0} y={9} width={GRID + 160} height={GRID} fill={`url(#${uid}-waves)`} />
           </g>
           {radar ? <Radar uid={uid} /> : null}
@@ -121,7 +121,7 @@ export const Grid = forwardRef<GridHandle, GridProps>(function Grid(
             <line x1={0} y1={GRID / 2} x2={GRID} y2={GRID / 2} strokeDasharray="2 6" />
           </g>
           {badCells
-            ? [...badCells].map((i) => <rect key={`bad${i}`} x={(i % 10) * C + 1} y={Math.floor(i / 10) * C + 1} width={C - 2} height={C - 2} rx={5} fill="rgba(255, 77, 109, 0.28)" />)
+            ? [...badCells].map((i) => <rect key={`bad${i}`} x={(i % 10) * C + 1} y={Math.floor(i / 10) * C + 1} width={C - 2} height={C - 2} rx={5} fill="rgba(255, 90, 110, 0.32)" />)
             : null}
           {under}
           {/* Misses and known empty squares sit under the ships */}
@@ -131,11 +131,13 @@ export const Grid = forwardRef<GridHandle, GridProps>(function Grid(
             if (m === 'miss')
               return (
                 <g key={i}>
-                  <circle cx={x} cy={y} r={9} fill="rgba(220, 240, 255, 0.10)" stroke="rgba(235, 248, 255, 0.75)" strokeWidth={1.6} />
-                  <circle cx={x} cy={y} r={3} fill="#eaf6ff" />
+                  <path d={`M${x - 12} ${y + 6} L${x - 4} ${y + 2} L${x + 3} ${y + 5} L${x + 12} ${y - 2}`} fill="none" stroke="rgba(47, 111, 208, 0.45)" strokeWidth={1} strokeLinecap="round" />
+                  <circle cx={x - 3} cy={y} r={5.5} fill="#ffffff" stroke="rgba(90, 143, 224, 0.55)" strokeWidth={1} />
+                  <circle cx={x + 3.5} cy={y - 2} r={4.5} fill="#ffffff" stroke="rgba(90, 143, 224, 0.55)" strokeWidth={1} />
+                  <circle cx={x + 1} cy={y + 3} r={4} fill="#ffffff" />
                 </g>
               );
-            if (m === 'auto') return <circle key={i} cx={x} cy={y} r={2.6} fill="rgba(200, 230, 255, 0.38)" />;
+            if (m === 'auto') return <circle key={i} cx={x} cy={y} r={2.6} fill="rgba(47, 111, 208, 0.35)" />;
             return null;
           })}
           {ships.map((s) => {
@@ -154,7 +156,7 @@ export const Grid = forwardRef<GridHandle, GridProps>(function Grid(
             return <Burn key={`b${i}`} uid={uid} x={x} y={y} sunk={m === 'sunk'} seed={i} />;
           })}
           {lastShot ? (
-            <rect x={lastShot.col * C + 2} y={lastShot.row * C + 2} width={C - 4} height={C - 4} rx={6} fill="none" stroke="rgba(255, 255, 255, 0.85)" strokeWidth={1.5} strokeDasharray="4 4" />
+            <rect x={lastShot.col * C + 2} y={lastShot.row * C + 2} width={C - 4} height={C - 4} rx={6} fill="none" stroke="#2F6FD0" strokeWidth={1.8} strokeDasharray="4 4" />
           ) : null}
           {aim ? <Crosshair row={aim.row} col={aim.col} active={!!aimActive} /> : null}
           {children}
@@ -213,7 +215,7 @@ function Radar({ uid }: { uid: string }) {
 function Crosshair({ row, col, active }: { row: number; col: number; active: boolean }) {
   const x = col * C + C / 2;
   const y = row * C + C / 2;
-  const col1 = active ? COLORS.lime : 'rgba(127, 227, 255, 0.45)';
+  const col1 = active ? '#2F6FD0' : 'rgba(47, 111, 208, 0.5)';
   return (
     <g pointerEvents="none" style={{ filter: active ? 'drop-shadow(0 0 4px rgba(127, 227, 255,0.8))' : undefined }}>
       <rect x={col * C} y={0} width={C} height={GRID} fill="rgba(127, 227, 255, 0.05)" />
@@ -232,26 +234,21 @@ function Crosshair({ row, col, active }: { row: number; col: number; active: boo
   );
 }
 
+/** A hit cracks the ice open in a star and shows dark water. A sunk square is an open hole that slowly refreezes. */
 function Burn({ uid, x, y, sunk, seed }: { uid: string; x: number; y: number; sunk: boolean; seed: number }) {
-  const delay = `${(seed % 7) * 0.09}s`;
-  if (sunk) {
-    return (
-      <g pointerEvents="none">
-        <circle cx={x} cy={y} r={15} fill={`url(#${uid}-scorch)`} />
-        <circle cx={x} cy={y} r={3.2} fill={COLORS.fire} />
-        <circle cx={x} cy={y} r={1.4} fill={COLORS.fireHot} />
-        <circle className="sb-smoke" cx={x + 3} cy={y - 6} r={4} fill="rgba(180, 180, 190, 0.35)" style={{ animationDelay: delay }} />
-      </g>
-    );
-  }
+  const rot = (seed * 37) % 360;
+  const rays = Array.from({ length: 6 }, (_, k) => {
+    const a = ((rot + k * 60 + (k % 2) * 14) * Math.PI) / 180;
+    const len = 14 + (k % 3) * 4;
+    return `M${x + Math.cos(a) * 6} ${y + Math.sin(a) * 6}L${x + Math.cos(a) * len} ${y + Math.sin(a) * len}`;
+  }).join('');
   return (
     <g pointerEvents="none">
-      <circle cx={x} cy={y} r={16} fill={`url(#${uid}-scorch)`} />
-      <circle cx={x} cy={y} r={13} fill={`url(#${uid}-fire)`} opacity={0.55} />
-      <g className="sb-flame" style={{ animationDelay: delay }}>
-        <path d={`M${x} ${y - 13} C${x + 9} ${y - 3} ${x + 8} ${y + 8} ${x} ${y + 9} C${x - 8} ${y + 8} ${x - 9} ${y - 2} ${x - 2} ${y - 7} C${x - 1} ${y - 3} ${x + 1} ${y - 2} ${x} ${y - 13} Z`} fill={COLORS.fire} />
-        <path d={`M${x} ${y - 5} C${x + 5} ${y} ${x + 4} ${y + 6} ${x} ${y + 7} C${x - 4} ${y + 6} ${x - 4} ${y + 1} ${x} ${y - 5} Z`} fill={COLORS.fireHot} />
-      </g>
+      <path d={rays} stroke="#ffffff" strokeWidth={2.2} strokeLinecap="round" opacity={0.95} />
+      <path d={rays} stroke="#2F6FD0" strokeWidth={0.9} strokeLinecap="round" opacity={0.7} />
+      <circle cx={x} cy={y} r={sunk ? 15 : 10} fill={`url(#${uid}-scorch)`} />
+      <path d={`M${x - 7} ${y - 3} L${x - 2} ${y - 8} L${x + 6} ${y - 6} L${x + 8} ${y + 2} L${x + 2} ${y + 8} L${x - 6} ${y + 6} Z`} fill={COLORS.fire} stroke="#BFF1FF" strokeWidth={1.2} strokeLinejoin="round" />
+      {sunk ? <circle cx={x} cy={y} r={9} fill="none" stroke="rgba(242, 247, 252, 0.6)" strokeWidth={2} strokeDasharray="3 3" /> : null}
     </g>
   );
 }

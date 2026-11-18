@@ -99,7 +99,7 @@ const DEFS: Record<PieceType, PieceDef> = {
   },
 };
 
-const INK = '#141a28';
+const INK = '#080e1a';
 
 interface PieceArtProps {
   color: PieceColor;
@@ -120,28 +120,28 @@ export function PieceArt({ color, type, halo = false, haloWidth = 8.5, shadow = 
   const def = DEFS[type];
   const light = color === 'w';
   const stroke = light ? INK : '#05070d';
-  const lineColor = light ? INK : 'rgba(170,184,214,0.75)';
-  const markColor = light ? INK : 'rgba(205,215,236,0.9)';
+  const lineColor = light ? 'rgba(47,111,170,0.85)' : 'rgba(190,226,255,0.8)';
+  const markColor = light ? INK : 'rgba(220,240,255,0.92)';
   return (
     <svg viewBox="0 0 100 100" className={className} role={title ? 'img' : undefined} aria-hidden={title ? undefined : true} aria-label={title}>
       <defs>
         <linearGradient id={gid} x1="0.15" y1="0" x2="0.85" y2="1">
           {light ? (
             <>
-              <stop offset="0" stopColor="#fffbf2" />
-              <stop offset="0.55" stopColor="#f1e8d6" />
-              <stop offset="1" stopColor="#dccfb5" />
+              <stop offset="0" stopColor="#ffffff" />
+              <stop offset="0.5" stopColor="#e3f6ff" />
+              <stop offset="1" stopColor="#a9def5" />
             </>
           ) : (
             <>
-              <stop offset="0" stopColor="#47526b" />
-              <stop offset="0.45" stopColor="#262e41" />
-              <stop offset="1" stopColor="#11151f" />
+              <stop offset="0" stopColor="#5b8fd6" />
+              <stop offset="0.45" stopColor="#2a5797" />
+              <stop offset="1" stopColor="#12305e" />
             </>
           )}
         </linearGradient>
       </defs>
-      {shadow ? <ellipse cx="50" cy="89.5" rx="31" ry="4.2" fill="rgba(0,0,0,0.22)" /> : null}
+      {shadow ? <ellipse cx="50" cy="89.5" rx="31" ry="4.2" fill="rgba(8,14,26,0.22)" /> : null}
       {halo ? (
         <g fill="none" stroke="rgba(214,224,246,0.62)" strokeWidth={haloWidth} strokeLinejoin="round">
           {def.shapes.map((d, i) => (
@@ -152,6 +152,12 @@ export function PieceArt({ color, type, halo = false, haloWidth = 8.5, shadow = 
       <g fill={`url(#${gid})`} stroke={stroke} strokeWidth="3.2" strokeLinejoin="round" strokeLinecap="round">
         {def.shapes.map((d, i) => (
           <path key={i} d={d} />
+        ))}
+      </g>
+      {/* ice glint: a soft highlight down the left edge of every piece */}
+      <g fill="none" stroke={light ? 'rgba(127,227,255,0.55)' : 'rgba(170,220,255,0.35)'} strokeWidth="1.6" opacity="0.9" style={{ mixBlendMode: 'screen' }}>
+        {def.shapes.slice(0, 1).map((d, i) => (
+          <path key={i} d={d} transform="translate(1.6 1.6) scale(0.968)" />
         ))}
       </g>
       {def.lines ? (

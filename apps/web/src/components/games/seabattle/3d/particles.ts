@@ -1,5 +1,5 @@
 /**
- * GPU particles for splashes, fireballs, sparks, smoke and burning cells. One instanced billboard
+ * GPU particles for snow splashes, ice shard bursts, snowball trails and frost mist over cracked cells. One instanced billboard
  * geometry, one draw call per pool. Motion is evaluated in the vertex shader from per particle
  * start values, so the CPU only writes a few floats when something is emitted, never per frame.
  * Premultiplied blending lets one material do additive fire (alpha out 0) and normal smoke.
@@ -155,9 +155,10 @@ export class ParticlePool {
 /* ---------------- effect recipes (all original) ---------------- */
 
 const rnd = (a: number, b: number) => a + Math.random() * (b - a);
-const FIRE: [number, number, number] = [1.0, 0.55, 0.12];
-const HOT: [number, number, number] = [1.0, 0.92, 0.6];
-const EMBER: [number, number, number] = [0.6, 0.1, 0.02];
+// Ice, not fire: hits throw up shards and snow, cracked cells breathe a little frost mist.
+const FIRE: [number, number, number] = [0.5, 0.89, 1.0];
+const HOT: [number, number, number] = [0.95, 0.99, 1.0];
+const EMBER: [number, number, number] = [0.35, 0.6, 0.9];
 
 export function splashBurst(x: number, y: number, z: number, t: number): Particle[] {
   const out: Particle[] = [];
@@ -176,12 +177,12 @@ export function splashBurst(x: number, y: number, z: number, t: number): Particl
 export function fireBurst(x: number, y: number, z: number, t: number, big: boolean): Particle[] {
   const out: Particle[] = [];
   const k = big ? 1.5 : 1;
-  out.push({ x, y: y + 0.2, z, start: t, life: 0.18, c0: [1, 0.7, 0.35], additive: true, alpha: 0.8, s0: 0.5 * k, s1: 2.0 * k });
-  out.push({ x, y: y + 0.3, z, start: t, life: 0.9, c0: [1, 0.5, 0.12], c1: [0.6, 0.1, 0.0], additive: true, alpha: 0.7, s0: 1.2 * k, s1: 2.4 * k });
+  out.push({ x, y: y + 0.2, z, start: t, life: 0.18, c0: [0.8, 0.95, 1], additive: true, alpha: 0.7, s0: 0.5 * k, s1: 2.0 * k });
+  out.push({ x, y: y + 0.3, z, start: t, life: 0.9, c0: [0.55, 0.85, 1], c1: [0.2, 0.45, 0.8], additive: true, alpha: 0.5, s0: 1.2 * k, s1: 2.4 * k });
   for (let i = 0; i < 18 * k; i++) {
     const a = rnd(0, Math.PI * 2);
     const sp = rnd(0.3, 1.4) * k;
-    out.push({ x, y: y + 0.15, z, vx: Math.cos(a) * sp, vy: rnd(0.6, 2.2) * k, vz: Math.sin(a) * sp, start: t + rnd(0, 0.08), life: rnd(0.55, 1.0), gravity: -0.8, c0: [1, 0.75, 0.3], c1: [0.85, 0.16, 0.02], additive: true, alpha: 0.85, s0: rnd(0.45, 0.8) * k, s1: rnd(1.0, 1.6) * k, spin: rnd(-2, 2) });
+    out.push({ x, y: y + 0.15, z, vx: Math.cos(a) * sp, vy: rnd(0.6, 2.2) * k, vz: Math.sin(a) * sp, start: t + rnd(0, 0.08), life: rnd(0.55, 1.0), gravity: -0.8, c0: [0.92, 0.98, 1], c1: [0.4, 0.7, 0.95], additive: false, alpha: 0.8, s0: rnd(0.45, 0.8) * k, s1: rnd(1.0, 1.6) * k, spin: rnd(-2, 2) });
   }
   for (let i = 0; i < 34 * k; i++) {
     const a = rnd(0, Math.PI * 2);
@@ -190,7 +191,7 @@ export function fireBurst(x: number, y: number, z: number, t: number, big: boole
     out.push({ x, y: y + 0.2, z, vx: Math.cos(a) * sp * (1 - up * 0.5), vy: up * sp * 1.4, vz: Math.sin(a) * sp * (1 - up * 0.5), start: t, life: rnd(0.5, 1.1), gravity: 7, c0: HOT, c1: FIRE, additive: true, alpha: 1, s0: 0.06, s1: 0.03 });
   }
   for (let i = 0; i < 12 * k; i++) {
-    out.push({ x: x + rnd(-0.2, 0.2), y: y + 0.3, z: z + rnd(-0.2, 0.2), vx: rnd(-0.25, 0.25), vy: rnd(0.6, 1.2), vz: rnd(-0.25, 0.25), start: t + rnd(0.15, 0.4), life: rnd(1.8, 3), gravity: -0.05, c0: [0.25, 0.16, 0.12], c1: [0.42, 0.44, 0.5], alpha: 0.5, s0: 0.4, s1: 1.6 * k, spin: rnd(-0.6, 0.6) });
+    out.push({ x: x + rnd(-0.2, 0.2), y: y + 0.3, z: z + rnd(-0.2, 0.2), vx: rnd(-0.25, 0.25), vy: rnd(0.6, 1.2), vz: rnd(-0.25, 0.25), start: t + rnd(0.15, 0.4), life: rnd(1.8, 3), gravity: -0.05, c0: [0.9, 0.95, 1], c1: [0.75, 0.85, 0.95], alpha: 0.4, s0: 0.4, s1: 1.6 * k, spin: rnd(-0.6, 0.6) });
   }
   // water thrown up around the impact
   for (let i = 0; i < 14; i++) {
@@ -202,8 +203,8 @@ export function fireBurst(x: number, y: number, z: number, t: number, big: boole
 
 export function trail(x: number, y: number, z: number, t: number): Particle[] {
   return [
-    { x, y, z, start: t, life: 0.4, c0: [0.9, 1, 0.6], c1: [1, 0.45, 0.1], additive: true, alpha: 0.9, s0: 0.42, s1: 0.08 },
-    { x, y, z, vy: 0.1, start: t, life: 0.9, c0: [0.5, 0.55, 0.6], alpha: 0.18, s0: 0.1, s1: 0.4 },
+    { x, y, z, start: t, life: 0.4, c0: [1, 1, 1], c1: [0.6, 0.85, 1], additive: true, alpha: 0.9, s0: 0.42, s1: 0.08 },
+    { x, y, z, vy: 0.1, start: t, life: 0.9, c0: [0.9, 0.95, 1], alpha: 0.22, s0: 0.1, s1: 0.4 },
   ];
 }
 
@@ -214,17 +215,17 @@ export function burning(x: number, y: number, z: number, seed: number, heavy: bo
     const s = Math.sin(seed * 12.9898 + i * 78.233) * 43758.5453;
     return s - Math.floor(s);
   };
-  const flames = heavy ? 12 : 5;
+  const flames = heavy ? 6 : 3;
   for (let i = 0; i < flames; i++) {
     const life = 0.6 + r(i) * 0.45;
-    out.push({ x: x + (r(i + 10) - 0.5) * 0.32, y: y + 0.08, z: z + (r(i + 20) - 0.5) * 0.32, vx: 0, vy: 1.0 + r(i + 30) * 0.7, vz: 0, start: -r(i + 40) * life, life, loop: true, c0: HOT, c1: [0.85, 0.15, 0.02], additive: true, alpha: heavy ? 1 : 0.8, s0: heavy ? 0.62 : 0.38, s1: 0.14, spin: (r(i + 50) - 0.5) * 3 });
+    out.push({ x: x + (r(i + 10) - 0.5) * 0.32, y: y + 0.08, z: z + (r(i + 20) - 0.5) * 0.32, vx: 0, vy: 1.0 + r(i + 30) * 0.7, vz: 0, start: -r(i + 40) * life, life, loop: true, c0: HOT, c1: [0.5, 0.8, 1.0], additive: true, alpha: heavy ? 0.45 : 0.3, s0: heavy ? 0.3 : 0.2, s1: 0.08, spin: (r(i + 50) - 0.5) * 3 });
   }
   // soft glow pool that breathes under the flames
-  out.push({ x, y: y + 0.12, z, start: -r(200) * 1.6, life: 1.6, loop: true, c0: [1, 0.45, 0.1], c1: [1, 0.35, 0.05], additive: true, alpha: heavy ? 0.4 : 0.22, s0: heavy ? 1.3 : 0.9, s1: heavy ? 1.5 : 1.0 });
+  out.push({ x, y: y + 0.12, z, start: -r(200) * 1.6, life: 1.6, loop: true, c0: [0.3, 0.6, 0.95], c1: [0.25, 0.5, 0.9], additive: true, alpha: heavy ? 0.22 : 0.12, s0: heavy ? 1.3 : 0.9, s1: heavy ? 1.5 : 1.0 });
   const smokes = heavy ? 6 : 5;
   for (let i = 0; i < smokes; i++) {
     const life = 2.6 + r(i + 60) * 1.4;
-    out.push({ x: x + (r(i + 70) - 0.5) * 0.2, y: y + 0.35, z, vx: (r(i + 80) - 0.5) * 0.1, vy: 0.55 + r(i + 90) * 0.3, vz: 0, start: -r(i + 100) * life, life, loop: true, c0: [0.3, 0.2, 0.16], c1: [0.42, 0.45, 0.52], alpha: heavy ? 0.42 : 0.36, s0: 0.3, s1: 1.4 + r(i + 110) * 0.6, spin: (r(i + 120) - 0.5) });
+    out.push({ x: x + (r(i + 70) - 0.5) * 0.2, y: y + 0.35, z, vx: (r(i + 80) - 0.5) * 0.1, vy: 0.55 + r(i + 90) * 0.3, vz: 0, start: -r(i + 100) * life, life, loop: true, c0: [0.92, 0.97, 1], c1: [0.8, 0.9, 1], alpha: heavy ? 0.22 : 0.16, s0: 0.3, s1: 1.4 + r(i + 110) * 0.6, spin: (r(i + 120) - 0.5) });
   }
   if (heavy) {
     for (let i = 0; i < 3; i++) {

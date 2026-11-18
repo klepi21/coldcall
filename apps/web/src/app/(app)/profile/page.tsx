@@ -109,7 +109,7 @@ export default function ProfilePage() {
           <div className="mt-2 flex gap-2">
             {(['marble', 'night'] as const).map((t) => (
               <Chip key={t} active={(s.boardTheme ?? 'marble') === t} onClick={() => save({ settings: { boardTheme: t } })}>
-                {t === 'marble' ? 'Marble' : 'Night'}
+                {t === 'marble' ? 'Snow' : 'Deep ice'}
               </Chip>
             ))}
           </div>

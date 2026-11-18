@@ -41,9 +41,10 @@ export function waveHeight(x: number, z: number, t: number) {
 const wavesGlsl = WAVES.map(([dx, dz, k, w, a]) => `h += ${a.toFixed(3)} * sin(dot(vec2(${dx.toFixed(3)}, ${dz.toFixed(3)}), p) * ${k.toFixed(3)} + t * ${w.toFixed(3)});`).join('\n  ');
 
 const COMMON = /* glsl */ `
+// The lake is frozen: the surface stays flat, only a hint of unevenness far from the grid.
 float waveAmp(vec2 p) {
   float d = max(abs(p.x), abs(p.y));
-  return 0.045 + 0.2 * smoothstep(5.5, 16.0, d);
+  return 0.002 + 0.012 * smoothstep(8.0, 16.0, d);
 }
 float waveH(vec2 p, float t) {
   float h = 0.0;
@@ -100,9 +101,9 @@ float noise(vec2 p) {
 void main() {
   vec3 N = normalize(vNormal);
   // small ripples in the normal for a glittering surface
-  vec2 q = vWorld.xz * 5.0 + vec2(uTime * 0.5, uTime * 0.3);
-  vec2 q2 = vWorld.xz * 1.3 - vec2(uTime * 0.12, uTime * 0.2);
-  N = normalize(N + vec3(noise(q) - 0.5, 0.0, noise(q + 7.3) - 0.5) * 0.09 + vec3(noise(q2) - 0.5, 0.0, noise(q2 + 3.1) - 0.5) * 0.05);
+  vec2 q = vWorld.xz * 5.0;
+  vec2 q2 = vWorld.xz * 1.3;
+  N = normalize(N + vec3(noise(q) - 0.5, 0.0, noise(q + 7.3) - 0.5) * 0.05 + vec3(noise(q2) - 0.5, 0.0, noise(q2 + 3.1) - 0.5) * 0.03);
   vec3 V = normalize(cameraPosition - vWorld);
   float ndv = max(dot(N, V), 0.0);
   float fres = 0.03 + 0.97 * pow(1.0 - ndv, 5.0);
@@ -110,16 +111,18 @@ void main() {
   vec3 zenith = vec3(0.008, 0.016, 0.045);
   vec3 sky = mix(uHorizon * 0.9, zenith, smoothstep(0.0, 0.4, R.y));
   vec3 moonDir = normalize(vec3(-0.35, 0.42, -0.84));
-  float glint = smoothstep(0.55, 0.85, noise(vWorld.xz * 9.0 + uTime * 0.8));
+  float glint = smoothstep(0.6, 0.9, noise(vWorld.xz * 9.0 + uTime * 0.15));
   float spec = pow(max(dot(R, moonDir), 0.0), 500.0) * (0.15 + 0.9 * glint) + pow(max(dot(R, moonDir), 0.0), 40.0) * 0.025;
-  vec3 deep = vec3(0.002, 0.008, 0.022);
-  vec3 body = mix(deep, vec3(0.004, 0.026, 0.048), clamp(vH * 0.5 + 0.5, 0.0, 1.0));
-  vec3 col = mix(body, sky, fres) + vec3(0.6, 0.8, 1.0) * spec;
-
-  // foam on crests (mostly away from the grid)
-  float crest = smoothstep(0.85, 1.3, vH + (noise(vWorld.xz * 4.0 + uTime * 0.2) - 0.5) * 0.35);
-  float far = smoothstep(6.0, 12.0, max(abs(vWorld.x), abs(vWorld.z)));
-  col += vec3(0.4, 0.6, 0.7) * crest * (0.01 + 0.05 * far);
+  // frozen lake ice: pale blue with cloudy patches and fine frost cracks
+  vec3 iceA = vec3(0.30, 0.47, 0.64);
+  vec3 iceB = vec3(0.55, 0.72, 0.86);
+  float cloud = noise(vWorld.xz * 0.6) * 0.6 + noise(vWorld.xz * 2.1) * 0.4;
+  vec3 body = mix(iceA, iceB, cloud);
+  float crk = abs(noise(vWorld.xz * 3.0) - 0.5);
+  body = mix(body, vec3(0.86, 0.94, 1.0), (1.0 - smoothstep(0.0, 0.035, crk)) * 0.45);
+  float far = smoothstep(6.0, 13.0, max(abs(vWorld.x), abs(vWorld.z)));
+  body = mix(body, vec3(0.12, 0.22, 0.36), far * 0.6);
+  vec3 col = mix(body, sky, fres * 0.45) + vec3(0.8, 0.92, 1.0) * spec;
 
   // ---------- battle grid ----------
   vec2 g = vWorld.xz + 5.0;          // 0..10 over the grid
@@ -132,53 +135,60 @@ void main() {
   float glowLine = exp(-min(min(f.x, 1.0 - f.x), min(f.y, 1.0 - f.y)) * 22.0);
   vec2 bd = min(g, 10.0 - g);
   float border = exp(-abs(min(bd.x, bd.y)) * 9.0) * step(-0.6, min(bd.x, bd.y));
-  vec3 cyan = vec3(0.24, 0.86, 1.0);
-  vec3 lime = vec3(0.78, 1.0, 0.24);
-  col += cyan * inside * uGrid * (0.006 + line * 0.26 + glowLine * 0.035 + 0.012 * uActive);
-  col += cyan * border * uGrid * (0.38 + 0.22 * uActive);
+  vec3 cyan = vec3(0.50, 0.89, 1.0);
+  vec3 lofi = vec3(0.18, 0.43, 0.82);
+  // ice tiles: bright cut lines, a frosty rim around the field
+  col = mix(col, vec3(0.93, 0.97, 1.0), inside * uGrid * clamp(line * 0.75 + glowLine * 0.08, 0.0, 1.0));
+  col += cyan * inside * uGrid * 0.03 * uActive;
+  col = mix(col, vec3(0.92, 0.97, 1.0), clamp(border * uGrid * (0.7 + 0.2 * uActive), 0.0, 1.0));
   // centre cross, dashed
   float cx = exp(-abs(g.x - 5.0) * 40.0) + exp(-abs(g.y - 5.0) * 40.0);
-  col += cyan * cx * 0.08 * inside * step(0.5, fract((g.x + g.y) * 2.0)) * uGrid;
+  col = mix(col, lofi, clamp(cx * 0.25 * inside * step(0.5, fract((g.x + g.y) * 2.0)) * uGrid, 0.0, 1.0));
 
   // marks
   vec2 cc = f - 0.5;
   float r = length(cc);
   if (inside > 0.5) {
     vec4 m = texture2D(uMarks, (cell + 0.5) / 10.0);
-    // miss: white ring with a soft centre
-    float ring = exp(-pow((r - 0.22) * 34.0, 2.0));
-    col += vec3(0.85, 0.95, 1.0) * m.r * ring * 0.42;
-    // auto empty: small dim dot
-    col += vec3(0.6, 0.8, 1.0) * m.g * exp(-r * r * 260.0) * 0.45;
-    // hit: burning scorch disc
-    float flick = 0.85 + 0.15 * sin(uTime * 13.0 + cell.x * 3.1 + cell.y * 1.7);
-    col = mix(col, vec3(0.03, 0.01, 0.0), m.b * smoothstep(0.5, 0.15, r) * 0.6);
-    col += vec3(1.0, 0.36, 0.08) * m.b * exp(-r * r * 9.0) * 0.8 * flick;
-    // sunk: hot red cell outline
+    float ang = atan(cc.y, cc.x);
+    // miss: a snow puff with a hairline crack
+    float puff = smoothstep(0.27, 0.2, r + 0.03 * sin(ang * 5.0));
+    float hair = exp(-abs(cc.y - cc.x * 0.35) * 90.0) * smoothstep(0.48, 0.2, r);
+    col = mix(col, lofi, m.r * hair * 0.5);
+    col = mix(col, vec3(1.0), m.r * puff * 0.95);
+    // auto empty: small blue dot
+    col = mix(col, lofi, m.g * exp(-r * r * 260.0) * 0.6);
+    // hit: the ice cracks open in a star and shows dark water
+    float star = pow(abs(cos(ang * 3.0 + cell.x)), 26.0) * smoothstep(0.5, 0.12, r);
+    col = mix(col, vec3(0.96, 0.99, 1.0), m.b * star * 0.9);
+    col = mix(col, vec3(0.02, 0.07, 0.15), m.b * smoothstep(0.24, 0.14, r + 0.02 * sin(ang * 7.0)));
+    // sunk: an open hole of dark water across the cell that slowly refreezes at the edges
     float box = exp(-min(min(f.x, 1.0 - f.x), min(f.y, 1.0 - f.y)) * 16.0);
-    col += vec3(1.0, 0.28, 0.12) * m.a * (box * 0.5 + 0.06);
+    col = mix(col, vec3(0.04, 0.11, 0.22), m.a * (0.55 + 0.2 * sin(uTime * 0.7 + cell.x)));
+    col = mix(col, vec3(0.9, 0.96, 1.0), m.a * box * 0.6);
   }
   // aim band and cell
   if (uAim.z > 0.0 && inside > 0.5) {
     float band = max(step(abs(cell.x - uAim.x), 0.1), step(abs(cell.y - uAim.y), 0.1));
     float here = step(abs(cell.x - uAim.x), 0.1) * step(abs(cell.y - uAim.y), 0.1);
-    col += lime * uAim.z * (band * 0.04 + here * (0.1 + line * 0.6));
+    col = mix(col, lofi, clamp(uAim.z * (band * 0.1 + here * (0.25 + line * 0.6)), 0.0, 1.0));
   }
   if (uHover.z > 0.0 && inside > 0.5) {
     float here = step(abs(cell.x - uHover.x), 0.1) * step(abs(cell.y - uHover.y), 0.1);
-    col += lime * uHover.z * here * (0.05 + line * 0.35);
+    col = mix(col, lofi, clamp(uHover.z * here * (0.12 + line * 0.4), 0.0, 1.0));
   }
   // last shot: dashed white outline
   if (uLast.z > 0.0 && inside > 0.5) {
     float here = step(abs(cell.x - uLast.x), 0.1) * step(abs(cell.y - uLast.y), 0.1);
     float edge = 1.0 - smoothstep(0.055, 0.075, min(min(f.x, 1.0 - f.x), min(f.y, 1.0 - f.y)));
     float dash = step(0.5, fract((f.x + f.y) * 4.0));
-    col += vec3(1.0) * here * edge * dash * 0.7;
+    col = mix(col, lofi, here * edge * dash * 0.85);
   }
   // labels
   vec2 luv = (vWorld.xz + 6.0) / 12.0;
   if (luv.x > 0.0 && luv.x < 1.0 && luv.y > 0.0 && luv.y < 1.0) {
-    col += texture2D(uLabels, luv).rgb * 0.8 * uGrid;
+    vec3 lt = texture2D(uLabels, luv).rgb;
+    col = mix(col, vec3(0.93, 0.97, 1.0), max(max(lt.r, lt.g), lt.b) * 0.9 * uGrid);
   }
   // fire light on the water
   for (int i = 0; i < ${MAX_FIRES}; i++) {
@@ -186,7 +196,7 @@ void main() {
     vec3 fp = uFires[i];
     float d2 = dot(vWorld.xz - fp.xy, vWorld.xz - fp.xy);
     float fl = 0.8 + 0.2 * sin(uTime * 11.0 + float(i) * 2.3);
-    col += vec3(1.0, 0.38, 0.1) * fp.z * fl * 0.32 * exp(-d2 * 1.1) * (0.4 + fres * 2.0);
+    col += vec3(0.3, 0.6, 0.9) * fp.z * fl * 0.12 * exp(-d2 * 1.6);
   }
   // splash ripples
   for (int i = 0; i < ${MAX_RIPPLES}; i++) {
@@ -196,7 +206,7 @@ void main() {
     float rad = 0.15 + age * 1.5;
     float d = length(vWorld.xz - rp.xy);
     float rr = exp(-pow((d - rad) * 9.0, 2.0)) + 0.6 * exp(-pow((d - rad * 0.62) * 12.0, 2.0));
-    col += vec3(0.85, 0.95, 1.0) * rr * rp.w * (1.0 - age / 1.8) * 0.7;
+    col = mix(col, vec3(1.0), clamp(rr * rp.w * (1.0 - age / 1.8) * 0.8, 0.0, 1.0));
   }
 
   // distance haze into the horizon

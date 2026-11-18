@@ -30,7 +30,7 @@ export function Shell({ row, col, from, duration }: { row: number; col: number; 
       transition={{ duration, ease: 'linear' }}
     >
       <circle r={9} fill="rgba(127, 227, 255, 0.25)" />
-      <circle r={5} fill="#f6ffe0" stroke={COLORS.lime} strokeWidth={2} />
+      <circle r={5.5} fill="#ffffff" stroke="#9CC2F7" strokeWidth={1.6} />
     </motion.g>
   );
 }
@@ -48,7 +48,7 @@ export function Splash({ row, col, reduce }: { row: number; col: number; reduce:
           cx={x}
           cy={y}
           fill="none"
-          stroke="#ffffff"
+          stroke="#5A8FE0"
           strokeWidth={2.4 - k * 0.6}
           initial={{ r: 3, opacity: 0.95 }}
           animate={{ r: 24 + k * 6, opacity: 0 }}
@@ -61,7 +61,7 @@ export function Splash({ row, col, reduce }: { row: number; col: number; reduce:
           cx={x}
           cy={y}
           r={2.4}
-          fill="#e8f7ff"
+          fill="#ffffff"
           initial={{ x: 0, y: 0, opacity: 1 }}
           animate={{ x: dx * 16, y: [0, -18 - k * 3, -4], opacity: [1, 1, 0] }}
           transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -80,7 +80,7 @@ export function Explosion({ row, col, big, reduce }: { row: number; col: number;
   const sparks = big ? 12 : 8;
   return (
     <g pointerEvents="none">
-      <motion.circle cx={x} cy={y} fill="#fff7d6" initial={{ r: 4, opacity: 1 }} animate={{ r: R * 0.55, opacity: 0 }} transition={{ duration: 0.28, ease: 'easeOut' }} />
+      <motion.circle cx={x} cy={y} fill="#ffffff" initial={{ r: 4, opacity: 1 }} animate={{ r: R * 0.55, opacity: 0 }} transition={{ duration: 0.28, ease: 'easeOut' }} />
       <motion.circle cx={x} cy={y} fill={COLORS.fire} initial={{ r: 6, opacity: 0.95 }} animate={{ r: R, opacity: 0 }} transition={{ duration: 0.6, ease: 'easeOut' }} />
       <motion.circle cx={x} cy={y} fill="none" stroke={COLORS.fireHot} strokeWidth={3} initial={{ r: 8, opacity: 1 }} animate={{ r: R + 12, opacity: 0 }} transition={{ duration: 0.7, ease: 'easeOut' }} />
       {Array.from({ length: sparks }, (_, k) => {
@@ -106,7 +106,7 @@ export function Explosion({ row, col, big, reduce }: { row: number; col: number;
   );
 }
 
-/** Red flash over every square of a ship that just sank. */
+/** The ice opens over every square of a ship that just sank. */
 export function SinkFlash({ cells, reduce }: { cells: { row: number; col: number }[]; reduce: boolean }) {
   return (
     <g pointerEvents="none">

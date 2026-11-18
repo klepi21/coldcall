@@ -78,9 +78,9 @@ const DIE = 0.46;
 
 function useResources() {
   return useMemo(() => {
-    const frameWood = makeWood({ light: '#7C5636', dark: '#3A2213', seed: 7, rings: 9 });
-    const fieldWood = makeWood({ light: '#A27a52', dark: '#6B4A2E', seed: 21, rings: 6 });
-    const felt = makeFelt('#2B1B12');
+    const frameWood = makeWood({ light: '#D9BE93', dark: '#A88559', seed: 7, rings: 9 });
+    const fieldWood = makeWood({ light: '#EAD7B6', dark: '#C9AA7E', seed: 21, rings: 6 });
+    const felt = makeFelt('#5B7FA8');
     // veneer for the inlaid points: pale maple and a terracotta stained wood
     const veneer = (light: string, dark: string, seed: number) => {
       const { map } = makeWood({ light, dark, seed, rings: 5, width: 512, height: 128 });
@@ -89,8 +89,8 @@ function useResources() {
       map.repeat.set(0.35, 1.2);
       return map;
     };
-    const ivoryVeneer = veneer('#F1E6CC', '#D2BC92', 31);
-    const terraVeneer = veneer('#C9603F', '#94391F', 37);
+    const ivoryVeneer = veneer('#F4F9FF', '#D3E6F6', 31);
+    const terraVeneer = veneer('#6F9FE6', '#3F6FB8', 37);
     const wood = (base: ReturnType<typeof makeWood>, rx: number, ry: number, rot: boolean) => {
       const map = base.map.clone();
       const rough = base.rough.clone();
@@ -113,19 +113,19 @@ function useResources() {
       tray: new THREE.MeshStandardMaterial({ map: felt, roughness: 1, metalness: 0 }),
       ivoryPoint: new THREE.MeshPhysicalMaterial({ map: ivoryVeneer, roughness: 0.5, clearcoat: 0.4, clearcoatRoughness: 0.4 }),
       terraPoint: new THREE.MeshPhysicalMaterial({ map: terraVeneer, roughness: 0.55, clearcoat: 0.4, clearcoatRoughness: 0.4 }),
-      inlay: new THREE.MeshStandardMaterial({ color: '#E9DDC3', roughness: 0.45 }),
-      brass: new THREE.MeshStandardMaterial({ color: '#C9A15A', roughness: 0.28, metalness: 0.9 }),
-      groove: new THREE.MeshStandardMaterial({ color: '#1C0F07', roughness: 1 }),
+      inlay: new THREE.MeshStandardMaterial({ color: '#EAF4FC', roughness: 0.45 }),
+      brass: new THREE.MeshStandardMaterial({ color: '#BFD8EE', roughness: 0.22, metalness: 0.85 }),
+      groove: new THREE.MeshStandardMaterial({ color: '#6B5232', roughness: 1 }),
       checker: [
-        new THREE.MeshPhysicalMaterial({ color: '#E9DEC6', roughness: 0.4, clearcoat: 0.9, clearcoatRoughness: 0.18 }),
-        new THREE.MeshPhysicalMaterial({ color: '#1A2036', roughness: 0.32, clearcoat: 1, clearcoatRoughness: 0.12, metalness: 0.05 }),
+        new THREE.MeshPhysicalMaterial({ color: '#EAF7FF', roughness: 0.22, clearcoat: 1, clearcoatRoughness: 0.12, sheen: 0.5, sheenColor: new THREE.Color('#7FE3FF') }),
+        new THREE.MeshPhysicalMaterial({ color: '#1F4C8C', roughness: 0.2, clearcoat: 1, clearcoatRoughness: 0.08, metalness: 0.02, sheen: 0.4, sheenColor: new THREE.Color('#9CC2F7') }),
       ],
       shadow: new THREE.ShadowMaterial({ opacity: 0.32 }),
       edgeShade: new THREE.MeshBasicMaterial({ map: makeEdgeShade(), transparent: true, depthWrite: false, toneMapped: false }),
     };
     const dieFaces = DIE_FACES.map((v) => makeDieFace(v));
     const dieMats = dieFaces.map((map) => new THREE.MeshPhysicalMaterial({ map, roughness: 0.32, clearcoat: 0.7, clearcoatRoughness: 0.15 }));
-    const dieMatsUsed = dieFaces.map((map) => new THREE.MeshPhysicalMaterial({ map, color: '#8C8478', roughness: 0.5, clearcoat: 0.2 }));
+    const dieMatsUsed = dieFaces.map((map) => new THREE.MeshPhysicalMaterial({ map, color: '#D8EEFA', roughness: 0.18, clearcoat: 1, clearcoatRoughness: 0.1, transmission: 0, sheen: 0.4, sheenColor: new THREE.Color('#7FE3FF') }));
     const geo = {
       checker: makeCheckerGeometry(),
       die: makeDieGeometry(DIE, 0.065),
@@ -561,12 +561,12 @@ export function Scene3D(props: SceneProps) {
   return (
     <>
       <CameraRig parallax={props.parallax} />
-      <hemisphereLight args={['#FFF1DC', '#2A1A10', 0.4]} />
+      <hemisphereLight args={['#EAF6FF', '#2A3A55', 0.45]} />
       <ambientLight intensity={0.18} />
       <directionalLight
         position={[-3.5, 9, 4.5]}
         intensity={1.9}
-        color="#FFF4E2"
+        color="#F2F7FC"
         castShadow
         shadow-mapSize-width={1024}
         shadow-mapSize-height={1024}
@@ -579,10 +579,10 @@ export function Scene3D(props: SceneProps) {
         shadow-bias={-0.0004}
         shadow-normalBias={0.02}
       />
-      <directionalLight position={[5, 4, -3]} intensity={0.35} color="#FFD9B0" />
+      <directionalLight position={[5, 4, -3]} intensity={0.35} color="#BFE6FF" />
       <Environment resolution={64} frames={1}>
-        <Lightformer form="rect" intensity={2.2} color="#FFF3E0" position={[0, 6, 2]} rotation={[-Math.PI / 2, 0, 0]} scale={[10, 6, 1]} />
-        <Lightformer form="rect" intensity={1.1} color="#FFD2A1" position={[-6, 3, 2]} rotation={[0, Math.PI / 2, 0]} scale={[6, 3, 1]} />
+        <Lightformer form="rect" intensity={2.2} color="#F2F7FC" position={[0, 6, 2]} rotation={[-Math.PI / 2, 0, 0]} scale={[10, 6, 1]} />
+        <Lightformer form="rect" intensity={1.1} color="#CDEBFF" position={[-6, 3, 2]} rotation={[0, Math.PI / 2, 0]} scale={[6, 3, 1]} />
         <Lightformer form="rect" intensity={0.7} color="#B9C6FF" position={[6, 2, -3]} rotation={[0, -Math.PI / 2, 0]} scale={[6, 2, 1]} />
       </Environment>
 

@@ -642,26 +642,26 @@ export function TichuTable(props: TichuTableProps) {
 /* ================= pieces ================= */
 
 /**
- * The table is an arena in both page themes: dark felt with a neon edge.
+ * The table is ice blue felt in both page themes, with a frosty rim.
  * Tokens are redefined locally so text, panels and buttons stay readable on the felt.
  */
 const FELT_NOISE =
   "url(\"data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>\")";
 const TABLE_STYLE = {
-  '--text': '#F4F4FB',
-  '--text-2': '#A8A8C4',
-  '--surface': '#12121C',
-  '--surface-2': '#1D1D2C',
-  '--line': '#2C2C42',
-  '--primary': '#7fe3ff',
-  '--primary-ink': '#0A0A0F',
-  '--accent': '#5a8fe0',
+  '--text': '#F2F7FC',
+  '--text-2': '#B4CDEA',
+  '--surface': '#13294A',
+  '--surface-2': '#1A3560',
+  '--line': '#2A4A78',
+  '--primary': '#5a8fe0',
+  '--primary-ink': '#080E1A',
+  '--accent': '#7fe3ff',
   '--gold': '#f5c542',
-  '--win': '#7fe3ff',
-  '--loss': '#FF4D6D',
+  '--win': '#3ddc97',
+  '--loss': '#FF5A6E',
   '--shadow-card': '0 2px 14px rgba(0,0,0,.5)',
   '--shadow-modal': '0 24px 64px rgba(0,0,0,.65)',
-  background: `${FELT_NOISE}, radial-gradient(110% 80% at 50% 45%, #1E1842 0%, #131030 40%, #0B0A18 75%, #07070C 100%)`,
+  background: `${FELT_NOISE}, radial-gradient(110% 80% at 50% 45%, #3E6FA8 0%, #2A5488 40%, #183A66 75%, #0B1A2E 100%)`,
   border: '1.5px solid rgba(90, 143, 224,.75)',
   boxShadow: '0 0 0 1px rgba(90, 143, 224,.35), 0 0 34px rgba(90, 143, 224,.35), inset 0 0 0 1px rgba(127, 227, 255,.12), inset 0 0 80px rgba(90, 143, 224,.18)',
   colorScheme: 'dark',
@@ -676,7 +676,7 @@ function TableInlay() {
         </filter>
       </defs>
       <ellipse cx="50" cy="48" rx="45" ry="34" fill="none" stroke="#5a8fe0" strokeOpacity="0.55" strokeWidth="3" vectorEffect="non-scaling-stroke" filter="url(#tichu-neon)" />
-      <ellipse cx="50" cy="48" rx="45" ry="34" fill="none" stroke="#A58DFF" strokeOpacity="0.7" strokeWidth="1" vectorEffect="non-scaling-stroke" />
+      <ellipse cx="50" cy="48" rx="45" ry="34" fill="none" stroke="#BFEFFF" strokeOpacity="0.7" strokeWidth="1" vectorEffect="non-scaling-stroke" />
       <ellipse cx="50" cy="48" rx="43.3" ry="32.4" fill="none" stroke="#7fe3ff" strokeOpacity="0.18" strokeWidth="1" strokeDasharray="3 7" vectorEffect="non-scaling-stroke" />
       <ellipse cx="50" cy="48" rx="28" ry="19" fill="#5a8fe0" fillOpacity="0.07" />
     </svg>
@@ -689,8 +689,8 @@ function ScoreBlock({ label, value, tone, align = 'left' }: { label: string; val
       className={`flex min-w-0 flex-col rounded-2xl px-3 py-1.5 shadow-card ${align === 'right' ? 'items-end' : 'items-start'}`}
       style={
         tone === 'us'
-          ? { background: 'linear-gradient(135deg, #D8FF6A, #9FE01F)', color: '#0A0A0F', boxShadow: '0 0 22px rgba(127, 227, 255,.35)' }
-          : { background: 'linear-gradient(135deg, #FF6A86, #D9264B)', color: '#FFFFFF', boxShadow: '0 0 22px rgba(255,77,109,.35)' }
+          ? { background: 'linear-gradient(135deg, #7EF0C0, #3DDC97)', color: '#080E1A', boxShadow: '0 0 22px rgba(127, 227, 255,.35)' }
+          : { background: 'linear-gradient(135deg, #FF7A8C, #FF5A6E)', color: '#FFFFFF', boxShadow: '0 0 22px rgba(255,90,110,.35)' }
       }
     >
       <span className="whitespace-nowrap text-[10px] font-extrabold uppercase tracking-[0.14em] opacity-80 sm:text-[11px]">{label}</span>
@@ -816,10 +816,10 @@ function SeatPanel({ pos, seat, view, name, bubble, narrow, short }: { pos: Pos;
         />
       ) : null}
       <div
-        className={`flex size-10 items-center justify-center rounded-full text-lg font-black sm:size-12 sm:text-xl ${partner ? 'text-[#0A0A0F]' : 'text-white'}`}
+        className={`flex size-10 items-center justify-center rounded-full text-lg font-black sm:size-12 sm:text-xl ${partner ? 'text-[#080E1A]' : 'text-[#080E1A]'}`}
         style={{
-          background: partner ? 'linear-gradient(135deg, #D8FF6A, #8FD10F)' : 'linear-gradient(135deg, #FF6A86, #C21F44)',
-          boxShadow: `0 0 0 2px #0B0A18, 0 0 0 3.5px ${partner ? '#7fe3ff' : '#FF4D6D'}, 0 0 16px ${partner ? 'rgba(127, 227, 255,.45)' : 'rgba(255,77,109,.45)'}`,
+          background: partner ? 'linear-gradient(135deg, #7EF0C0, #3DDC97)' : 'linear-gradient(135deg, #FF7A8C, #E2445A)',
+          boxShadow: `0 0 0 2px #0B1A2E, 0 0 0 3.5px ${partner ? '#3ddc97' : '#FF5A6E'}, 0 0 16px ${partner ? 'rgba(127, 227, 255,.45)' : 'rgba(255,90,110,.45)'}`,
         }}
       >
         {name.slice(0, 1)}
@@ -845,7 +845,7 @@ function SeatPanel({ pos, seat, view, name, bubble, narrow, short }: { pos: Pos;
     <div className={`flex min-w-0 flex-col ${horizontal ? 'items-start' : 'items-center text-center'}`}>
       <span className="max-w-[9rem] truncate text-sm font-semibold leading-tight">{name}</span>
       <span
-        className={`mt-0.5 rounded-full px-1.5 py-px text-[10px] font-extrabold uppercase leading-[13px] tracking-[0.08em] ${narrow && !partner && !short ? 'rounded-lg py-0.5 text-center' : 'whitespace-nowrap'} ${partner ? 'bg-[#7fe3ff] text-[#0A0A0F]' : 'bg-[#FF4D6D] text-white'}`}
+        className={`mt-0.5 rounded-full px-1.5 py-px text-[10px] font-extrabold uppercase leading-[13px] tracking-[0.08em] ${narrow && !partner && !short ? 'rounded-lg py-0.5 text-center' : 'whitespace-nowrap'} ${partner ? 'bg-[#3ddc97] text-[#080E1A]' : 'bg-[#FF5A6E] text-[#080E1A]'}`}
       >
         {partner ? 'Partner' : short ? 'Opponent' : narrow ? (
           <>

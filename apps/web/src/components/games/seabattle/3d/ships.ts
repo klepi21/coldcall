@@ -209,10 +209,10 @@ export function shipMaterials(look: ShipLook3D): Record<Slot, THREE.Material> {
   const glow = (color: string) => new THREE.MeshBasicMaterial({ color, toneMapped: false });
   const m: Record<Slot, THREE.Material> =
     look === 'own'
-      ? { hull: std('#3a3f7e', 0.45, 0.5, '#3a24b0', 0.45), deck: std('#5a5f9e', 0.55, 0.3), detail: std('#9298d0', 0.45, 0.4), glow: glow('#b3a1ff') }
+      ? { hull: std('#1E3F6E', 0.45, 0.4, '#0b2a55', 0.25), deck: std('#EAF4FC', 0.5, 0.1), detail: std('#7FA6CF', 0.45, 0.3), glow: glow('#7fe3ff') }
       : look === 'reveal'
-        ? { hull: std('#2c3a4c', 0.45, 0.55, '#16380a', 0.35), deck: std('#4b5a6c', 0.55, 0.35), detail: std('#93a3b5', 0.45, 0.4), glow: glow('#7fe3ff') }
-        : { hull: std('#2a1c16', 0.85, 0.2, '#7a1e04', 0.7), deck: std('#3a2a22', 0.9, 0.1, '#5a1800', 0.6), detail: std('#4a362c', 0.9, 0.15, '#3a1000', 0.5), glow: glow('#ff6a2a') };
+        ? { hull: std('#2c4a6e', 0.45, 0.45, '#0b2a55', 0.2), deck: std('#c9dcef', 0.55, 0.2), detail: std('#93a3b5', 0.45, 0.4), glow: glow('#9cc2f7') }
+        : { hull: std('#0E2A4D', 0.85, 0.15, '#041226', 0.4), deck: std('#3E5F86', 0.9, 0.1), detail: std('#5E7590', 0.9, 0.15), glow: glow('#bff1ff') };
   mats.set(look, m);
   return m;
 }

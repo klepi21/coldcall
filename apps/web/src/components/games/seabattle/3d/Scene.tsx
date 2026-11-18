@@ -62,7 +62,7 @@ export function Scene(props: SceneProps) {
     <>
       <Rig mode={mode} reduce={reduce} shared={shared} />
       <ambientLight intensity={0.35} color="#8fa6d8" />
-      <hemisphereLight args={['#4a6cb0', '#05060a', 0.9]} />
+      <hemisphereLight args={['#9cc2f7', '#0b1a2e', 1.0]} />
       <directionalLight position={[-5, 7, -9]} intensity={2.1} color="#c4d2ff" />
       <directionalLight position={[6, 4, 8]} intensity={0.55} color="#5a8fe0" />
       <Sky reduce={reduce} />
@@ -401,7 +401,7 @@ function Crosshair({ cell, active, reduce }: { cell: Cell; active: boolean; redu
         blending: THREE.AdditiveBlending,
         uniforms: { uA: { value: 1 } },
         vertexShader: 'varying float vY; void main(){ vY = position.y; gl_Position = projectionMatrix * modelViewMatrix * vec4(position,1.0); }',
-        fragmentShader: 'uniform float uA; varying float vY; void main(){ float a = (1.0 - smoothstep(-1.2, 1.2, vY)) * 0.35 * uA; gl_FragColor = vec4(vec3(0.78,1.0,0.24) * a, 1.0); }',
+        fragmentShader: 'uniform float uA; varying float vY; void main(){ float a = (1.0 - smoothstep(-1.2, 1.2, vY)) * 0.35 * uA; gl_FragColor = vec4(vec3(0.5,0.89,1.0) * a, 1.0); }',
       }),
     [],
   );
@@ -472,7 +472,7 @@ function FireLight({ marks, reduce }: { marks?: SbMark[]; reduce: boolean }) {
     const t = s.clock.elapsedTime;
     l.intensity = centre ? (reduce ? 4 : 4 + Math.sin(t * 13) * 0.8 + Math.sin(t * 7.3) * 0.6) : 0;
   });
-  return <pointLight ref={light} position={[centre?.x ?? 0, 0.9, centre?.z ?? 0]} color="#ff7a2a" distance={9} decay={1.6} intensity={0} />;
+  return <pointLight ref={light} position={[centre?.x ?? 0, 0.9, centre?.z ?? 0]} color="#7fe3ff" distance={9} decay={1.6} intensity={0} />;
 }
 
 /* ---------------------------------------------------------------------------------------------- */
@@ -573,7 +573,7 @@ function Effects({ marks, flight, impact, flightMs = 800, shared }: SceneProps &
   return (
     <mesh ref={shell} visible={false} renderOrder={12}>
       <sphereGeometry args={[0.13, 12, 8]} />
-      <meshBasicMaterial color="#f6ffe0" toneMapped={false} />
+      <meshBasicMaterial color="#ffffff" toneMapped={false} />
     </mesh>
   );
 }

@@ -160,15 +160,16 @@ const PIPS: Record<number, [number, number][]> = {
   6: [[0, 0], [2, 0], [0, 1], [2, 1], [0, 2], [2, 2]],
 };
 
-/** One die face: warm ivory with engraved ink pips (the one is terracotta, a tavli tradition). */
+/** One die face: an ice cube with Snow pips set into it. */
 export function makeDieFace(value: number): THREE.CanvasTexture {
   const s = 256;
   const cv = document.createElement('canvas');
   cv.width = cv.height = s;
   const ctx = cv.getContext('2d')!;
   const g = ctx.createRadialGradient(s * 0.45, s * 0.4, s * 0.1, s / 2, s / 2, s * 0.75);
-  g.addColorStop(0, '#FFFCF4');
-  g.addColorStop(1, '#EDE3CF');
+  g.addColorStop(0, '#D8F2FF');
+  g.addColorStop(0.6, '#A9DAF4');
+  g.addColorStop(1, '#7FB8E2');
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, s, s);
   const pr = value === 1 ? 30 : 23;
@@ -178,16 +179,11 @@ export function makeDieFace(value: number): THREE.CanvasTexture {
     // engraved look: a light lip below, a dark well with a soft inner shade
     ctx.beginPath();
     ctx.arc(x + 1.5, y + 2.5, pr + 2, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.fillStyle = 'rgba(20,60,110,0.45)';
     ctx.fill();
     const pg = ctx.createRadialGradient(x - pr * 0.3, y - pr * 0.35, pr * 0.1, x, y, pr);
-    if (value === 1) {
-      pg.addColorStop(0, '#7A2414');
-      pg.addColorStop(1, '#B0442A');
-    } else {
-      pg.addColorStop(0, '#05070F');
-      pg.addColorStop(1, '#1F2640');
-    }
+    pg.addColorStop(0, '#FFFFFF');
+    pg.addColorStop(1, '#E3F2FC');
     ctx.beginPath();
     ctx.arc(x, y, pr, 0, Math.PI * 2);
     ctx.fillStyle = pg;

@@ -10,30 +10,36 @@ import { FILES, VALUES, describeLastMove, isLightSquare, moverColor, parsePlacem
 
 export { PieceArt } from './pieces';
 
-/** Board palettes from brand/BRAND.md. */
+/**
+ * Frozen board palettes (brand/BRAND_COLDCALL.md): light squares are packed snow, dark squares are glacier
+ * ice, with a thin frost line between them. Last move in Frost Cyan, selection in Lofi Blue.
+ * "marble" is the snow board (default), "night" the deep ice board.
+ */
 const THEMES = {
   marble: {
-    light: '#EDE6D8',
-    dark: '#9C8F7B',
-    coordOnLight: 'rgba(124,111,92,0.95)',
-    coordOnDark: 'rgba(240,234,222,0.92)',
-    select: 'rgba(76,141,255,0.35)',
-    last: 'rgba(232,180,76,0.35)',
+    light: '#EEF5FC',
+    dark: '#7FA6CF',
+    coordOnLight: 'rgba(47,90,150,0.95)',
+    coordOnDark: 'rgba(242,247,252,0.95)',
+    select: 'rgba(90,143,224,0.45)',
+    last: 'rgba(127,227,255,0.45)',
     lastStroke: null as string | null,
-    dot: 'rgba(28,32,46,0.26)',
-    grain: { opacity: 0.1, blend: 'multiply' as const },
+    dot: 'rgba(11,26,46,0.28)',
+    grain: { opacity: 0.08, blend: 'soft-light' as const },
+    frost: 'rgba(255,255,255,0.55)',
     halo: false,
   },
   night: {
-    light: '#2B3A5C',
-    dark: '#1A2540',
-    coordOnLight: 'rgba(150,166,204,0.85)',
-    coordOnDark: 'rgba(124,140,180,0.85)',
-    select: 'rgba(76,141,255,0.42)',
-    last: 'rgba(232,180,76,0.1)',
-    lastStroke: 'rgba(232,180,76,0.6)' as string | null,
-    dot: 'rgba(226,232,246,0.24)',
+    light: '#2E5583',
+    dark: '#173459',
+    coordOnLight: 'rgba(190,214,242,0.9)',
+    coordOnDark: 'rgba(150,182,224,0.9)',
+    select: 'rgba(90,143,224,0.5)',
+    last: 'rgba(127,227,255,0.14)',
+    lastStroke: 'rgba(127,227,255,0.75)' as string | null,
+    dot: 'rgba(226,240,255,0.26)',
     grain: { opacity: 0.07, blend: 'screen' as const },
+    frost: 'rgba(127,227,255,0.22)',
     halo: true,
   },
 };
@@ -489,13 +495,15 @@ export function ChessBoard(props: BoardProps<ChessView, ChessMove> & { devPrevie
               <feColorMatrix type="saturate" values="0" />
             </filter>
             <radialGradient id={`${uid}-check`}>
-              <stop offset="0" stopColor="rgba(226,96,63,0.95)" />
-              <stop offset="0.55" stopColor="rgba(226,96,63,0.55)" />
-              <stop offset="1" stopColor="rgba(226,96,63,0)" />
+              <stop offset="0" stopColor="rgba(255,90,110,0.95)" />
+              <stop offset="0.55" stopColor="rgba(255,90,110,0.55)" />
+              <stop offset="1" stopColor="rgba(255,90,110,0)" />
             </radialGradient>
           </defs>
           {squares}
           <rect width={800} height={800} filter={`url(#${uid}-grain)`} opacity={theme.grain.opacity} style={{ mixBlendMode: theme.grain.blend }} />
+          {/* frost lines between squares */}
+          <path d={Array.from({ length: 7 }, (_, k) => `M${(k + 1) * 100} 0V800M0 ${(k + 1) * 100}H800`).join('')} stroke={theme.frost} strokeWidth={1.5} fill="none" />
           {lastSq.map((sq, i) => hl(sq, theme.last, `l${i}`))}
           {theme.lastStroke
             ? lastSq.map((sq, i) => {

@@ -607,7 +607,7 @@ function Swatch({ seat }: { seat: number }) {
   return (
     <span
       className="inline-block size-3 rounded-full"
-      style={{ background: seat === 0 ? 'radial-gradient(circle at 35% 30%, #fffbf2, #cdbe9f)' : 'radial-gradient(circle at 35% 30%, #47527a, #0d1222)', boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.35)' }}
+      style={{ background: seat === 0 ? 'radial-gradient(circle at 35% 30%, #ffffff, #b5ddf2)' : 'radial-gradient(circle at 35% 30%, #3d6fb3, #0f2b54)', boxShadow: 'inset 0 0 0 1px rgba(0,0,0,0.35)' }}
       aria-hidden
     />
   );

@@ -79,23 +79,28 @@ const easeInOut = (k: number) => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k 
 
 function useMaterials(theme: Theme3D) {
   return useMemo(() => {
+    // Clear frosted ice with a cyan glow inside, against deep blue glacier ice.
     const ivory = new THREE.MeshPhysicalMaterial({
-      color: '#EFE6D3',
-      roughness: 0.34,
+      color: '#E6F7FF',
+      roughness: 0.28,
       metalness: 0,
-      clearcoat: 0.65,
-      clearcoatRoughness: 0.22,
-      sheen: 0.3,
-      sheenColor: new THREE.Color('#fff6e4'),
-      sheenRoughness: 0.6,
+      clearcoat: 1,
+      clearcoatRoughness: 0.18,
+      sheen: 0.6,
+      sheenColor: new THREE.Color('#7FE3FF'),
+      sheenRoughness: 0.5,
+      emissive: new THREE.Color('#7FE3FF'),
+      emissiveIntensity: 0.06,
     });
     const obsidian = new THREE.MeshPhysicalMaterial({
-      color: theme === 'night' ? '#1B1A24' : '#16151B',
-      roughness: 0.24,
-      metalness: 0.05,
+      color: theme === 'night' ? '#2C5C9E' : '#24508F',
+      roughness: 0.2,
+      metalness: 0.02,
       clearcoat: 1,
-      clearcoatRoughness: 0.08,
+      clearcoatRoughness: 0.06,
       reflectivity: 0.6,
+      sheen: 0.4,
+      sheenColor: new THREE.Color('#9CC2F7'),
     });
     return { w: ivory, b: obsidian };
   }, [theme]);
@@ -120,12 +125,12 @@ function Lights({ flipped }: { flipped: boolean }) {
   }, []);
   return (
     <>
-      <hemisphereLight args={['#E8ECFF', '#1A1424', 0.35]} />
+      <hemisphereLight args={['#EAF6FF', '#0B1A2E', 0.4]} />
       <directionalLight
         ref={key}
         position={[3.5 * s, 11, 4.5 * s]}
         intensity={1.7}
-        color="#FFF4E6"
+        color="#F2F7FC"
         castShadow
         shadow-mapSize-width={2048}
         shadow-mapSize-height={2048}
@@ -138,7 +143,7 @@ function Lights({ flipped }: { flipped: boolean }) {
       <Environment resolution={256} frames={1} environmentIntensity={0.55}>
         <Lightformer form="rect" intensity={2.2} position={[0, 8, 0]} rotation-x={Math.PI / 2} scale={[12, 12, 1]} color="#ffffff" />
         <Lightformer form="rect" intensity={2.4} position={[-7, 3, 2]} rotation-y={Math.PI / 2} scale={[10, 2, 1]} color="#ffffff" />
-        <Lightformer form="rect" intensity={1.6} position={[7, 3, 0]} rotation-y={-Math.PI / 2} scale={[10, 2, 1]} color="#fff3e0" />
+        <Lightformer form="rect" intensity={1.6} position={[7, 3, 0]} rotation-y={-Math.PI / 2} scale={[10, 2, 1]} color="#e6f6ff" />
         <Lightformer form="rect" intensity={2.2} position={[0, 2, -8]} scale={[10, 1.4, 1]} color={VIOLET} />
         <Lightformer form="ring" intensity={1.2} position={[0, 2, 8]} scale={3} color={LIME} />
       </Environment>
@@ -174,7 +179,7 @@ function Board({ theme, flipped }: { theme: Theme3D; flipped: boolean }) {
     };
   }, [tex, theme, flipped, invalidate]);
   useEffect(() => () => tex.dispose(), [tex]);
-  const frame = theme === 'night' ? '#0E1018' : '#17161C';
+  const frame = theme === 'night' ? '#0B1A2E' : '#13294A';
   const slab = units + 0.36;
   return (
     <group>
@@ -376,14 +381,14 @@ function Overlays(props: Pick<SceneProps, 'selected' | 'targets' | 'lastSq' | 'c
     return { geo, x: x1, z: z1, rot: Math.atan2(-(z2 - z1), x2 - x1) };
   }, [hint]);
 
-  const lastColor = theme === 'night' ? '#E8B44C' : '#E8B44C';
+  const lastColor = '#7FE3FF';
   return (
     <group>
       {lastSq.map((sq) => (
         <SquareTint key={`l${sq}`} sq={sq} color={lastColor} opacity={theme === 'night' ? 0.22 : 0.38} />
       ))}
-      {selected ? <SquareTint sq={selected} color={LIME} opacity={theme === 'night' ? 0.26 : 0.4} y={0.004} /> : null}
-      {checkSq ? <SquareTint sq={checkSq} color="#FF4D6D" opacity={0.35} y={0.005} /> : null}
+      {selected ? <SquareTint sq={selected} color={VIOLET} opacity={theme === 'night' ? 0.32 : 0.45} y={0.004} /> : null}
+      {checkSq ? <SquareTint sq={checkSq} color="#FF5A6E" opacity={0.35} y={0.005} /> : null}
       {checkSq
         ? (() => {
             const [x, z] = sqToXZ(checkSq);
@@ -657,7 +662,7 @@ export function Scene(props: SceneProps) {
       {dying.map((p) => (
         <DyingPiece key={`d${p.id}`} p={p} geo={geos[p.t as PieceType]} mat={mats[p.c]} />
       ))}
-      <ContactShadows position={[0, -BOARD.thick - 0.01, 0]} scale={units + 4} blur={2.6} far={3} opacity={0.75} resolution={512} frames={1} color="#000000" />
+      <ContactShadows position={[0, -BOARD.thick - 0.01, 0]} scale={units + 4} blur={2.6} far={3} opacity={0.75} resolution={512} frames={1} color="#04101f" />
       <OrbitControls
         ref={controlsRef}
         makeDefault
