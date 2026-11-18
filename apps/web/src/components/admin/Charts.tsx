@@ -212,7 +212,7 @@ export function TimeChart({
           </div>
         ) : null}
       </div>
-      <table className="sr-only">
+      <div className="sr-only"><table>
         <caption>{title}, per UTC day</caption>
         <thead>
           <tr>
@@ -234,7 +234,7 @@ export function TimeChart({
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
     </figure>
   );
 }

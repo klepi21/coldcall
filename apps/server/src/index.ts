@@ -369,7 +369,7 @@ app.post('/api/wallet/faucet/lofi', { preHandler: requireUser, config: { rateLim
 );
 
 /** "Get test SUI": the game wallet sends a little SUI. Rate limited per player and per IP. */
-app.post('/api/wallet/faucet/sui', { preHandler: requireUser, config: { rateLimit: { max: 3, timeWindow: '10 minutes' } } }, async (req) =>
+app.post('/api/wallet/faucet/sui', { preHandler: requireUser, config: { rateLimit: { max: 10, timeWindow: '10 minutes' } } }, async (req) =>
   dripTestSui(req.user.id, req.user.wallet_address),
 );
 

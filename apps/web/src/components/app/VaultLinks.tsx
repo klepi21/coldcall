@@ -47,7 +47,7 @@ export function VaultLinks({ compact = false, only }: { compact?: boolean; only?
         return (
           <div key={c} className="well relative overflow-hidden rounded-[16px] p-4 shadow-[inset_0_0_0_1px_color-mix(in_srgb,var(--gold)_25%,transparent)]">
             <p className="text-xs font-bold uppercase tracking-wider text-text-2">{c} vault, live from Sui</p>
-            <p className="t-num mt-1 text-3xl text-text">{v ? <Amount minor={v.minor} currency={c} /> : '0.00'}</p>
+            <p className="t-num mt-1 break-words text-2xl text-text sm:text-3xl">{v ? <Amount minor={v.minor} currency={c} className="flex-wrap" /> : '0.00'}</p>
             {v ? (
               <p className="mt-1 text-sm text-text-2">
                 Held for players and the house: <Amount minor={v.owedMinor} currency={c} coin={false} className="text-text" />.{' '}

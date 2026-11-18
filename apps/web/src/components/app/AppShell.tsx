@@ -184,9 +184,9 @@ export function AppShell({ children, bare }: { children: ReactNode; bare?: boole
               <div className="flex min-w-0 items-center gap-1.5 sm:gap-2">
                 <span className="hidden rounded-full px-3 py-1 text-xs font-semibold text-text-2 [box-shadow:inset_0_0_0_1px_var(--well-line)] xl:inline">Devnet beta</span>
                 {me?.role === 'admin' ? (
-                  <Link href="/admin" aria-label="Admin" aria-current={active('/admin') ? 'page' : undefined} className="press glass inline-flex h-11 items-center gap-1 rounded-full px-3 text-[13px] font-semibold lg:hidden">
+                  <Link href="/admin" aria-label="Admin" aria-current={active('/admin') ? 'page' : undefined} className="press glass inline-flex h-11 shrink-0 items-center gap-1 rounded-full px-3 text-[13px] font-semibold lg:hidden">
                     <NavIcon d={ADMIN_NAV.icon} className="size-4 text-primary" />
-                    Admin
+                    <span className="sr-only sm:not-sr-only">Admin</span>
                   </Link>
                 ) : null}
                 {me ? <CurrencySwitch /> : null}
